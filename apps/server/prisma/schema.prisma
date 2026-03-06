@@ -1,0 +1,227 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://www.prisma.io/docs/concepts/components/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+// ============ CATEGORIAS ============
+model Category {
+    id           String   @id @default(cuid())
+    name         String   @unique
+    description  String?
+    icon         String? // Emoji ou ícone
+    displayOrder Int      @default(0)
+    isActive     Boolean  @default(true)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    menuItems MenuItem[]
+
+    @@index([isActive])
+}
+
+// ============ ITENS DO MENU ============
+model MenuItem {
+    id         String   @id @default(cuid())
+    categoryId String
+    category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+    name        String
+    description String?
+    price       Float
+    icon        String? // Emoji
+    imageUrl    String?
+
+    isAvailable  Boolean  @default(true)
+    displayOrder Int      @default(0)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    addons     MenuItemAddon[]
+    orderItems OrderItem[]
+    comboItems ComboItem[]
+
+    @@unique([categoryId, name])
+    @@index([categoryId])
+    @@index([isAvailable])
+}
+
+// ============ ADICIONAIS/EXTRAS ============
+model Addon {
+    id          String  @id @default(cuid())
+    name        String  @unique
+    addonType   String  @default("EXTRA") // EXTRA, SUBSTITUTION, REMOVAL
+    price       Float   @default(0)
+    description String?
+
+    isActive  Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    menuItemAddons  MenuItemAddon[]
+    orderItemAddons OrderItemAddon[]
+
+    @@index([addonType])
+    @@index([isActive])
+}
+
+// ============ RELACIONAMENTO ITEM X ADICIONAL ============
+model MenuItemAddon {
+    id         String   @id @default(cuid())
+    menuItemId String
+    menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+    addonId String
+    addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
+
+    isRequired   Boolean @default(false)
+    displayOrder Int     @default(0)
+
+    @@unique([menuItemId, addonId])
+    @@index([menuItemId])
+    @@index([addonId])
+}
+
+// ============ COMBOS/PROMOÇÕES ============
+model Combo {
+    id          String  @id @default(cuid())
+    name        String  @unique
+    description String?
+    price       Float
+    icon        String? // Emoji
+
+    isActive     Boolean  @default(true)
+    displayOrder Int      @default(0)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    comboItems ComboItem[]
+    orderItems OrderItem[]
+
+    @@index([isActive])
+}
+
+// ============ ITENS DO COMBO ============
+model ComboItem {
+    id      String @id @default(cuid())
+    comboId String
+    combo   Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+    menuItemId String
+    menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+    quantity Int @default(1)
+
+    @@unique([comboId, menuItemId])
+    @@index([comboId])
+    @@index([menuItemId])
+}
+
+// ============ PEDIDOS ============
+model Order {
+    id          String @id @default(cuid())
+    orderNumber Int    @unique @default(0)
+
+    status        String @default("PENDING") // PENDING, PREPARING, READY, COMPLETED, CANCELLED
+    paymentStatus String @default("PENDING") // PENDING, PAID, REFUNDED
+
+    totalPrice Float
+    discount   Float @default(0)
+    finalPrice Float
+
+    customerName  String?
+    customerPhone String?
+    notes         String?
+
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    completedAt DateTime?
+
+    items         OrderItem[]
+    statusHistory OrderStatusHistory[]
+
+    @@index([status])
+    @@index([paymentStatus])
+    @@index([createdAt])
+}
+
+// ============ ITENS DO PEDIDO ============
+model OrderItem {
+    id      String @id @default(cuid())
+    orderId String
+    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    menuItemId String?
+    menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+
+    comboId String?
+    combo   Combo?  @relation(fields: [comboId], references: [id], onDelete: SetNull)
+
+    quantity  Int     @default(1)
+    itemPrice Float // Snapshot do preço no momento
+    notes     String?
+
+    addons OrderItemAddon[]
+
+    @@index([orderId])
+    @@index([menuItemId])
+    @@index([comboId])
+}
+
+// ============ ADICIONAIS DO ITEM DE PEDIDO ============
+model OrderItemAddon {
+    id          String    @id @default(cuid())
+    orderItemId String
+    orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+    addonId String
+    addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
+
+    quantity   Int   @default(1)
+    addonPrice Float // Snapshot do preço
+
+    @@index([orderItemId])
+    @@index([addonId])
+}
+
+// ============ HISTÓRICO DE STATUS ============
+model OrderStatusHistory {
+    id      String @id @default(cuid())
+    orderId String
+    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    fromStatus String
+    toStatus   String
+    reason     String?
+
+    changedAt DateTime @default(now())
+
+    @@index([orderId])
+    @@index([changedAt])
+}
+
+// ============ USUÁRIOS ============
+model User {
+    id       String @id @default(cuid())
+    email    String @unique
+    password String // Usar bcrypt em produção
+
+    role String  @default("STAFF") // STAFF, ADMIN
+    name String?
+
+    isActive  Boolean   @default(true)
+    lastLogin DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([email])
+    @@index([role])
+    @@index([isActive])
+}

@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos Off-Grid - Documentação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        },
+                        secondary: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        },
+                        accent: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        }
+
+        .doc-content h1 {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            padding: 1.5rem;
+            margin: 0 0 2rem 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-radius: 0.75rem;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .doc-content h1::before {
+            content: '';
+            display: block;
+            position: absolute;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, #ffffff 20%, #ffffff 80%, transparent);
+            width: calc(100% - 1rem);
+            top: 0;
+            left: 0.5rem;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .doc-content h2 {
+            @apply text-3xl font-bold text-gray-800 mt-8 mb-3;
+        }
+
+        .doc-content h3 {
+            @apply text-2xl font-semibold text-gray-700 mt-6 mb-2;
+        }
+
+        .doc-content p {
+            @apply text-gray-700 leading-relaxed mb-4;
+        }
+
+        .doc-content ul, .doc-content ol {
+            @apply ml-6 mb-4 space-y-2;
+        }
+
+        .doc-content li {
+            @apply text-gray-700;
+        }
+
+        .doc-content ul li {
+            @apply list-disc;
+        }
+
+        .doc-content ol li {
+            @apply list-decimal;
+        }
+
+        .doc-content code {
+            @apply bg-gray-100 text-red-600 px-2 py-1 rounded text-sm font-mono;
+        }
+
+        .doc-content pre {
+            @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4 text-sm;
+        }
+
+        .doc-content pre code {
+            @apply bg-transparent text-gray-100 p-0;
+        }
+
+        .doc-content table {
+            @apply w-full border-collapse mb-6;
+        }
+
+        .doc-content th {
+            @apply bg-primary-500 text-white px-4 py-3 text-left font-semibold;
+        }
+
+        .doc-content td {
+            @apply border border-gray-300 px-4 py-2;
+        }
+
+        .doc-content tr:nth-child(even) {
+            @apply bg-gray-50;
+        }
+
+        .menu-item {
+            @apply flex items-center space-x-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200;
+            position: relative;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            @apply bg-primary-50;
+            border-left-color: #f97316;
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            @apply bg-gradient-to-r from-primary-50 to-orange-50 text-primary-700 font-semibold;
+            border-left-color: #f97316;
+            box-shadow: inset 0 0 10px rgba(249, 115, 22, 0.1);
+        }
+
+        .menu-item.active .menu-icon {
+            transform: scale(1.15);
+        }
+
+        .menu-icon {
+            @apply text-2xl flex-shrink-0;
+            transition: transform 0.2s ease;
+        }
+
+        .menu-section {
+            @apply mb-6;
+        }
+
+        .menu-section h3 {
+            @apply text-xs font-bold text-gray-500 uppercase tracking-wider px-4 mb-3;
+            background: linear-gradient(90deg, tran parent, #f97316, transparent);
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            border-bottom: 2px solid #f0f0f0;
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .menu-section:first-child h3 {
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 p-6 border border-gray-100;
+        }
+
+        .card:hover {
+            @apply border-primary-300;
+        }
+
+        .breadcrumb {
+            @apply flex items-center space-x-2 text-sm text-gray-600 mb-6;
+            background: linear-gradient(90deg, #f9fafb, #fff7ed);
+            padding: 0.75rem 1rem;
+            border-left: 4px solid #f97316;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+
+        .breadcrumb-item {
+            @apply flex items-center space-x-2;
+        }
+
+        .breadcrumb-item.active {
+            color: #f97316;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-full mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-white text-2xl">🍔</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Documentação Técnica</h1>
+                        <p class="text-xs text-gray-600">Sistema de Pedidos Off-Grid</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="inline-block px-4 py-2 bg-accent-100 text-accent-700 rounded-full font-semibold text-sm">
+                        ✅ v1.0 Completo
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex h-[calc(100vh-72px)]">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white border-r border-gray-200 overflow-y-auto shadow-sm">
+            <nav class="p-4 space-y-1">
+                <!-- Visão Geral -->
+                <div class="menu-section">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 mb-3">📌 Visão Geral</h3>
+                    <button onclick="showDoc('home')" data-doc="home" class="menu-item w-full text-left">
+                        <span class="menu-icon">🏠</span>
+                        <span class="font-medium">Início</span>
+                    </button>
+                    <button onclick="showDoc('executive-summary')" data-doc="executive-summary" class="menu-item w-full text-left">
+                        <span class="menu-icon">📊</span>
+                        <span class="font-medium">Resumo Executivo</span>
+                    </button>
+                </div>
+
+                <!-- Arquitetura -->
+                <div class="menu-section">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 mb-3">🏗️ Arquitetura</h3>
+                    <button onclick="showDoc('architecture')" data-doc="architecture" class="menu-item w-full text-left">
+                        <span class="menu-icon">🎯</span>
+                        <span class="font-medium">Técnica</span>
+                    </button>
+                    <button onclick="showDoc('data-model')" data-doc="data-model" class="menu-item w-full text-left">
+                        <span class="menu-icon">🗄️</span>
+                        <span class="font-medium">Modelo de Dados</span>
+                    </button>
+                    <button onclick="showDoc('project-structure')" data-doc="project-structure" class="menu-item w-full text-left">
+                        <span class="menu-icon">📁</span>
+                        <span class="font-medium">Estrutura</span>
+                    </button>
+                </div>
+
+                <!-- Design -->
+                <div class="menu-section">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 mb-3">🎨 Design & UX</h3>
+                    <button onclick="showDoc('screens')" data-doc="screens" class="menu-item w-full text-left">
+                        <span class="menu-icon">🖼️</span>
+                        <span class="font-medium">Wireframes</span>
+                    </button>
+                    <button onclick="showDoc('design-system')" data-doc="design-system" class="menu-item w-full text-left">
+                        <span class="menu-icon">🎨</span>
+                        <span class="font-medium">Design System</span>
+                    </button>
+                </div>
+
+                <!-- Negócio -->
+                <div class="menu-section">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 mb-3">💼 Negócio</h3>
+                    <button onclick="showDoc('pricing')" data-doc="pricing" class="menu-item w-full text-left">
+                        <span class="menu-icon">💰</span>
+                        <span class="font-medium">Precificação</span>
+                    </button>
+                    <button onclick="showDoc('payment')" data-doc="payment" class="menu-item w-full text-left">
+                        <span class="menu-icon">💳</span>
+                        <span class="font-medium">Pagamento</span>
+                    </button>
+                </div>
+
+                <!-- Implementação -->
+                <div class="menu-section">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 mb-3">🚀 Implementação</h3>
+                    <button onclick="showDoc('roadmap')" data-doc="roadmap" class="menu-item w-full text-left">
+                        <span class="menu-icon">🗺️</span>
+                        <span class="font-medium">Roadmap MVP</span>
+                    </button>
+                    <button onclick="showDoc('checklist')" data-doc="checklist" class="menu-item w-full text-left">
+                        <span class="menu-icon">✅</span>
+                        <span class="font-medium">Checklist</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="max-w-5xl mx-auto p-8">
+                <div id="content" class="doc-content fade-in">
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">⏳</div>
+                        <p class="text-gray-600">Carregando documentação...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const docs = {
+            'home': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item active">🏠 Início</span>
+                </div>
+
+                <h1>🍔 Sistema de Pedidos Off-Grid</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-lg font-semibold text-primary-900 mb-2">✨ Bem-vindo à documentação completa!</p>
+                    <p class="text-primary-800">Sistema completo de pedidos funcionando <strong>100% offline</strong>, acessado via navegador em rede local (LAN/Wi-Fi).</p>
+                </div>
+
+                <h2>📋 Visão Geral do Sistema</h2>
+                <p>Sistema com <strong>3 interfaces principais</strong> para diferentes perfis de usuários:</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+                    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; border: none;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🖥️</div>
+                        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem;">Kiosk</h3>
+                        <p style="color: #ffedd5;">Cliente monta seu pedido sozinho em tela touch grande</p>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; border: none;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
+                        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem;">Staff</h3>
+                        <p style="color: #fee2e2;">Atendente registra pedidos rapidamente no balcão</p>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; border: none;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍💼</div>
+                        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem;">Admin</h3>
+                        <p style="color: #dcfce7;">Gerencia cardápio, preços e visualiza relatórios</p>
+                    </div>
+                </div>
+
+                <h2>✨ Características Principais</h2>
+                <div class="space-y-3 my-6">
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-2xl">✅</span>
+                        <span><strong>100% Off-Grid:</strong> Funciona sem internet, apenas rede local</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-2xl">✅</span>
+                        <span><strong>Multi-Dispositivo:</strong> Totems, tablets e PCs acessando simultaneamente</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-2xl">✅</span>
+                        <span><strong>Servidor Local:</strong> PC Windows central rodando backend + banco de dados</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-2xl">✅</span>
+                        <span><strong>Interface Touch-First:</strong> UX otimizada para telas grandes e touch</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-2xl">✅</span>
+                        <span><strong>Cardápio Completo:</strong> Categorias, itens avulsos, combos e adicionais</span>
+                    </div>
+                </div>
+
+                <h2>🏗️ Arquitetura Simplificada</h2>
+                <pre><code>┌─────────────────────────────────────────────────┐
+│         REDE LOCAL (LAN/Wi-Fi)                  │
+│                                                 │
+│  ┌────────┐  ┌────────┐  ┌────────┐             │
+│  │ TOTEM1 │  │ TOTEM2 │  │TABLET  │             │
+│  │(Kiosk) │  │(Kiosk) │  │(Staff) │             │
+│  └───┬────┘  └───┬────┘  └───┬────┘             │
+│      │           │            │                 │
+│      └───────────┴────────────┘                 │
+│              │                                  │
+│       ┌──────▼──────┐                           │
+│       │  PC CENTRAL │                           │
+│       │• Node.js    │                           │
+│       │• SQLite     │                           │
+│       └─────────────┘                           │
+│                                                 │
+└─────────────────────────────────────────────────┘</code></pre>
+
+                <h2>🚀 Stack Tecnológico</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold text-lg mb-4">Backend</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>✓ Node.js 20+ (TypeScript)</li>
+                            <li>✓ Fastify (Framework)</li>
+                            <li>✓ SQLite (Database)</li>
+                            <li>✓ Prisma (ORM)</li>
+                            <li>✓ JWT (Autenticação)</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-secondary-700 font-bold text-lg mb-4">Frontend</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>✓ React 18+ (TypeScript)</li>
+                            <li>✓ Vite (Build)</li>
+                            <li>✓ Tailwind CSS (Styling)</li>
+                            <li>✓ Zustand (State)</li>
+                            <li>✓ React Router (Navegação)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>📚 Documentação</h2>
+                <p>Clique no menu lateral para explorar:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div class="card cursor-pointer hover:bg-primary-50" onclick="showDoc('executive-summary')">
+                        <h4 class="font-bold text-gray-900 mb-2">📊 Resumo Executivo</h4>
+                        <p class="text-sm text-gray-600">Visão para stakeholders e decisões</p>
+                    </div>
+
+                    <div class="card cursor-pointer hover:bg-primary-50" onclick="showDoc('architecture')">
+                        <h4 class="font-bold text-gray-900 mb-2">🏗️ Arquitetura</h4>
+                        <p class="text-sm text-gray-600">Especificação técnica completa</p>
+                    </div>
+
+                    <div class="card cursor-pointer hover:bg-primary-50" onclick="showDoc('data-model')">
+                        <h4 class="font-bold text-gray-900 mb-2">🗄️ Modelo de Dados</h4>
+                        <p class="text-sm text-gray-600">14 entidades e relacionamentos</p>
+                    </div>
+
+                    <div class="card cursor-pointer hover:bg-primary-50" onclick="showDoc('roadmap')">
+                        <h4 class="font-bold text-gray-900 mb-2">🗺️ Roadmap MVP</h4>
+                        <p class="text-sm text-gray-600">6 fases em 6-8 semanas</p>
+                    </div>
+                </div>
+
+                <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
+                    <h3 class="text-accent-900 font-bold mb-3">🎯 Total de Documentação</h3>
+                    <p class="text-accent-800">~130 páginas de especificação técnica estruturada, pronta para implementação</p>
+                </div>
+            `,
+
+            'executive-summary': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">📋 Visão Geral</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">📊 Resumo Executivo</span>
+                </div>
+
+                <h1>📊 Resumo Executivo</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">Documento de alto nível para stakeholders e tomada de decisão.</p>
+                </div>
+
+                <h2>🎯 Problema</h2>
+                <p>Restaurantes precisam de sistema de pedidos que funcione <strong>100% offline</strong>, acessível por múltiplos dispositivos (totems, tablets, PCs) em rede local.</p>
+
+                <h2>💡 Solução</h2>
+                <p>Sistema web de pedidos rodando em servidor local (PC Windows), acessado via navegador. Sem dependência de internet.</p>
+
+                <h2>📈 Benefícios</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                    <div class="card">
+                        <h4 class="font-bold text-accent-700 mb-3">Operacionais</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>⏱️ Redução de filas (30%+)</li>
+                            <li>📉 Redução de erros (50%+)</li>
+                            <li>🚀 3x mais pedidos/hora</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4 class="font-bold text-primary-700 mb-3">Negócio</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>💵 Maior ticket médio</li>
+                            <li>📊 Dados estruturados</li>
+                            <li>🔒 Total controle dados</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>💰 Estimativas</h2>
+                <div class="space-y-4">
+                    <div class="card border-l-4 border-primary-500">
+                        <p><strong>Desenvolvimento:</strong> 6-8 semanas (1-2 devs)</p>
+                    </div>
+                    <div class="card border-l-4 border-secondary-500">
+                        <p><strong>Hardware:</strong> R$ 10.000 - R$ 20.000</p>
+                    </div>
+                    <div class="card border-l-4 border-accent-500">
+                        <p><strong>Mensal:</strong> R$ 0 (sem mensalidades)</p>
+                    </div>
+                </div>
+
+                <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
+                    <h3 class="text-accent-900 font-bold mb-3">✅ Recomendação</h3>
+                    <p class="text-accent-800">Projeto é <strong>tecnicamente viável</strong> e <strong>comercialmente interessante</strong>. Recomenda-se aprovação para início imediato.</p>
+                </div>
+            `,
+
+            'architecture': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🏗️ Arquitetura</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">🎯 Técnica</span>
+                </div>
+
+                <h1>🏗️ Especificação Técnica</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">Sistema offline com rede local, backend Node.js e SQLite.</p>
+                </div>
+
+                <h2>📌 Modelo de Operação</h2>
+                <p>O sistema funciona em <strong>modo totalmente offline</strong>, sem dependência de internet. Comunicação via <strong>rede local (LAN/Wi-Fi)</strong>.</p>
+
+                <h2>🛠️ Stack Técnico</h2>
+
+                <h3>Backend</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tecnologia</th>
+                            <th>Versão</th>
+                            <th>Justificativa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Node.js</strong></td>
+                            <td>20+ LTS</td>
+                            <td>Runtime confiável com TypeScript</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fastify</strong></td>
+                            <td>4.x</td>
+                            <td>Performance superior, schema validation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SQLite</strong></td>
+                            <td>Latest</td>
+                            <td>Zero config, single-file, offline perfeito</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prisma</strong></td>
+                            <td>5.x</td>
+                            <td>ORM type-safe, migrations automáticas</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Frontend</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tecnologia</th>
+                            <th>Versão</th>
+                            <th>Justificativa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>React</strong></td>
+                            <td>18+</td>
+                            <td>Componentes reutilizáveis, comunidade grande</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vite</strong></td>
+                            <td>5.x</td>
+                            <td>Build ultrarrápido, hot reload instantâneo</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tailwind</strong></td>
+                            <td>3.x</td>
+                            <td>UI rápida, responsiva, touch-friendly</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Zustand</strong></td>
+                            <td>4.x</td>
+                            <td>State management leve, sem boilerplate</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
+                    <h3 class="text-accent-900 font-bold mb-3">✅ Vantagens</h3>
+                    <ul class="space-y-2">
+                        <li>• Zero internet: Funciona 100% offline</li>
+                        <li>• Performance: Latência mínima rede local</li>
+                        <li>• Controle: Dados nunca saem do restaurante</li>
+                        <li>• Escalável: Fácil adicionar dispositivos</li>
+                        <li>• Seguro: TypeScript reduz erros runtime</li>
+                    </ul>
+                </div>
+            `,
+
+            'data-model': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🏗️ Arquitetura</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">🗄️ Modelo de Dados</span>
+                </div>
+
+                <h1>🗄️ Modelo de Dados</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">14 entidades com relacionamentos e integridade.</p>
+                </div>
+
+                <h2>📊 Entidades Principais</h2>
+
+                <div class="space-y-4">
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">1️⃣ Category (Categorias)</h3>
+                        <p class="text-sm">Organiza cardápio (Hambúrgueres, Bebidas, etc.)</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">2️⃣ MenuItem (Itens)</h3>
+                        <p class="text-sm">Produtos individuais com preço e disponibilidade</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">3️⃣ Addon (Adicionais)</h3>
+                        <p class="text-sm">Extras, substituições, remoções (EXTRA, SUBSTITUTION, REMOVAL)</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">4️⃣ MenuItemAddon</h3>
+                        <p class="text-sm">Relacionamento N:N entre itens e adicionais</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">5️⃣ Combo (Promoções)</h3>
+                        <p class="text-sm">Conjuntos com preço fixo e economia</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">6️⃣ ComboItem</h3>
+                        <p class="text-sm">Itens inclusos no combo</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">7️⃣ Order (Pedidos)</h3>
+                        <p class="text-sm">Registro com status, total, cliente</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">8️⃣ OrderItem</h3>
+                        <p class="text-sm">Itens que compõem o pedido</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">9️⃣ User (Usuários)</h3>
+                        <p class="text-sm">Staff e Admin com autenticação JWT</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-primary-700 font-bold mb-2">🔟 OrderStatus</h3>
+                        <p class="text-sm">Histórico de mudanças de status</p>
+                    </div>
+                </div>
+
+                <h2>✅ Características de Design</h2>
+                <div class="space-y-3 mt-6">
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-xl">📸</span>
+                        <span><strong>Snapshot de Preços:</strong> Mudanças no cardápio não afetam pedidos criados</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-xl">📝</span>
+                        <span><strong>Histórico:</strong> OrderStatusHistory rastreia todas as mudanças</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-xl">🔄</span>
+                        <span><strong>Flexibilidade:</strong> Adicionais com tipos EXTRA, SUBSTITUTION, REMOVAL</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-xl">🔍</span>
+                        <span><strong>Auditoria:</strong> DateTime fields em todas as entidades</span>
+                    </div>
+                </div>
+            `,
+
+            'pricing': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">💼 Negócio</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">💰 Precificação</span>
+                </div>
+
+                <h1>💰 Regras de Precificação</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">Cálculos de preço para itens, adicionais e combos.</p>
+                </div>
+
+                <h2>📐 Fórmulas</h2>
+
+                <h3>Item Individual</h3>
+                <pre><code>Preço = MenuItem.price + Σ(Addon.price × qty)</code></pre>
+
+                <h3>Exemplo 1: Hambúrguer</h3>
+                <div class="card bg-gray-50">
+                    <pre><code>Hambúrguer Clássico:      R$ 18,00
++ Bacon Extra (×1):       R$  3,50
++ Queijo Extra (×2):      R$  5,00
+─────────────────────────────────
+TOTAL:                   R$ 26,50</code></pre>
+                </div>
+
+                <h2>🏷️ Tipos de Adicionais</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Preço</th>
+                            <th>Exemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>EXTRA</strong></td>
+                            <td>Pago integral</td>
+                            <td>Bacon extra (+R$ 3,50)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SUBSTITUTION</strong></td>
+                            <td>Pode ter taxa</td>
+                            <td>Pão integral (+R$ 1,00)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>REMOVAL</strong></td>
+                            <td>Sempre grátis</td>
+                            <td>Sem cebola (R$ 0)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>📦 Combos</h2>
+                <pre><code>Preço = Combo.price + Extras</code></pre>
+
+                <h3>Exemplo 2: Combo Clássico</h3>
+                <div class="card bg-gray-50">
+                    <pre><code>Combo Clássico (FIXO):    R$ 25,00
+├─ Hambúrguer
+├─ Batata
+└─ Refrigerante
+
+Economia:
+Avulso:  R$ 32,00
+Combo:   R$ 25,00
+Ganho:   R$  7,00 (22%)</code></pre>
+                </div>
+
+                <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
+                    <h3 class="text-accent-900 font-bold mb-3">✅ Princípios</h3>
+                    <ul class="space-y-2">
+                        <li>• Transparência: Cliente vê total atualizado</li>
+                        <li>• Snapshot: Preços não mudam em pedidos criados</li>
+                        <li>• Precisão: Decimal(10,2) para evitar erros</li>
+                    </ul>
+                </div>
+            `,
+
+            'payment': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">💼 Negócio</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">💳 Pagamento</span>
+                </div>
+
+                <h1>💳 Estratégia de Pagamento</h1>
+
+                <div class="card bg-gradient-to-r from-accent-50 to-green-50 border-2 border-accent-300 mb-8">
+                    <p class="text-accent-900 font-semibold"><strong>MVP não implementa integração</strong>, mas arquitetura está pronta.</p>
+                </div>
+
+                <h2>📋 MVP: Pagamento Manual</h2>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
+                        <span class="text-2xl">1️⃣</span>
+                        <span>Cliente vê total do pedido na tela</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
+                        <span class="text-2xl">2️⃣</span>
+                        <span>Funcionário recebe pagamento em dinheiro</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
+                        <span class="text-2xl">3️⃣</span>
+                        <span>Registra como "PAID" no sistema</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
+                        <span class="text-2xl">4️⃣</span>
+                        <span>Pedido segue para cozinha</span>
+                    </div>
+                </div>
+
+                <h2>🚀 Próxima Fase: Gateways</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Gateway</th>
+                            <th>PIX</th>
+                            <th>Cartão</th>
+                            <th>Taxa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Mercado Pago</strong></td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>2.99% + R$ 0,30</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PagSeguro</strong></td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>3.2% + R$ 0,40</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Asaas</strong></td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>2.9% + R$ 0,25</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="card bg-primary-50 border-l-4 border-primary-500 mt-8">
+                    <h3 class="font-bold text-primary-900 mb-2">💡 Arquitetura Preparada</h3>
+                    <p class="text-primary-800">Interface abstrata permite múltiplos gateways sem refatoração massiva.</p>
+                </div>
+            `,
+
+            'roadmap': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🚀 Implementação</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">🗺️ Roadmap MVP</span>
+                </div>
+
+                <h1>🗺️ MVP Roadmap - 6 Fases</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold"><strong>Timeline:</strong> 6-8 semanas para MVP completo e funcional</p>
+                </div>
+
+                <h2>⏱️ Estimativa por Fase</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fase</th>
+                            <th>Timeline</th>
+                            <th>Atividades Principais</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>📅 Setup</strong></td>
+                            <td><strong>5-7 dias</strong></td>
+                            <td>Monorepo, TypeScript, SQLite, Prisma, Fastify, React, Tailwind</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📅 Backend API</strong></td>
+                            <td><strong>7-10 dias</strong></td>
+                            <td>CRUD Menu, Pedidos, Autenticação, Validação com Zod</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📅 Kiosk Frontend</strong></td>
+                            <td><strong>7-10 dias</strong></td>
+                            <td>Categorias, Itens, Carrinho, Checkout, Confirmação</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📅 Staff Frontend</strong></td>
+                            <td><strong>5-7 dias</strong></td>
+                            <td>Login, Dashboard, Novo Pedido, Lista, Detalhes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📅 Admin Frontend</strong></td>
+                            <td><strong>5-7 dias</strong></td>
+                            <td>Gerenciar Cardápio, Combos, Usuários, Relatórios</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📅 Deploy</strong></td>
+                            <td><strong>3-5 dias</strong></td>
+                            <td>Testes, Build, Setup, Documentação, Go-live</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 class="mt-10">✅ Escopo MVP</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="card border-l-4 border-accent-500">
+                        <h4 class="font-bold text-accent-700 mb-3">✅ Entra no MVP</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>• CRUD Menu completo</li>
+                            <li>• Combos com preço fixo</li>
+                            <li>• 3 interfaces (Kiosk, Staff, Admin)</li>
+                            <li>• Autenticação JWT</li>
+                            <li>• Pagamento manual</li>
+                        </ul>
+                    </div>
+
+                    <div class="card border-l-4 border-secondary-500">
+                        <h4 class="font-bold text-secondary-700 mb-3">❌ Fica para Depois</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>• Combos complexos</li>
+                            <li>• Integração gateways</li>
+                            <li>• WebSocket (polling ok)</li>
+                            <li>• Relatórios avançados</li>
+                            <li>• Impressoras/Kitchen Display</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+
+            'screens': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🎨 Design & UX</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">🖼️ Wireframes</span>
+                </div>
+
+                <h1>🖼️ Wireframes e Mapa de Telas</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">19 telas distribuídas entre Kiosk, Staff e Admin</p>
+                </div>
+
+                <h2>🎯 Kiosk (Cliente) - 7 Telas</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tela</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Splash Screen</td>
+                            <td>Logo, bem-vindo, botão grande para começar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>Categorias</td>
+                            <td>Grid de categorias, busca, contador carrinho</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Itens da Categoria</td>
+                            <td>Lista com preço, imagem, botão adicionar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td>Detalhes do Item</td>
+                            <td>Modal: imagem, descrição, adicionais, observações</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td>Carrinho</td>
+                            <td>Items adicionados, cálculo total real-time</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6</strong></td>
+                            <td>Confirmação</td>
+                            <td>Revisão final, botão confirmar pedido</td>
+                        </tr>
+                        <tr>
+                            <td><strong>7</strong></td>
+                            <td>Sucesso/Número</td>
+                            <td>Número do pedido, tempo estimado</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 class="mt-10">👔 Staff (Funcionário) - 5 Telas</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tela</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Login</td>
+                            <td>Autenticação com usuário e senha</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>Dashboard</td>
+                            <td>Métricas do dia, pedidos pendentes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Novo Pedido</td>
+                            <td>Seleção rápida de itens no balcão</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td>Lista de Pedidos</td>
+                            <td>Filtros por status, datas, clientes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td>Detalhes do Pedido</td>
+                            <td>Itens, status, histórico de alterações</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 class="mt-10">👨‍💼 Admin (Gerente) - 7 Telas</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tela</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Login</td>
+                            <td>Autenticação com credenciais admin</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>Dashboard</td>
+                            <td>KPIs, vendas, usuários ativos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Gerenciar Cardápio</td>
+                            <td>CRUD de categorias e itens</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td>Criar/Editar Item</td>
+                            <td>Formulário com preço, descrição, adicionais</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td>Gerenciar Combos</td>
+                            <td>CRUD de promoções e preços</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6</strong></td>
+                            <td>Criar/Editar Combo</td>
+                            <td>Seleção de itens inclusos e preço fixo</td>
+                        </tr>
+                        <tr>
+                            <td><strong>7</strong></td>
+                            <td>Relatórios</td>
+                            <td>Vendas, lucro, produtos mais pedidos</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 class="mt-10">🎯 Padrões de UX</h2>
+                <div class="space-y-2 mt-4">
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">📱</span>
+                        <span><strong>Touch-first:</strong> Botões 80x80px+ em totem</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">📝</span>
+                        <span><strong>Feedback visual:</strong> Loading, sucesso, erro claros</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">🔤</span>
+                        <span><strong>Grandes fontes:</strong> 18px+ para leitura distância</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">⏱️</span>
+                        <span><strong>Timeout:</strong> Kiosk volta splash após 30s inativo</span>
+                    </div>
+                </div>
+            `,
+
+            'project-structure': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🏗️ Arquitetura</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">📁 Estrutura</span>
+                </div>
+
+                <h1>📁 Estrutura do Projeto</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">Monorepo com workspaces para frontend, backend e shared</p>
+                </div>
+
+                <pre><code>sistema-pedidos/
+├── apps/
+│   ├── frontend/          # React + Vite
+│   │   ├── public/
+│   │   ├── src/
+│   │   │   ├── app/       # Bootstrap
+│   │   │   ├── routes/    # Páginas (kiosk, staff, admin)
+│   │   │   ├── features/  # Módulos (menu, orders, cart)
+│   │   │   ├── components/
+│   │   │   ├── services/  # API client
+│   │   │   ├── stores/    # Zustand state
+│   │   │   └── types/
+│   │   └── package.json
+│   │
+│   └── server/            # Node.js + Fastify
+│       ├── prisma/
+│       │   ├── schema.prisma
+│       │   └── migrations/
+│       ├── src/
+│       │   ├── modules/   # auth, menu, orders, combos
+│       │   ├── shared/    # middleware, utils
+│       │   └── server.ts
+│       └── package.json
+│
+└── packages/
+    └── shared/            # Types, utils compartilhados
+        └── src/
+            ├── types/
+            └── utils/</code></pre>
+
+                <h2>🔗 Path Aliases</h2>
+                <pre><code>@/*              → src/*
+@shared/*        → packages/shared/*</code></pre>
+
+                <h2>📋 Convenções</h2>
+                <div class="space-y-3 mt-4">
+                    <div class="card">
+                        <h4 class="font-bold text-primary-700">TypeScript</h4>
+                        <p class="text-sm">Tipos explícitos, interfaces para contratos, never use \`any\`</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="font-bold text-primary-700">Componentes React</h4>
+                        <p class="text-sm">PascalCase, Props interface, hooks customizados (useMenu, useCart)</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="font-bold text-primary-700">Módulos</h4>
+                        <p class="text-sm">Cada módulo: routes, service, repository, types, schema, controller</p>
+                    </div>
+                </div>
+            `,
+
+            'checklist': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🚀 Implementação</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">✅ Checklist</span>
+                </div>
+
+                <h1>✅ Checklist de Implementação</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">200+ itens práticos para completar todas as 6 fases</p>
+                </div>
+
+                <h2>📋 Fase 1: Setup (5-7 dias)</h2>
+                <h3>Backend</h3>
+                <ul class="space-y-1 mb-4 text-sm">
+                    <li>☐ Node.js + TypeScript setup</li>
+                    <li>☐ Workspaces configurados</li>
+                    <li>☐ Fastify instalado e testado</li>
+                    <li>☐ Prisma + SQLite configurados</li>
+                    <li>☐ Schema.prisma com todas entidades</li>
+                    <li>☐ Migrations geradas</li>
+                    <li>☐ Seed data carregado</li>
+                </ul>
+
+                <h3>Frontend</h3>
+                <ul class="space-y-1">
+                    <li>☐ React + Vite criado</li>
+                    <li>☐ Tailwind CSS configurado</li>
+                    <li>☐ shadcn/ui instalado</li>
+                    <li>☐ React Router integrado</li>
+                    <li>☐ Zustand integrado</li>
+                    <li>☐ Path aliases configurados</li>
+                </ul>
+
+                <h2 class="mt-10">📋 Fase 2: Backend API (7-10 dias)</h2>
+                <ul class="space-y-1 text-sm">
+                    <li>☐ POST /auth/login</li>
+                    <li>☐ GET/POST/PATCH/DELETE /api/categories</li>
+                    <li>☐ GET/POST/PATCH/DELETE /api/items</li>
+                    <li>☐ GET/POST/PATCH/DELETE /api/addons</li>
+                    <li>☐ GET/POST /api/orders</li>
+                    <li>☐ PATCH /api/orders/:id/status</li>
+                    <li>☐ Validação com Zod em todas rotas</li>
+                    <li>☐ Error handling centralizado</li>
+                    <li>☐ Cálculo de preço automático</li>
+                </ul>
+
+                <h2 class="mt-10">📋 Fase 3-6</h2>
+                <p class="text-sm text-gray-600">Veja documentação completa para todos os 200+ itens</p>
+
+                <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
+                    <h3 class="text-accent-900 font-bold mb-2">💡 Dica</h3>
+                    <p class="text-sm text-accent-800">Seguir sequencialmente garante implementação sólida. Use branches git para cada fase!</p>
+                </div>
+            `,
+
+            'design-system': `
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">🎨 Design & UX</span>
+                    <span>→</span>
+                    <span class="breadcrumb-item active">🎨 Design System</span>
+                </div>
+
+                <h1>🎨 Design System - Padrões</h1>
+
+                <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
+                    <p class="text-primary-900 font-semibold">Cores, tipografia e componentes oficiais do projeto</p>
+                </div>
+
+                <h2>🎨 Paleta de Cores</h2>
+
+                <h3>Primária (Laranja) - Ações e Destaques</h3>
+                <div class="flex space-x-2 mb-4">
+                    <div class="w-16 h-16 bg-primary-500 rounded-lg shadow flex items-center justify-center text-white font-bold text-sm">#f97316</div>
+                </div>
+
+                <h3>Secundária (Vermelho) - Alertas</h3>
+                <div class="flex space-x-2 mb-4">
+                    <div class="w-16 h-16 bg-secondary-500 rounded-lg shadow flex items-center justify-center text-white font-bold text-sm">#ef4444</div>
+                </div>
+
+                <h3>Sucesso (Verde)</h3>
+                <div class="flex space-x-2 mb-6">
+                    <div class="w-16 h-16 bg-accent-500 rounded-lg shadow flex items-center justify-center text-white font-bold text-sm">#22c55e</div>
+                </div>
+
+                <h2>✍️ Tipografia</h2>
+                <ul class="space-y-3 text-sm">
+                    <li><strong>Font:</strong> Inter (sistema padrão)</li>
+                    <li><strong>H1:</strong> 36px, bold (border-bottom 4px primary)</li>
+                    <li><strong>H2:</strong> 30px, bold</li>
+                    <li><strong>Parágrafo:</strong> 16px, leading-relaxed</li>
+                </ul>
+
+                <h2 class="mt-10">🔘 Componentes</h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-bold mb-2">Botão Primário</p>
+                        <button class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg shadow">
+                            Ação Principal
+                        </button>
+                    </div>
+
+                    <div>
+                        <p class="font-bold mb-2">Botão Secundário</p>
+                        <button class="px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white font-semibold rounded-lg shadow">
+                            Ação Crítica
+                        </button>
+                    </div>
+
+                    <div>
+                        <p class="font-bold mb-2">Card Padrão</p>
+                        <div class="card">
+                            <p>Card com shadow, border subtle, hover effect</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="font-bold mb-2">Badge de Status</p>
+                        <span class="inline-block px-4 py-2 bg-accent-100 text-accent-700 rounded-full font-medium text-sm">✅ Sucesso</span>
+                    </div>
+                </div>
+
+                <h2 class="mt-10">📱 Mobile Guidelines</h2>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">👆</span>
+                        <span><strong>Botões:</strong> Mínimo 80x80px (totem), idealmente 100x100px</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">🔤</span>
+                        <span><strong>Fonts:</strong> 18px+ para leitura à distância</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">📏</span>
+                        <span><strong>Espaçamento:</strong> Generoso, evitar elementos muito próximos</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-lg">🎨</span>
+                        <span><strong>Contraste:</strong> WCAG AA mínimo (4.5:1)</span>
+                    </div>
+                </div>
+
+                <div class="card bg-primary-50 border-2 border-primary-300 mt-8">
+                    <h3 class="text-primary-900 font-bold mb-2">💡 Usar em Tudo</h3>
+                    <p class="text-sm text-primary-800">Este design system deve ser seguido em todas as telas: Kiosk, Staff e Admin para garantir consistência.</p>
+                </div>
+            `
+        };
+
+        // Mostrar documento
+        function showDoc(docId) {
+            const content = document.getElementById('content');
+            const contentHtml = docs[docId] || '<h1>Documento não encontrado</h1>';
+
+            content.style.opacity = '0';
+            setTimeout(() => {
+                content.innerHTML = contentHtml;
+                content.classList.remove('fade-in');
+                void content.offsetWidth; // Trigger reflow
+                content.classList.add('fade-in');
+                content.style.opacity = '1';
+
+                // Atualizar menu ativo
+                document.querySelectorAll('.menu-item').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelector(`[data-doc="${docId}"]`)?.classList.add('active');
+
+                // Scroll to top
+                document.querySelector('main').scrollTop = 0;
+            }, 100);
+        }
+
+        // Load on start
+        window.onload = () => {
+            showDoc('home');
+        };
+    </script>
+</body>
+</html>
