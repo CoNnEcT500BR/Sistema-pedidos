@@ -1,38 +1,44 @@
 // Utility functions for API calls
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const api = {
-  get: async (path: string) => {
-    const response = await fetch(`${API_URL}${path}`)
-    if (!response.ok) throw new Error(`API error: ${response.status}`)
-    return response.json()
+  get: async <TResponse = unknown>(path: string): Promise<TResponse> => {
+    const response = await fetch(`${API_URL}${path}`);
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    return response.json() as Promise<TResponse>;
   },
 
-  post: async (path: string, data: any) => {
+  post: async <TResponse = unknown, TBody = unknown>(
+    path: string,
+    data: TBody,
+  ): Promise<TResponse> => {
     const response = await fetch(`${API_URL}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error(`API error: ${response.status}`)
-    return response.json()
+    });
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    return response.json() as Promise<TResponse>;
   },
 
-  put: async (path: string, data: any) => {
+  put: async <TResponse = unknown, TBody = unknown>(
+    path: string,
+    data: TBody,
+  ): Promise<TResponse> => {
     const response = await fetch(`${API_URL}${path}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error(`API error: ${response.status}`)
-    return response.json()
+    });
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    return response.json() as Promise<TResponse>;
   },
 
-  delete: async (path: string) => {
+  delete: async <TResponse = unknown>(path: string): Promise<TResponse> => {
     const response = await fetch(`${API_URL}${path}`, {
       method: 'DELETE',
-    })
-    if (!response.ok) throw new Error(`API error: ${response.status}`)
-    return response.json()
+    });
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    return response.json() as Promise<TResponse>;
   },
-}
+};

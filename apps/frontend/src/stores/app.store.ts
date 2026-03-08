@@ -1,18 +1,25 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
+
+interface AppUser {
+  id: string;
+  email: string;
+  role: 'ADMIN' | 'STAFF';
+  name?: string;
+}
 
 interface AppStore {
   // UI State
-  isLoading: boolean
-  setIsLoading: (loading: boolean) => void
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 
   // User
-  user: any | null
-  setUser: (user: any) => void
-  logout: () => void
+  user: AppUser | null;
+  setUser: (user: AppUser) => void;
+  logout: () => void;
 
   // Theme (dark mode ready)
-  isDarkMode: boolean
-  toggleDarkMode: () => void
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -27,6 +34,5 @@ export const useAppStore = create<AppStore>((set) => ({
 
   // Theme
   isDarkMode: false,
-  toggleDarkMode: () =>
-    set((state) => ({ isDarkMode: !state.isDarkMode })),
-}))
+  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+}));

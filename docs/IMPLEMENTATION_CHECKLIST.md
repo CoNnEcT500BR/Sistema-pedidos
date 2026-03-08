@@ -8,7 +8,8 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ### Backend Setup
 
-- [ ] **1.1 Inicializar projeto Node.js**
+- [x] **1.1 Inicializar projeto Node.js**
+
   ```bash
   mkdir sistema-pedidos
   cd sistema-pedidos
@@ -16,11 +17,12 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   mkdir apps packages docs
   ```
 
-- [ ] **1.2 Configurar workspaces no root**
-  - [ ] Editar `package.json` com `"workspaces": ["apps/*", "packages/*"]`
-  - [ ] Adicionar scripts: `dev`, `build`, `test`, `lint`
+- [x] **1.2 Configurar workspaces no root**
+  - [x] Editar `package.json` com `"workspaces": ["apps/*", "packages/*"]`
+  - [x] Adicionar scripts: `dev`, `build`, `test`, `lint`
 
-- [ ] **1.3 Inicializar backend**
+- [x] **1.3 Inicializar backend**
+
   ```bash
   cd apps
   mkdir server
@@ -30,43 +32,46 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   npm install -D typescript @types/node tsx prisma
   ```
 
-- [ ] **1.4 Configurar TypeScript (backend)**
-  - [ ] Criar `tsconfig.json`
-  - [ ] Configurar `paths` com aliases (`@/*`)
+- [x] **1.4 Configurar TypeScript (backend)**
+  - [x] Criar `tsconfig.json`
+  - [x] Configurar `paths` com aliases (`@/*`)
 
-- [ ] **1.5 Estrutura de pastas backend**
-  - [ ] Criar: `src/`, `src/modules/`, `src/shared/`, `src/config/`, `src/types/`
-  - [ ] Criar: `prisma/`, `prisma/migrations/`
+- [x] **1.5 Estrutura de pastas backend**
+  - [x] Criar: `src/`, `src/modules/`, `src/shared/`, `src/config/`, `src/types/`
+  - [x] Criar: `prisma/`, `prisma/migrations/`
 
-- [ ] **1.6 Configurar Prisma**
+- [x] **1.6 Configurar Prisma**
+
   ```bash
   npx prisma init --datasource-provider sqlite
   ```
-  - [ ] Editar `schema.prisma` com todas as entidades (copiar de DATA_MODEL.md)
-  - [ ] Gerar migrations: `npx prisma migrate dev --name init`
-  - [ ] Gerar Prisma Client: `npx prisma generate`
 
-- [ ] **1.7 Criar seed script**
-  - [ ] Criar `prisma/seed.ts`
-  - [ ] Adicionar categorias padrão (Hambúrgueres, Bebidas, etc.)
-  - [ ] Adicionar itens de exemplo (5-10 por categoria)
-  - [ ] Adicionar combos exemplo (2-3)
-  - [ ] Adicionar usuários: admin e staff padrão
-  - [ ] Adicionar roles (admin, staff)
-  - [ ] Executar: `npx prisma db seed`
+  - [x] Editar `schema.prisma` com todas as entidades (copiar de DATA_MODEL.md)
+  - [x] Gerar migrations: `npx prisma migrate dev --name init`
+  - [x] Gerar Prisma Client: `npx prisma generate`
 
-- [ ] **1.8 Setup inicial do Fastify**
-  - [ ] Criar `src/app.ts` (configuração do Fastify)
-  - [ ] Criar `src/server.ts` (entry point)
-  - [ ] Configurar CORS
-  - [ ] Configurar logger (Pino)
-  - [ ] Testar: `npm run dev` → servidor rodando
+- [x] **1.7 Criar seed script**
+  - [x] Criar `prisma/seed.ts`
+  - [x] Adicionar categorias padrão (Hambúrgueres, Bebidas, etc.)
+  - [x] Adicionar itens de exemplo (5-10 por categoria)
+  - [x] Adicionar combos exemplo (2-3)
+  - [x] Adicionar usuários: admin e staff padrão
+  - [x] Adicionar roles (admin, staff)
+  - [x] Executar: `npx prisma db seed`
+
+- [x] **1.8 Setup inicial do Fastify**
+  - [x] Criar `src/app.ts` (configuração do Fastify)
+  - [x] Criar `src/server.ts` (entry point)
+  - [x] Configurar CORS
+  - [x] Configurar logger (Pino)
+  - [x] Testar: `npm run dev` → servidor rodando
 
 ---
 
 ### Frontend Setup
 
-- [ ] **1.9 Inicializar frontend**
+- [x] **1.9 Inicializar frontend**
+
   ```bash
   cd ../
   npm create vite@latest frontend -- --template react-ts
@@ -74,47 +79,50 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   npm install
   ```
 
-- [ ] **1.10 Instalar dependências frontend**
+- [x] **1.10 Instalar dependências frontend**
+
   ```bash
   npm install react-router-dom zustand axios
   npm install -D tailwindcss postcss autoprefixer
   npx tailwindcss init -p
   ```
 
-- [ ] **1.11 Configurar Tailwind CSS**
-  - [ ] Editar `tailwind.config.js` (adicionar paths: `./src/**/*.{js,ts,jsx,tsx}`)
-  - [ ] Criar `src/styles/globals.css` com directives do Tailwind
+- [x] **1.11 Configurar Tailwind CSS**
+  - [x] Editar `tailwind.config.js` (adicionar paths: `./src/**/*.{js,ts,jsx,tsx}`)
+  - [x] Criar `src/styles/globals.css` com directives do Tailwind
 
-- [ ] **1.12 Instalar shadcn/ui**
+- [x] **1.12 Instalar shadcn/ui**
+
   ```bash
   npx shadcn-ui@latest init
   npx shadcn-ui@latest add button card input dialog toast
   ```
 
-- [ ] **1.13 Estrutura de pastas frontend**
-  - [ ] Criar: `src/app/`, `src/routes/`, `src/features/`, `src/components/`
-  - [ ] Criar: `src/services/`, `src/stores/`, `src/utils/`, `src/types/`
-  - [ ] Criar subpastas em `routes/`: `kiosk/`, `staff/`, `admin/`
+- [x] **1.13 Estrutura de pastas frontend**
+  - [x] Criar: `src/app/`, `src/routes/`, `src/features/`, `src/components/`
+  - [x] Criar: `src/services/`, `src/stores/`, `src/utils/`, `src/types/`
+  - [x] Criar subpastas em `routes/`: `kiosk/`, `staff/`, `admin/`
 
-- [ ] **1.14 Configurar TypeScript (frontend)**
-  - [ ] Editar `tsconfig.json` com paths aliases
-  - [ ] Adicionar: `"@/*": ["./src/*"]`
+- [x] **1.14 Configurar TypeScript (frontend)**
+  - [x] Editar `tsconfig.json` com paths aliases
+  - [x] Adicionar: `"@/*": ["./src/*"]`
 
-- [ ] **1.15 Configurar React Router**
-  - [ ] Criar `src/app/router.tsx`
-  - [ ] Definir rotas: `/kiosk`, `/staff`, `/admin`
-  - [ ] Integrar no `App.tsx`
+- [x] **1.15 Configurar React Router**
+  - [x] Criar `src/app/router.tsx`
+  - [x] Definir rotas: `/kiosk`, `/staff`, `/admin`
+  - [x] Integrar no `App.tsx`
 
-- [ ] **1.16 Setup de API client**
-  - [ ] Criar `src/services/api.service.ts`
-  - [ ] Configurar Axios base URL
-  - [ ] Adicionar interceptors (JWT, error handling)
+- [x] **1.16 Setup de API client**
+  - [x] Criar `src/services/api.service.ts`
+  - [x] Configurar Axios base URL
+  - [x] Adicionar interceptors (JWT, error handling)
 
 ---
 
 ### Package Shared (Opcional mas Recomendado)
 
-- [ ] **1.17 Criar package shared**
+- [x] **1.17 Criar package shared**
+
   ```bash
   cd ../../packages
   mkdir shared
@@ -123,34 +131,34 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   npm install -D typescript
   ```
 
-- [ ] **1.18 Definir tipos compartilhados**
-  - [ ] Criar `src/types/menu.types.ts`
-  - [ ] Criar `src/types/order.types.ts`
-  - [ ] Criar `src/types/user.types.ts`
+- [x] **1.18 Definir tipos compartilhados**
+  - [x] Criar `src/types/menu.types.ts`
+  - [x] Criar `src/types/order.types.ts`
+  - [x] Criar `src/types/user.types.ts`
 
 ---
 
 ### DevOps e Scripts
 
-- [ ] **1.19 Configurar ESLint + Prettier**
-  - [ ] Criar `.eslintrc.json` no root
-  - [ ] Criar `.prettierrc` no root
-  - [ ] Adicionar scripts: `lint`, `format`
+- [x] **1.19 Configurar ESLint + Prettier**
+  - [x] Criar `.eslintrc.json` no root
+  - [x] Criar `.prettierrc` no root
+  - [x] Adicionar scripts: `lint`, `format`
 
-- [ ] **1.20 Criar scripts auxiliares**
-  - [ ] `scripts/setup.sh` (Linux/Mac)
-  - [ ] `scripts/setup.ps1` (Windows)
-  - [ ] `scripts/backup.sh` (backup do .db)
+- [x] **1.20 Criar scripts auxiliares**
+  - [x] `scripts/setup.sh` (Linux/Mac)
+  - [x] `scripts/setup.ps1` (Windows)
+  - [x] `scripts/backup.sh` (backup do .db)
 
-- [ ] **1.21 Documentação básica**
-  - [ ] Criar README.md no root (copiar de docs/)
-  - [ ] Criar .env.example (backend e frontend)
+- [x] **1.21 Documentação básica**
+  - [x] Criar README.md no root (copiar de docs/)
+  - [x] Criar .env.example (backend e frontend)
 
-- [ ] **1.22 Testar setup completo**
-  - [ ] Backend rodando: `npm run dev -w server`
-  - [ ] Frontend rodando: `npm run dev -w frontend`
-  - [ ] Sem erros de build
-  - [ ] Banco de dados seed executado
+- [x] **1.22 Testar setup completo**
+  - [x] Backend rodando: `npm run dev -w server`
+  - [x] Frontend rodando: `npm run dev -w frontend`
+  - [x] Sem erros de build
+  - [x] Banco de dados seed executado
 
 ---
 
@@ -728,6 +736,7 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   - [ ] Desabilitar hibernação/sleep
 
 - [ ] **6.10 Clonar projeto no PC Central**
+
   ```bash
   git clone <repo-url> C:\sistema-pedidos
   cd C:\sistema-pedidos
@@ -739,11 +748,13 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   - [ ] Frontend: `VITE_API_URL=http://192.168.1.100:3000`
 
 - [ ] **6.12 Build do projeto**
+
   ```bash
   npm run build
   ```
 
 - [ ] **6.13 Executar migrations**
+
   ```bash
   cd apps/server
   npx prisma migrate deploy
@@ -751,6 +762,7 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   ```
 
 - [ ] **6.14 Iniciar servidor como serviço (pm2)**
+
   ```bash
   npm install -g pm2
   pm2 start apps/server/dist/server.js --name sistema-pedidos
@@ -860,6 +872,7 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 **Parabéns!** O sistema está em produção e funcionando.
 
 **Próximos passos:**
+
 1. Operar por 2-4 semanas sem mudanças grandes (estabilizar)
 2. Coletar dados e feedback
 3. Iterar nas funcionalidades mais solicitadas
@@ -870,6 +883,7 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 ## 📞 Suporte
 
 Em caso de dúvidas durante a implementação, consultar:
+
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
 - [DATA_MODEL.md](./DATA_MODEL.md)
 - [PRICING_RULES.md](./PRICING_RULES.md)

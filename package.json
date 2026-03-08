@@ -4,19 +4,22 @@
   "description": "Sistema de Pedidos 100% Offline com Rede Local",
   "private": true,
   "workspaces": [
-    "apps/server",
-    "apps/frontend",
-    "packages/shared"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "dev": "pnpm --filter=./apps/server dev & pnpm --filter=./apps/frontend dev",
-    "build": "pnpm --filter=./apps/server build && pnpm --filter=./apps/frontend build",
-    "start": "pnpm --filter=./apps/server start",
-    "type-check": "pnpm --filter=./apps/server type-check && pnpm --filter=./apps/frontend type-check",
-    "lint": "pnpm --filter=./apps/server lint && pnpm --filter=./apps/frontend lint"
+    "dev": "npm run -w apps/server dev & npm run -w apps/frontend dev",
+    "build": "npm run -w apps/server build && npm run -w apps/frontend build",
+    "start": "npm run -w apps/server start",
+    "test": "npm run type-check",
+    "type-check": "npm run -w apps/server type-check && npm run -w apps/frontend type-check",
+    "lint": "npm run -w apps/server lint && npm run -w apps/frontend lint",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@typescript-eslint/parser": "^8.56.1",
+    "prettier": "^3.6.2",
     "typescript": "^5.3.0"
   },
   "engines": {
