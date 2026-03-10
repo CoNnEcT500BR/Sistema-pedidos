@@ -54,6 +54,7 @@ export async function buildApp(): Promise<FastifyInstance> {
         { name: 'combos', description: 'Combos e promocoes' },
         { name: 'orders', description: 'Pedidos e status' },
         { name: 'addons', description: 'Adicionais e regras por item' },
+        { name: 'telemetry', description: 'Eventos de jornada do kiosk' },
       ],
       components: {
         securitySchemes: {

@@ -15,6 +15,7 @@ import {
   updateOrderStatusBodySchema,
   validationErrorSchema,
 } from '@/shared/http/openapi';
+import { OrderValidationError } from './orders.calculator';
 import {
   createOrder,
   getOrderById,
@@ -52,6 +53,13 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
         const order = await createOrder(parsed.data);
         return reply.code(201).send({ data: order });
       } catch (error) {
+        if (error instanceof OrderValidationError) {
+          return reply.code(400).send({
+            message: error.message,
+            itemErrors: error.itemErrors,
+          });
+        }
+
         if (isOrderServiceError(error)) {
           return reply.code(error.statusCode).send({ message: error.message });
         }

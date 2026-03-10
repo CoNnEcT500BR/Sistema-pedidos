@@ -27,141 +27,621 @@ async function main() {
   ]);
 
   const categories = await prisma.$transaction([
-    prisma.category.create({ data: { name: 'Hamburgueres', displayOrder: 1 } }),
-    prisma.category.create({ data: { name: 'Bebidas', displayOrder: 2 } }),
-    prisma.category.create({ data: { name: 'Acompanhamentos', displayOrder: 3 } }),
+    prisma.category.create({ data: { name: 'Hamburgueres', icon: '🍔', displayOrder: 1 } }),
+    prisma.category.create({ data: { name: 'Bebidas', icon: '🥤', displayOrder: 2 } }),
+    prisma.category.create({ data: { name: 'Acompanhamentos', icon: '🍟', displayOrder: 3 } }),
+    prisma.category.create({ data: { name: 'Sobremesas', icon: '🍰', displayOrder: 4 } }),
+    prisma.category.create({ data: { name: 'Combos', icon: '🎁', displayOrder: 5 } }),
+    prisma.category.create({ data: { name: 'Kids', icon: '🧒', displayOrder: 6 } }),
+    prisma.category.create({ data: { name: 'Molhos e Extras', icon: '🫙', displayOrder: 7 } }),
+    prisma.category.create({ data: { name: 'Compartilhaveis', icon: '🍗', displayOrder: 8 } }),
   ]);
 
-  const [hamburgueres, bebidas, acompanhamentos] = categories;
+  const [
+    hamburgueres,
+    bebidas,
+    acompanhamentos,
+    sobremesas,
+    _combos,
+    kids,
+    molhos,
+    compartilhaveis,
+  ] = categories;
 
   await prisma.menuItem.createMany({
     data: [
-      { name: 'Classic Burger', categoryId: hamburgueres.id, price: 18.9, displayOrder: 1 },
-      { name: 'Cheese Burger', categoryId: hamburgueres.id, price: 21.9, displayOrder: 2 },
-      { name: 'Bacon Burger', categoryId: hamburgueres.id, price: 24.9, displayOrder: 3 },
-      { name: 'Double Burger', categoryId: hamburgueres.id, price: 27.9, displayOrder: 4 },
-      { name: 'Veggie Burger', categoryId: hamburgueres.id, price: 22.9, displayOrder: 5 },
+      {
+        name: 'Classic Burger P',
+        categoryId: hamburgueres.id,
+        price: 16.9,
+        displayOrder: 1,
+        description: 'Pequeno: carne, queijo, ketchup e picles',
+      },
+      {
+        name: 'Classic Burger M',
+        categoryId: hamburgueres.id,
+        price: 19.9,
+        displayOrder: 2,
+        description: 'Medio: carne, mostarda, ketchup, cebola e picles',
+      },
+      {
+        name: 'Classic Burger G',
+        categoryId: hamburgueres.id,
+        price: 23.9,
+        displayOrder: 3,
+        description: 'Grande: 2 carnes, queijo, mostarda, ketchup, cebola e picles',
+      },
+      {
+        name: 'Bacon Burger M',
+        categoryId: hamburgueres.id,
+        price: 23.9,
+        displayOrder: 4,
+        description: 'Medio: carne, bacon, queijo, cebola e maionese',
+      },
+      {
+        name: 'Bacon Burger G',
+        categoryId: hamburgueres.id,
+        price: 28.9,
+        displayOrder: 5,
+        description: 'Grande: 2 carnes, bacon, 2 queijos, cebola e maionese',
+      },
+      {
+        name: 'Chicken Burger M',
+        categoryId: hamburgueres.id,
+        price: 22.9,
+        displayOrder: 6,
+        description: 'Medio: frango grelhado, queijo, alface, tomate e maionese',
+      },
+      {
+        name: 'Veggie Burger P',
+        categoryId: hamburgueres.id,
+        price: 18.9,
+        displayOrder: 7,
+        description: 'Pequeno: burger vegetal, alface, tomate e molho especial',
+      },
+      {
+        name: 'Veggie Burger M',
+        categoryId: hamburgueres.id,
+        price: 21.9,
+        displayOrder: 8,
+        description: 'Medio: burger vegetal duplo, alface, tomate e molho especial',
+      },
+      {
+        name: 'Monster Burger G',
+        categoryId: hamburgueres.id,
+        price: 34.9,
+        displayOrder: 9,
+        description: 'Exclusivo grande: 3 carnes, queijo, bacon, cebola e molho especial',
+      },
 
-      { name: 'Refrigerante Lata', categoryId: bebidas.id, price: 6.5, displayOrder: 1 },
-      { name: 'Suco Natural', categoryId: bebidas.id, price: 8.5, displayOrder: 2 },
-      { name: 'Cha Gelado', categoryId: bebidas.id, price: 7.5, displayOrder: 3 },
-      { name: 'Agua Mineral', categoryId: bebidas.id, price: 4.5, displayOrder: 4 },
-      { name: 'Milkshake', categoryId: bebidas.id, price: 14.9, displayOrder: 5 },
+      {
+        name: 'Refrigerante P',
+        categoryId: bebidas.id,
+        price: 5.9,
+        displayOrder: 1,
+        description: '300ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Refrigerante M',
+        categoryId: bebidas.id,
+        price: 7.4,
+        displayOrder: 2,
+        description: '500ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Refrigerante G',
+        categoryId: bebidas.id,
+        price: 8.9,
+        displayOrder: 3,
+        description: '700ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Suco P',
+        categoryId: bebidas.id,
+        price: 6.9,
+        displayOrder: 4,
+        description: '300ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Suco M',
+        categoryId: bebidas.id,
+        price: 8.4,
+        displayOrder: 5,
+        description: '500ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Suco G',
+        categoryId: bebidas.id,
+        price: 9.9,
+        displayOrder: 6,
+        description: '700ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Cha Gelado P',
+        categoryId: bebidas.id,
+        price: 5.9,
+        displayOrder: 7,
+        description: '300ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Cha Gelado M',
+        categoryId: bebidas.id,
+        price: 7.4,
+        displayOrder: 8,
+        description: '500ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Cha Gelado G',
+        categoryId: bebidas.id,
+        price: 8.9,
+        displayOrder: 9,
+        description: '700ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Agua Mineral P',
+        categoryId: bebidas.id,
+        price: 3.9,
+        displayOrder: 10,
+        description: '300ml',
+      },
+      {
+        name: 'Agua Mineral M',
+        categoryId: bebidas.id,
+        price: 5.2,
+        displayOrder: 11,
+        description: '500ml',
+      },
+      {
+        name: 'Agua Mineral G',
+        categoryId: bebidas.id,
+        price: 6.5,
+        displayOrder: 12,
+        description: '700ml',
+      },
 
       { name: 'Batata Frita P', categoryId: acompanhamentos.id, price: 9.9, displayOrder: 1 },
-      { name: 'Batata Frita G', categoryId: acompanhamentos.id, price: 14.9, displayOrder: 2 },
-      { name: 'Onion Rings', categoryId: acompanhamentos.id, price: 13.9, displayOrder: 3 },
-      { name: 'Nuggets', categoryId: acompanhamentos.id, price: 15.9, displayOrder: 4 },
-      { name: 'Salada da Casa', categoryId: acompanhamentos.id, price: 12.9, displayOrder: 5 },
+      { name: 'Batata Frita M', categoryId: acompanhamentos.id, price: 12.4, displayOrder: 2 },
+      { name: 'Batata Frita G', categoryId: acompanhamentos.id, price: 14.9, displayOrder: 3 },
+      { name: 'Onion Rings', categoryId: acompanhamentos.id, price: 13.9, displayOrder: 4 },
+      { name: 'Nuggets (6 un.)', categoryId: acompanhamentos.id, price: 15.9, displayOrder: 5 },
+      { name: 'Brinquedo Surpresa', categoryId: acompanhamentos.id, price: 7.9, displayOrder: 6 },
+
+      {
+        name: 'Milkshake P',
+        categoryId: sobremesas.id,
+        price: 12.9,
+        displayOrder: 1,
+        description: '300ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Milkshake M',
+        categoryId: sobremesas.id,
+        price: 14.4,
+        displayOrder: 2,
+        description: '500ml. Escolha o sabor no modal.',
+      },
+      {
+        name: 'Milkshake G',
+        categoryId: sobremesas.id,
+        price: 15.9,
+        displayOrder: 3,
+        description: '700ml. Escolha o sabor no modal.',
+      },
+      { name: 'Sundae', categoryId: sobremesas.id, price: 9.9, displayOrder: 4 },
+      { name: 'Brownie com Sorvete', categoryId: sobremesas.id, price: 13.9, displayOrder: 5 },
+      { name: 'Torta de Maca', categoryId: sobremesas.id, price: 10.9, displayOrder: 6 },
+      { name: 'Casquinha', categoryId: sobremesas.id, price: 6.9, displayOrder: 7 },
+
+      {
+        name: 'Lanche Kids P',
+        categoryId: kids.id,
+        price: 16.9,
+        displayOrder: 1,
+        description: 'Burger pequeno, ideal para criancas',
+      },
+      {
+        name: 'Suco Kids P',
+        categoryId: kids.id,
+        price: 5.9,
+        displayOrder: 2,
+        description: 'Suco pequeno infantil',
+      },
+      {
+        name: 'Mini Batata Kids',
+        categoryId: kids.id,
+        price: 7.9,
+        displayOrder: 3,
+        description: 'Batata porcao infantil',
+      },
+
+      { name: 'Molho BBQ', categoryId: molhos.id, price: 2.0, displayOrder: 1 },
+      { name: 'Molho Ranch', categoryId: molhos.id, price: 2.0, displayOrder: 2 },
+      { name: 'Molho Picante', categoryId: molhos.id, price: 2.0, displayOrder: 3 },
+      { name: 'Cheddar Cremoso', categoryId: molhos.id, price: 3.5, displayOrder: 4 },
+
+      { name: 'Balde de Batata M', categoryId: compartilhaveis.id, price: 24.9, displayOrder: 1 },
+      { name: 'Balde de Batata G', categoryId: compartilhaveis.id, price: 34.9, displayOrder: 2 },
+      { name: 'Nuggets (12 un.)', categoryId: compartilhaveis.id, price: 29.9, displayOrder: 3 },
+      { name: 'Combo Molhos (4 un.)', categoryId: compartilhaveis.id, price: 7.5, displayOrder: 4 },
     ],
   });
 
-  const comboItems = await prisma.menuItem.findMany({
-    where: {
-      name: {
-        in: [
-          'Classic Burger',
-          'Cheese Burger',
-          'Bacon Burger',
-          'Refrigerante Lata',
-          'Suco Natural',
-          'Batata Frita P',
-          'Batata Frita G',
-          'Onion Rings',
-        ],
-      },
+  const allMenuItems = await prisma.menuItem.findMany();
+  const itemByName = new Map(allMenuItems.map((item) => [item.name, item]));
+
+  const addonsData = [
+    { name: 'Mostarda', addonType: 'REMOVAL', price: 0, description: 'Mostarda do item' },
+    { name: 'Ketchup', addonType: 'REMOVAL', price: 0, description: 'Ketchup do item' },
+    { name: 'Cebola', addonType: 'REMOVAL', price: 0, description: 'Cebola do item' },
+    { name: 'Picles', addonType: 'REMOVAL', price: 0, description: 'Picles do item' },
+    { name: 'Alface', addonType: 'REMOVAL', price: 0, description: 'Alface do item' },
+    { name: 'Tomate', addonType: 'REMOVAL', price: 0, description: 'Tomate do item' },
+    { name: 'Maionese', addonType: 'REMOVAL', price: 0, description: 'Maionese do item' },
+    { name: 'Bacon', addonType: 'REMOVAL', price: 0, description: 'Bacon do item' },
+    { name: 'Queijo', addonType: 'REMOVAL', price: 0, description: 'Queijo do item' },
+    {
+      name: 'Molho Especial',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Molho especial do item',
     },
-  });
+    { name: 'Gelo', addonType: 'REMOVAL', price: 0, description: 'Gelo da bebida' },
+    { name: 'Chantilly', addonType: 'REMOVAL', price: 0, description: 'Chantilly da sobremesa' },
 
-  const itemByName = new Map(comboItems.map((item) => [item.name, item]));
+    { name: 'Sabor Cola', addonType: 'EXTRA', price: 0, description: 'Troca sabor para cola' },
+    {
+      name: 'Sabor Guarana',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para guarana',
+    },
+    {
+      name: 'Sabor Laranja',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para laranja',
+    },
+    { name: 'Sabor Uva', addonType: 'EXTRA', price: 0, description: 'Troca sabor para uva' },
+    {
+      name: 'Sabor Maracuja',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para maracuja',
+    },
+    { name: 'Sabor Limao', addonType: 'EXTRA', price: 0, description: 'Troca sabor para limao' },
+    {
+      name: 'Sabor Pessego',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para pessego',
+    },
+    {
+      name: 'Sabor Chocolate',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para chocolate',
+    },
+    {
+      name: 'Sabor Morango',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para morango',
+    },
+    {
+      name: 'Sabor Baunilha',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Troca sabor para baunilha',
+    },
 
-  const [baconExtra, queijoExtra] = await prisma.$transaction([
-    prisma.addon.create({
-      data: {
-        name: 'Bacon Extra',
-        addonType: 'EXTRA',
-        price: 3.5,
-        description: 'Bacon crocante',
-      },
-    }),
-    prisma.addon.create({
-      data: {
-        name: 'Queijo Extra',
-        addonType: 'EXTRA',
-        price: 2.5,
-        description: 'Fatia adicional de queijo',
-      },
-    }),
-  ]);
+    { name: 'Carne Extra', addonType: 'EXTRA', price: 5.0, description: 'Adicionar carne extra' },
+    { name: 'Frango Extra', addonType: 'EXTRA', price: 4.5, description: 'Adicionar frango extra' },
+    { name: 'Bacon Extra', addonType: 'EXTRA', price: 3.5, description: 'Adicionar bacon extra' },
+    { name: 'Queijo Extra', addonType: 'EXTRA', price: 2.5, description: 'Adicionar queijo extra' },
+    {
+      name: 'Molho Especial Extra',
+      addonType: 'EXTRA',
+      price: 1.5,
+      description: 'Adicionar molho especial extra',
+    },
+    {
+      name: 'Brinquedo Surpresa Extra',
+      addonType: 'EXTRA',
+      price: 7.9,
+      description: 'Adicionar brinquedo surpresa',
+    },
 
-  await prisma.menuItemAddon.createMany({
+    {
+      name: 'Upgrade Batata para M',
+      addonType: 'EXTRA',
+      price: 2.5,
+      description: 'Troca batata do combo para medio',
+    },
+    {
+      name: 'Upgrade Batata para G',
+      addonType: 'EXTRA',
+      price: 5.0,
+      description: 'Troca batata do combo para grande',
+    },
+    {
+      name: 'Upgrade Bebida para M',
+      addonType: 'EXTRA',
+      price: 1.5,
+      description: 'Troca bebida do combo para medio',
+    },
+    {
+      name: 'Upgrade Bebida para G',
+      addonType: 'EXTRA',
+      price: 3.0,
+      description: 'Troca bebida do combo para grande',
+    },
+  ] as const;
+
+  await prisma.addon.createMany({ data: addonsData.map((addon) => ({ ...addon })) });
+
+  const allAddons = await prisma.addon.findMany();
+  const addonByName = new Map(allAddons.map((addon) => [addon.name, addon]));
+
+  const menuItemAddonsConfig = [
+    {
+      item: 'Classic Burger P',
+      removables: ['Queijo', 'Ketchup', 'Picles'],
+      extras: ['Carne Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Classic Burger M',
+      removables: ['Mostarda', 'Ketchup', 'Cebola', 'Picles'],
+      extras: ['Carne Extra', 'Queijo Extra', 'Bacon Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Classic Burger G',
+      removables: ['Queijo', 'Mostarda', 'Ketchup', 'Cebola', 'Picles'],
+      extras: ['Carne Extra', 'Queijo Extra', 'Bacon Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Bacon Burger M',
+      removables: ['Bacon', 'Queijo', 'Cebola', 'Maionese'],
+      extras: ['Carne Extra', 'Bacon Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Bacon Burger G',
+      removables: ['Bacon', 'Queijo', 'Cebola', 'Maionese'],
+      extras: ['Carne Extra', 'Bacon Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Chicken Burger M',
+      removables: ['Queijo', 'Alface', 'Tomate', 'Maionese'],
+      extras: ['Frango Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Veggie Burger P',
+      removables: ['Alface', 'Tomate', 'Molho Especial'],
+      extras: ['Queijo Extra', 'Molho Especial Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Veggie Burger M',
+      removables: ['Alface', 'Tomate', 'Molho Especial'],
+      extras: ['Queijo Extra', 'Molho Especial Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Monster Burger G',
+      removables: ['Queijo', 'Bacon', 'Cebola', 'Molho Especial'],
+      extras: [
+        'Carne Extra',
+        'Bacon Extra',
+        'Queijo Extra',
+        'Molho Especial Extra',
+        'Brinquedo Surpresa Extra',
+      ],
+    },
+
+    {
+      item: 'Refrigerante P',
+      removables: ['Gelo'],
+      extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
+    },
+    {
+      item: 'Refrigerante M',
+      removables: ['Gelo'],
+      extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
+    },
+    {
+      item: 'Refrigerante G',
+      removables: ['Gelo'],
+      extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
+    },
+    {
+      item: 'Suco P',
+      removables: ['Gelo'],
+      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+    },
+    {
+      item: 'Suco M',
+      removables: ['Gelo'],
+      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+    },
+    {
+      item: 'Suco G',
+      removables: ['Gelo'],
+      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+    },
+    { item: 'Cha Gelado P', removables: ['Gelo'], extras: ['Sabor Limao', 'Sabor Pessego'] },
+    { item: 'Cha Gelado M', removables: ['Gelo'], extras: ['Sabor Limao', 'Sabor Pessego'] },
+    { item: 'Cha Gelado G', removables: ['Gelo'], extras: ['Sabor Limao', 'Sabor Pessego'] },
+
+    {
+      item: 'Milkshake P',
+      removables: ['Chantilly'],
+      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+    },
+    {
+      item: 'Milkshake M',
+      removables: ['Chantilly'],
+      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+    },
+    {
+      item: 'Milkshake G',
+      removables: ['Chantilly'],
+      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+    },
+    {
+      item: 'Sundae',
+      removables: ['Chantilly'],
+      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+    },
+  ] as const;
+
+  // Atualizar removablesJson em cada item
+  for (const config of menuItemAddonsConfig) {
+    const menuItem = itemByName.get(config.item);
+    if (!menuItem) continue;
+
+    await prisma.menuItem.update({
+      where: { id: menuItem.id },
+      data: { removablesJson: JSON.stringify(config.removables) },
+    });
+  }
+
+  for (const config of menuItemAddonsConfig) {
+    const menuItem = itemByName.get(config.item);
+    if (!menuItem) continue;
+
+    const removables = config.removables
+      .map((name, index) => {
+        const addon = addonByName.get(name);
+        if (!addon) return null;
+        return {
+          menuItemId: menuItem.id,
+          addonId: addon.id,
+          isRequired: true,
+          displayOrder: index + 1,
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          menuItemId: string;
+          addonId: string;
+          isRequired: boolean;
+          displayOrder: number;
+        } => row !== null,
+      );
+
+    const extras = config.extras
+      .map((name, index) => {
+        const addon = addonByName.get(name);
+        if (!addon) return null;
+        return {
+          menuItemId: menuItem.id,
+          addonId: addon.id,
+          isRequired: false,
+          displayOrder: index + 1,
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          menuItemId: string;
+          addonId: string;
+          isRequired: boolean;
+          displayOrder: number;
+        } => row !== null,
+      );
+
+    if (removables.length || extras.length) {
+      await prisma.menuItemAddon.createMany({ data: [...removables, ...extras] });
+    }
+  }
+
+  await prisma.combo.createMany({
     data: [
       {
-        menuItemId: itemByName.get('Classic Burger')!.id,
-        addonId: baconExtra.id,
+        name: 'Combo Pequeno',
+        description: 'Classic Burger P + Batata Frita P + Refrigerante P',
+        price: 27.9,
+        displayOrder: 1,
       },
       {
-        menuItemId: itemByName.get('Classic Burger')!.id,
-        addonId: queijoExtra.id,
+        name: 'Combo Medio',
+        description: 'Classic Burger M + Batata Frita M + Refrigerante P',
+        price: 33.9,
+        displayOrder: 2,
       },
       {
-        menuItemId: itemByName.get('Cheese Burger')!.id,
-        addonId: baconExtra.id,
+        name: 'Combo Grande',
+        description: 'Classic Burger G + Batata Frita G + Refrigerante M',
+        price: 44.9,
+        displayOrder: 3,
       },
       {
-        menuItemId: itemByName.get('Cheese Burger')!.id,
-        addonId: queijoExtra.id,
+        name: 'Combo Monster',
+        description: 'Monster Burger G + Onion Rings + Milkshake M',
+        price: 52.9,
+        displayOrder: 4,
+      },
+      {
+        name: 'Combo Frango',
+        description: 'Chicken Burger M + Batata Frita M + Suco M',
+        price: 39.9,
+        displayOrder: 5,
+      },
+      {
+        name: 'Combo Kids Brinquedo',
+        description: 'Lanche Kids P + Mini Batata Kids + Suco Kids P + Brinquedo Surpresa',
+        price: 36.9,
+        displayOrder: 6,
+      },
+      {
+        name: 'Combo Compartilhar',
+        description: 'Balde de Batata M + Nuggets (12 un.) + Refrigerante G',
+        price: 54.9,
+        displayOrder: 7,
       },
     ],
   });
 
-  await prisma.combo.create({
-    data: {
-      name: 'Combo Classico',
-      description: 'Classic Burger + Batata P + Refrigerante',
-      price: 31.9,
-      displayOrder: 1,
-      comboItems: {
-        create: [
-          { menuItemId: itemByName.get('Classic Burger')!.id, quantity: 1 },
-          { menuItemId: itemByName.get('Batata Frita P')!.id, quantity: 1 },
-          { menuItemId: itemByName.get('Refrigerante Lata')!.id, quantity: 1 },
-        ],
-      },
-    },
-  });
+  const combos = await prisma.combo.findMany();
+  const comboByName = new Map(combos.map((combo) => [combo.name, combo]));
 
-  await prisma.combo.create({
-    data: {
-      name: 'Combo Cheese',
-      description: 'Cheese Burger + Batata G + Suco Natural',
-      price: 39.9,
-      displayOrder: 2,
-      comboItems: {
-        create: [
-          { menuItemId: itemByName.get('Cheese Burger')!.id, quantity: 1 },
-          { menuItemId: itemByName.get('Batata Frita G')!.id, quantity: 1 },
-          { menuItemId: itemByName.get('Suco Natural')!.id, quantity: 1 },
-        ],
-      },
+  const comboItemsConfig = [
+    {
+      combo: 'Combo Pequeno',
+      items: ['Classic Burger P', 'Batata Frita P', 'Refrigerante P'],
     },
-  });
+    { combo: 'Combo Medio', items: ['Classic Burger M', 'Batata Frita M', 'Refrigerante P'] },
+    { combo: 'Combo Grande', items: ['Classic Burger G', 'Batata Frita G', 'Refrigerante M'] },
+    { combo: 'Combo Monster', items: ['Monster Burger G', 'Onion Rings', 'Milkshake M'] },
+    { combo: 'Combo Frango', items: ['Chicken Burger M', 'Batata Frita M', 'Suco M'] },
+    {
+      combo: 'Combo Kids Brinquedo',
+      items: ['Lanche Kids P', 'Mini Batata Kids', 'Suco Kids P', 'Brinquedo Surpresa'],
+    },
+    {
+      combo: 'Combo Compartilhar',
+      items: ['Balde de Batata M', 'Nuggets (12 un.)', 'Refrigerante G'],
+    },
+  ] as const;
 
-  await prisma.combo.create({
-    data: {
-      name: 'Combo Bacon',
-      description: 'Bacon Burger + Onion Rings + Refrigerante',
-      price: 42.9,
-      displayOrder: 3,
-      comboItems: {
-        create: [
-          { menuItemId: itemByName.get('Bacon Burger')!.id, quantity: 1 },
-          { menuItemId: itemByName.get('Onion Rings')!.id, quantity: 1 },
-          { menuItemId: itemByName.get('Refrigerante Lata')!.id, quantity: 1 },
-        ],
-      },
-    },
-  });
+  for (const config of comboItemsConfig) {
+    const combo = comboByName.get(config.combo);
+    if (!combo) continue;
+
+    const rows = config.items
+      .map((itemName) => {
+        const item = itemByName.get(itemName);
+        if (!item) return null;
+        return { comboId: combo.id, menuItemId: item.id, quantity: 1 };
+      })
+      .filter(
+        (row): row is { comboId: string; menuItemId: string; quantity: number } => row !== null,
+      );
+
+    if (rows.length > 0) {
+      await prisma.comboItem.createMany({ data: rows });
+    }
+  }
 
   await prisma.user.createMany({
     data: [

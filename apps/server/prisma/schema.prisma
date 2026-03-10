@@ -37,10 +37,11 @@ model MenuItem {
     icon        String? // Emoji
     imageUrl    String?
 
-    isAvailable  Boolean  @default(true)
-    displayOrder Int      @default(0)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    isAvailable    Boolean  @default(true)
+    removablesJson String? // JSON array de nomes de removíveis permitidos, ex: '["Gelo", "Cebola"]'
+    displayOrder   Int      @default(0)
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 
     addons     MenuItemAddon[]
     orderItems OrderItem[]

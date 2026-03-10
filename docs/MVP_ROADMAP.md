@@ -1,6 +1,6 @@
 # MVP Roadmap - Sistema de Pedidos
 
-> Status em 10/03/2026: fundacao do monorepo e backend da Fase 2 ja entregues; frontend ainda esta em shell inicial com paginas placeholder em `/kiosk`, `/staff` e `/admin`.
+> Status em 10/03/2026: Fase 3 (Frontend Kiosk) concluída. Backend completo desde a Fase 2. Frontend com fluxo completo do kiosk implementado; interfaces Staff e Admin ainda são shells placeholder.
 
 ## 1. Filosofia do MVP
 
@@ -53,14 +53,13 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 **Kiosk (Cliente):**
 
-- 🚧 Shell inicial em `/kiosk`
-- ⏳ Splash screen
-- ⏳ Navegação de categorias
-- ⏳ Listagem de itens por categoria
-- ⏳ Modal de personalização (adicionais + observações)
-- ⏳ Carrinho com cálculo de total em tempo real
-- ⏳ Confirmação de pedido
-- ⏳ Tela de número do pedido
+- ✅ Splash screen com timeout de inatividade
+- ✅ Navegação de categorias (grid com ícones)
+- ✅ Listagem de itens por categoria
+- ✅ Modal de personalização (adicionais + observações)
+- ✅ Carrinho com cálculo de total em tempo real
+- ✅ Confirmação de pedido com resumo completo
+- ✅ Tela de número do pedido (auto-redirect 30s)
 
 **Staff (Funcionário):**
 

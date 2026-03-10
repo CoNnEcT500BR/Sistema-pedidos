@@ -4,6 +4,7 @@ import { registerMenuRoutes } from '@/modules/menu/menu.routes';
 import { registerCombosRoutes } from '@/modules/combos/combos.routes';
 import { registerOrdersRoutes } from '@/modules/orders/orders.routes';
 import { registerAddonsRoutes } from '@/modules/addons/addons.routes';
+import { registerTelemetryRoutes } from '@/modules/telemetry/telemetry.routes';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   fastify.get('/status', async () => ({
@@ -20,6 +21,7 @@ export async function registerRoutes(fastify: FastifyInstance) {
   await fastify.register(registerCombosRoutes, { prefix: '/api' });
   await fastify.register(registerOrdersRoutes, { prefix: '/api' });
   await fastify.register(registerAddonsRoutes, { prefix: '/api' });
+  await fastify.register(registerTelemetryRoutes, { prefix: '/api' });
 
-  console.log('Rotas da Fase 2 (Auth/Menu/Combos/Orders/Addons) registradas');
+  console.log('Rotas da Fase 2/3 (Auth/Menu/Combos/Orders/Addons/Telemetry) registradas');
 }

@@ -31,6 +31,14 @@ export const addonsService = {
         addonType: entry.addon.addonType,
         price: entry.addon.price,
         description: entry.addon.description,
-      }));
+        isRequired: entry.isRequired,
+      }))
+      .sort((a, b) => {
+        // Ordenar: primeiro required (removíveis), depois opcionais
+        if (a.isRequired !== b.isRequired) {
+          return b.isRequired ? 1 : -1;
+        }
+        return 0;
+      });
   },
 };

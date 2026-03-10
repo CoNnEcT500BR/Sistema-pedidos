@@ -13,6 +13,7 @@
     "start": "npm run -w apps/server start",
     "test:phase1": "node scripts/manual-test-phase1.js",
     "test": "npm run type-check",
+    "test:e2e:kiosk": "node scripts/e2e-kiosk-critical-flow.js",
     "type-check": "npm run -w apps/server type-check && npm run -w apps/frontend type-check",
     "lint": "npm run -w apps/server lint && npm run -w apps/frontend lint",
     "format": "prettier --write ."

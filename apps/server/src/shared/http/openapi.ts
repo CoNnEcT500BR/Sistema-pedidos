@@ -19,11 +19,38 @@ export const messageSchema = {
 } as const;
 
 export const validationErrorSchema = {
-  ...messageSchema,
-  description: 'Erro de validacao de payload ou query',
-  examples: [{ message: 'Payload invalido' }],
+  type: 'object',
+  required: ['message'],
+  properties: {
+    message: { type: 'string' },
+    itemErrors: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['itemIndex', 'itemName', 'message'],
+        properties: {
+          itemIndex: { type: 'number' },
+          itemName: { type: 'string' },
+          message: { type: 'string' },
+        },
+      },
+    },
+  },
+  description: 'Erro de validacao de payload, query, ou items do pedido',
+  examples: [
+    { message: 'Payload invalido' },
+    {
+      message: 'Sabor obrigatório para Refrigerante P',
+      itemErrors: [
+        {
+          itemIndex: 0,
+          itemName: 'Refrigerante P',
+          message: 'Sabor obrigatório para Refrigerante P',
+        },
+      ],
+    },
+  ],
 } as const;
-
 export const unauthorizedErrorSchema = {
   ...messageSchema,
   description: 'Requisicao sem token valido ou sem permissao',

@@ -22,10 +22,20 @@ export const orderItemInputSchema = z
     comboId: z.string().optional(),
     quantity: z.number().int().min(1, 'quantity deve ser >= 1'),
     notes: z.string().optional(),
-    addons: z.array(orderAddonInputSchema).default([]),
+    addons: z.array(orderAddonInputSchema).max(20, 'maximo de 20 addons por item').default([]),
   })
   .refine((data) => Boolean(data.menuItemId) !== Boolean(data.comboId), {
     message: 'Informe menuItemId ou comboId (apenas um)',
+  })
+  .superRefine((data, ctx) => {
+    const ids = data.addons.map((addon) => addon.addonId);
+    if (new Set(ids).size !== ids.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Nao envie addons duplicados no mesmo item',
+        path: ['addons'],
+      });
+    }
   });
 
 export const createOrderSchema = z.object({
