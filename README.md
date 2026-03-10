@@ -1,298 +1,190 @@
 # Sistema de Pedidos Off-Grid para Restaurante
 
-Sistema completo de pedidos para restaurante, funcionando **totalmente offline** (sem necessidade de internet), acessado via navegador em rede local (LAN/Wi-Fi).
+Sistema completo de pedidos para restaurante, funcionando offline em rede local (LAN/Wi-Fi), com backend em Fastify + Prisma e frontend React.
 
 ---
 
-## 📋 Visão Geral
+## Visao Geral
 
-Sistema com 3 interfaces principais:
+O sistema possui 3 interfaces:
 
-1. **Kiosk (Totem)**: Cliente monta seu pedido sozinho em tela touch
-2. **Staff (Funcionário)**: Atendente registra pedidos no balcão
-3. **Admin (Gerente)**: Gerencia cardápio, preços, usuários e visualiza relatórios
+- Kiosk (totem): autoatendimento do cliente
+- Staff: atendimento de balcao
+- Admin: gestao de cardapio e operacao
 
-### Características Principais
+Caracteristicas principais:
 
-- ✅ **100% Off-Grid**: Funciona sem internet, apenas rede local
-- ✅ **Multi-Dispositivo**: Totems, tablets e PCs acessando simultaneamente
-- ✅ **Servidor Local**: PC Windows central rodando backend + banco de dados
-- ✅ **Interface Touch-First**: UX otimizada para telas grandes e touch
-- ✅ **Cardápio Completo**: Categorias, itens avulsos, combos e adicionais
-- ✅ **Gestão Centralizada**: Admin completo para gerência
+- Operacao local sem dependencia de internet
+- Multi-dispositivo na mesma rede
+- Servidor central com Node.js + SQLite
+- Monorepo com apps frontend/backend e pacote shared
 
 ---
 
-## 🏗️ Arquitetura
+## Status Atual
 
+- Fase 1 (Setup e Estrutura Base): concluida
+- Prisma atualizado para v7
+- Migration inicial aplicada (`init`)
+- Seed inicial implementado (categorias, itens, combos, usuarios)
+- Lint, type-check e build funcionando
+
+Documentos de controle:
+
+- `docs/IMPLEMENTATION_CHECKLIST.md`
+- `docs/PHASE1_CHECKLIST_STATUS.md`
+- `docs/PHASE1_FILE_VALIDATION.md`
+
+---
+
+## Stack Tecnologica
+
+Backend:
+
+- Node.js 20+
+- Fastify (TypeScript)
+- Prisma 7 + SQLite
+- JWT
+- Zod
+- Pino + pino-pretty
+
+Frontend:
+
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui (base)
+- Zustand
+- Axios
+- React Router v6
+
+Compartilhado:
+
+- npm workspaces
+- ESLint + Prettier
+
+---
+
+## Estrutura do Projeto
+
+```text
+sistema-pedidos/
+|- apps/
+|  |- frontend/
+|  |- server/
+|- packages/
+|  |- shared/
+|- docs/
+|- scripts/
+|- package.json
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    REDE LOCAL (LAN/Wi-Fi)                   │
-│                                                             │
-│  ┌──────────┐  ┌──────────┐   ┌──────────┐  ┌──────────┐    │
-│  │  TOTEM 1 │  │  TOTEM 2 │   │  TABLET  │  │    PC    │    │
-│  │ (Kiosk)  │  │ (Kiosk)  │   │  (Staff) │  │  (Admin) │    │
-│  └────┬─────┘  └────┬─────┘   └────┬─────┘  └────┬─────┘    │
-│       │             │              │             │          │
-│       └─────────────┴──────────────┴─────────────┘          │
-│                            │                                │
-│                   HTTP/WebSocket                            │
-│                            │                                │
-│                   ┌────────▼────────┐                       │
-│                   │  PC CENTRAL     │                       │
-│                   │  (Servidor)     │                       │
-│                   │                 │                       │
-│                   │  • Node.js API  │                       │
-│                   │  • SQLite DB    │                       │
-│                   └─────────────────┘                       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Pre-requisitos
 
-### Backend
-- **Runtime**: Node.js 20+ LTS
-- **Framework**: Fastify (TypeScript)
-- **Database**: SQLite (arquivo local)
-- **ORM**: Prisma
-- **Auth**: JWT
-- **Validation**: Zod
-- **Logging**: Pino
+- Node.js 20+ (recomendado LTS)
+- npm 10+
 
-### Frontend
-- **Framework**: React 18+ (TypeScript)
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **UI Components**: shadcn/ui
-- **State Management**: Zustand
-- **HTTP Client**: Axios
-- **Router**: React Router v6
+Observacao:
 
-### Compartilhado
-- **Monorepo**: Workspaces (npm/pnpm)
-- **Linting**: ESLint + Prettier
-- **Package Manager**: npm ou pnpm
+- O projeto funciona com npm workspaces.
+- pnpm pode ser usado, mas os scripts do root estao padronizados com npm.
 
 ---
 
-## 📚 Documentação
-
-A documentação completa está organizada na pasta [`/docs`](./docs/):
-
-| Documento | Descrição |
-|-----------|-----------|
-| [**ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | Especificação técnica da arquitetura, justificativa de tecnologias, estrutura de pastas |
-| [**DATA_MODEL.md**](./docs/DATA_MODEL.md) | Modelo de dados completo (entidades, relacionamentos, campos) |
-| [**PRICING_RULES.md**](./docs/PRICING_RULES.md) | Regras de precificação de itens, combos, adicionais e cálculo de totais |
-| [**SCREENS_WIREFLOW.md**](./docs/SCREENS_WIREFLOW.md) | Wireframes e fluxo de telas para Kiosk, Staff e Admin |
-| [**PAYMENT_STRATEGY.md**](./docs/PAYMENT_STRATEGY.md) | Estratégia para integração futura de pagamentos (PIX, cartão) |
-| [**MVP_ROADMAP.md**](./docs/MVP_ROADMAP.md) | Roadmap de desenvolvimento, priorização de features e estimativas |
-
-**📖 Recomendação**: Ler os documentos na ordem acima para entendimento completo.
-
----
-
-## 🚀 Quick Start (Futuro)
-
-> ⚠️ **Este projeto ainda não foi implementado.** A documentação acima define a arquitetura e planejamento.
-
-### Pré-requisitos
-- Node.js 20+ LTS
-- npm ou pnpm
-- Windows 10/11 (para servidor central)
-
-### Instalação (quando implementado)
+## Setup Rapido
 
 ```bash
-# 1. Clonar repositório
-git clone <repo-url>
-cd sistema-pedidos
-
-# 2. Instalar dependências
+# 1) instalar dependencias do monorepo
 npm install
 
-# 3. Configurar banco de dados
-cd apps/server
-npx prisma migrate dev
-npx prisma db seed
+# 2) gerar client do prisma e aplicar migrations
+npm run -w apps/server db:migrate
 
-# 4. Iniciar desenvolvimento
+# 3) popular banco com seed inicial
+npm run -w apps/server db:seed
+
+# 4) subir backend e frontend
 npm run dev
 ```
 
-### Acesso
-- **Kiosk**: `http://localhost:3000/kiosk`
-- **Staff**: `http://localhost:3000/staff`
-- **Admin**: `http://localhost:3000/admin`
+Acessos locais:
+
+- Frontend: `http://localhost:5173`
+- Backend health: `http://localhost:3001/health`
+- Backend api health: `http://localhost:3001/api/v1/health`
 
 ---
 
-## 📁 Estrutura do Projeto (Sugerida)
+## Scripts Principais
 
-```
-sistema-pedidos/
-├── apps/
-│   ├── frontend/          # Aplicação React (Kiosk, Staff, Admin)
-│   └── server/            # API Node.js + Prisma
-├── packages/
-│   └── shared/            # Tipos e validações compartilhadas
-├── docs/                  # Documentação técnica
-├── package.json           # Root package.json (workspaces)
-└── README.md             # Este arquivo
-```
-
-Veja detalhes completos em [ARCHITECTURE.md](./docs/ARCHITECTURE.md).
-
----
-
-## 🎯 MVP: O Que Vai Entrar?
-
-### ✅ Incluído no MVP
-- Kiosk funcional (cliente faz pedido sozinho)
-- Staff (funcionário cria e gerencia pedidos)
-- Admin (gerente administra cardápio)
-- Cardápio completo (categorias, itens, adicionais)
-- Combos simples (preço fixo)
-- Cálculo automático de preços
-- Autenticação JWT
-- SQLite local
-
-### ❌ Para Versões Futuras
-- Combos avançados (regras dinâmicas)
-- Pagamento integrado (PIX, cartão)
-- WebSocket (tempo real)
-- Relatórios avançados (gráficos, exportação)
-- Impressão de comandas
-- Multi-loja
-- Delivery
-
-Veja roadmap completo em [MVP_ROADMAP.md](./docs/MVP_ROADMAP.md).
-
----
-
-## 💡 Conceitos-Chave
-
-### Operação Off-Grid
-- Sistema **não depende de internet**
-- Comunicação via **rede local (LAN/Wi-Fi)**
-- Servidor central no **PC da gerência**
-- Dispositivos acessam via navegador (`http://IP:3000`)
-
-### Multi-Role
-- **Kiosk**: Público, sem autenticação
-- **Staff**: Login com role "staff"
-- **Admin**: Login com role "admin"
-- Controle de acesso via middleware JWT
-
-### Precificação
-- Preços são **snapshot** no momento do pedido
-- Combos têm preço fixo + extras
-- Adicionais somam ao preço base
-- Cálculo automático e validado no backend
-
-Veja regras detalhadas em [PRICING_RULES.md](./docs/PRICING_RULES.md).
-
----
-
-## 🧪 Testes (Futuro)
+No root:
 
 ```bash
-# Testes unitários
+npm run dev         # sobe server + frontend
+npm run build       # build server + frontend
+npm run lint        # lint/checagens
+npm run test        # atualmente executa type-check
+npm run type-check  # type-check server + frontend
+npm run format      # prettier no repo
+```
+
+Backend (`apps/server`):
+
+```bash
+npm run -w apps/server dev
+npm run -w apps/server build
+npm run -w apps/server db:migrate
+npm run -w apps/server db:seed
+npm run -w apps/server db:studio
+```
+
+Frontend (`apps/frontend`):
+
+```bash
+npm run -w apps/frontend dev
+npm run -w apps/frontend build
+npm run -w apps/frontend lint
+```
+
+---
+
+## Banco de Dados
+
+- Provedor: SQLite
+- Arquivo local: `apps/server/prisma/dev.db`
+- Schema: `apps/server/prisma/schema.prisma`
+- Config Prisma v7: `apps/server/prisma.config.ts`
+- Migration inicial: `apps/server/prisma/migrations/*_init/migration.sql`
+
+---
+
+## Qualidade
+
+Validacoes usadas no projeto:
+
+- ESLint
+- TypeScript strict mode
+- Build de backend e frontend
+
+Comandos recomendados antes de commit:
+
+```bash
+npm run lint
 npm run test
-
-# Testes E2E
-npm run test:e2e
-
-# Cobertura
-npm run test:coverage
+npm run build
 ```
 
 ---
 
-## 📦 Deploy (Produção - Futuro)
+## Proximos Passos
 
-### Setup PC Central (Windows)
+A proxima etapa planejada no roadmap:
 
-1. **Instalar Node.js 20+ LTS**
-2. **Clonar e instalar projeto**
-3. **Configurar IP estático** no Windows
-4. **Abrir porta 3000 no Firewall**
-5. **Build do projeto**:
-   ```bash
-   npm run build
-   ```
-6. **Iniciar como serviço** (pm2 ou Windows Service):
-   ```bash
-   npm install -g pm2
-   pm2 start apps/server/dist/server.js --name sistema-pedidos
-   pm2 startup
-   pm2 save
-   ```
+- Fase 2: Backend API (Auth, Menu, Combos, Orders e Addons)
 
-### Acesso pelos Dispositivos
+Referencias:
 
-Descobrir IP do PC central:
-```bash
-ipconfig
-# Ex: 192.168.1.100
-```
-
-Acessar nos dispositivos:
-```
-http://192.168.1.100:3000/kiosk (totems)
-http://192.168.1.100:3000/staff (tablets)
-http://192.168.1.100:3000/admin (gerência)
-```
-
----
-
-## 🤝 Contribuindo (Futuro)
-
-Este projeto segue:
-- **Conventional Commits** (feat, fix, docs, etc.)
-- **ESLint + Prettier** (formatação automática)
-- **TypeScript strict mode**
-- **Pull requests** com code review
-
----
-
-## 📄 Licença
-
-[MIT License](./LICENSE) (ou conforme definido)
-
----
-
-## 📌 Status do Projeto
-
-🟡 **Em Planejamento** - Documentação completa, aguardando implementação.
-
-### Roadmap de Alto Nível
-
-- [x] Especificação técnica
-- [x] Modelo de dados
-- [x] Wireframes
-- [x] Estratégia de pagamento
-- [x] **Fase 1**: Setup (Semana 1)
-- [ ] **Fase 2**: Backend API (Semana 2)
-- [ ] **Fase 3**: Frontend Kiosk (Semana 3)
-- [ ] **Fase 4**: Frontend Staff (Semana 4)
-- [ ] **Fase 5**: Frontend Admin (Semana 5)
-- [ ] **Fase 6**: Deploy e Treinamento (Semana 6)
-- [ ] 🎉 **MVP em Produção**
-
----
-
-## 🙏 Agradecimentos
-
-Projeto desenvolvido com foco em:
-- Simplicidade operacional
-- Robustez offline
-- Experiência do usuário
-- Manutenibilidade de código
-
----
-
-**Última atualização**: Março 2026
+- `docs/MVP_ROADMAP.md`
+- `docs/IMPLEMENTATION_CHECKLIST.md`

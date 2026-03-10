@@ -11,6 +11,7 @@
     "dev": "npm run -w apps/server dev & npm run -w apps/frontend dev",
     "build": "npm run -w apps/server build && npm run -w apps/frontend build",
     "start": "npm run -w apps/server start",
+    "test:phase1": "node scripts/manual-test-phase1.js",
     "test": "npm run type-check",
     "type-check": "npm run -w apps/server type-check && npm run -w apps/frontend type-check",
     "lint": "npm run -w apps/server lint && npm run -w apps/frontend lint",

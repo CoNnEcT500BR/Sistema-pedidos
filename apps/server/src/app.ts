@@ -1,6 +1,8 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCors from '@fastify/cors';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 
 import { registerRoutes } from './routes';
 
@@ -36,6 +38,42 @@ export async function buildApp(): Promise<FastifyInstance> {
     sign: {
       expiresIn: '7d',
     },
+  });
+
+  await app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Sistema de Pedidos API',
+        description: 'Documentacao da API da Fase 2',
+        version: '1.0.0',
+      },
+      servers: [{ url: 'http://localhost:3001' }],
+      tags: [
+        { name: 'auth', description: 'Autenticacao e sessao' },
+        { name: 'menu', description: 'Cardapio e categorias' },
+        { name: 'combos', description: 'Combos e promocoes' },
+        { name: 'orders', description: 'Pedidos e status' },
+        { name: 'addons', description: 'Adicionais e regras por item' },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+  });
+
+  await app.register(fastifySwaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: false,
+    },
+    staticCSP: true,
   });
 
   app.get('/health', async () => ({

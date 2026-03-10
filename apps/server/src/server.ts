@@ -1,11 +1,6 @@
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import { PrismaClient } from '@prisma/client';
 import { buildApp } from './app';
+import { prisma } from '@/shared/database/prisma.client';
 
-// Initialize Prisma
-const databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
-const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
-export const prisma = new PrismaClient({ adapter });
 const app = await buildApp();
 
 // Start server

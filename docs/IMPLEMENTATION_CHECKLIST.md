@@ -166,149 +166,151 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ### Module: Auth
 
-- [ ] **2.1 Criar estrutura do módulo**
-  - [ ] `src/modules/auth/auth.routes.ts`
-  - [ ] `src/modules/auth/auth.service.ts`
-  - [ ] `src/modules/auth/auth.middleware.ts`
-  - [ ] `src/modules/auth/auth.types.ts`
+- [x] **2.1 Criar estrutura do módulo**
+  - [x] `src/modules/auth/auth.routes.ts`
+  - [x] `src/modules/auth/auth.service.ts`
+  - [x] `src/modules/auth/auth.middleware.ts`
+  - [x] `src/modules/auth/auth.types.ts`
 
-- [ ] **2.2 Implementar login**
-  - [ ] POST `/api/auth/login`
-  - [ ] Validar username + password (bcrypt)
-  - [ ] Gerar JWT token
-  - [ ] Retornar user + token
+- [x] **2.2 Implementar login**
+  - [x] POST `/api/auth/login`
+  - [x] Validar email + password (bcrypt ou fallback legado)
+  - [x] Gerar JWT token
+  - [x] Retornar user + token
+  - [x] GET `/api/auth/me`
 
-- [ ] **2.3 Implementar middleware JWT**
-  - [ ] Verificar token no header `Authorization: Bearer <token>`
-  - [ ] Decodificar e validar token
-  - [ ] Adicionar `user` ao request
+- [x] **2.3 Implementar middleware JWT**
+  - [x] Verificar token no header `Authorization: Bearer <token>`
+  - [x] Decodificar e validar token
+  - [x] Adicionar `user` ao request
 
-- [ ] **2.4 Implementar middleware de role**
-  - [ ] `checkRole(['admin', 'staff'])`
-  - [ ] Verificar se user.role está na lista permitida
+- [x] **2.4 Implementar middleware de role**
+  - [x] `checkRole(['ADMIN', 'STAFF'])`
+  - [x] Verificar se user.role está na lista permitida
 
-- [ ] **2.5 Testar com Postman/Insomnia**
-  - [ ] Login com credenciais corretas → 200 + token
-  - [ ] Login com credenciais erradas → 401
-  - [ ] Rota protegida sem token → 401
-  - [ ] Rota protegida com token válido → 200
+- [x] **2.5 Testar com Postman/Insomnia**
+  - [x] Login com credenciais corretas → 200 + token
+  - [x] Login com credenciais erradas → 401
+  - [x] Rota protegida sem token → 401
+  - [x] Rota protegida com token válido → 200
 
 ---
 
 ### Module: Menu
 
-- [ ] **2.6 Criar estrutura do módulo**
-  - [ ] `menu.routes.ts`, `menu.service.ts`, `menu.repository.ts`, `menu.types.ts`
+- [x] **2.6 Criar estrutura do módulo**
+  - [x] `menu.routes.ts`, `menu.service.ts`, `menu.repository.ts`, `menu.types.ts`
 
-- [ ] **2.7 Implementar endpoints públicos**
-  - [ ] GET `/api/categories` (listar categorias ativas)
-  - [ ] GET `/api/menu` (listar todos os itens disponíveis)
-  - [ ] GET `/api/menu?category=:id` (filtrar por categoria)
-  - [ ] GET `/api/menu/:id` (detalhes de um item)
+- [x] **2.7 Implementar endpoints públicos**
+  - [x] GET `/api/categories` (listar categorias ativas)
+  - [x] GET `/api/menu` (listar todos os itens disponíveis)
+  - [x] GET `/api/menu?category=:id` (filtrar por categoria)
+  - [x] GET `/api/menu/:id` (detalhes de um item)
 
-- [ ] **2.8 Implementar endpoints admin**
-  - [ ] POST `/api/menu` (criar item - admin only)
-  - [ ] PUT `/api/menu/:id` (editar item - admin only)
-  - [ ] PATCH `/api/menu/:id/availability` (marcar disponível/indisponível)
-  - [ ] DELETE `/api/menu/:id` (desativar item - soft delete)
+- [x] **2.8 Implementar endpoints admin**
+  - [x] POST `/api/menu` (criar item - admin only)
+  - [x] PUT `/api/menu/:id` (editar item - admin only)
+  - [x] PATCH `/api/menu/:id/availability` (marcar disponível/indisponível)
+  - [x] DELETE `/api/menu/:id` (desativar item - soft delete)
 
-- [ ] **2.9 Implementar validações (Zod)**
-  - [ ] Schema para CreateMenuItemDto
-  - [ ] Schema para UpdateMenuItemDto
-  - [ ] Validar antes de salvar no banco
+- [x] **2.9 Implementar validações (Zod)**
+  - [x] Schema para CreateMenuItemDto
+  - [x] Schema para UpdateMenuItemDto
+  - [x] Validar antes de salvar no banco
 
-- [ ] **2.10 Testar CRUD completo**
-  - [ ] Criar categoria → 201
-  - [ ] Criar item → 201
-  - [ ] Listar itens → 200 + array
-  - [ ] Editar item → 200
-  - [ ] Marcar indisponível → item.isAvailable = false
+- [x] **2.10 Testar CRUD completo**
+  - [x] Criar item → 201
+  - [x] Listar itens → 200 + array
+  - [x] Editar item → 200
+  - [x] Marcar indisponível → item.isAvailable = false
+  - [x] Soft delete → item removido da listagem publica
 
 ---
 
 ### Module: Combos (Simplificado)
 
-- [ ] **2.11 Criar estrutura do módulo**
-  - [ ] `combos.routes.ts`, `combos.service.ts`, `combos.repository.ts`
+- [x] **2.11 Criar estrutura do módulo**
+  - [x] `combos.routes.ts`, `combos.service.ts`, `combos.repository.ts`
 
-- [ ] **2.12 Implementar endpoints públicos**
-  - [ ] GET `/api/combos` (listar combos ativos e disponíveis)
-  - [ ] GET `/api/combos/:id` (detalhes do combo + itens inclusos)
+- [x] **2.12 Implementar endpoints públicos**
+  - [x] GET `/api/combos` (listar combos ativos)
+  - [x] GET `/api/combos/:id` (detalhes do combo + itens inclusos)
 
-- [ ] **2.13 Implementar endpoints admin**
-  - [ ] POST `/api/combos` (criar combo simples)
-  - [ ] PUT `/api/combos/:id` (editar combo)
-  - [ ] PATCH `/api/combos/:id/availability`
+- [x] **2.13 Implementar endpoints admin**
+  - [x] POST `/api/combos` (criar combo simples)
+  - [x] PUT `/api/combos/:id` (editar combo)
+  - [x] PATCH `/api/combos/:id/availability`
 
-- [ ] **2.14 Testar combos**
-  - [ ] Criar combo com 3 itens inclusos
-  - [ ] Listar combos → retorna corretamente
-  - [ ] Editar preço → reflete imediatamente
+- [x] **2.14 Testar combos**
+  - [x] Criar combo com 3 itens inclusos
+  - [x] Listar combos → retorna corretamente
+  - [x] Editar preço → reflete imediatamente
 
 ---
 
 ### Module: Orders
 
-- [ ] **2.15 Criar estrutura do módulo**
-  - [ ] `orders.routes.ts`, `orders.service.ts`, `orders.repository.ts`
-  - [ ] `orders.calculator.ts` (lógica de precificação)
+- [x] **2.15 Criar estrutura do módulo**
+  - [x] `orders.routes.ts`, `orders.service.ts`, `orders.repository.ts`
+  - [x] `orders.calculator.ts` (lógica de precificação)
 
-- [ ] **2.16 Implementar cálculo de preços**
-  - [ ] Função: `calculateOrderTotal(items)`
-  - [ ] Iterar por cada item
-  - [ ] Se MenuItem: preço base + adicionais
-  - [ ] Se Combo: preço fixo + adicionais extras
-  - [ ] Retornar: `{ items: [...], totalAmount: 123.45 }`
+- [x] **2.16 Implementar cálculo de preços**
+  - [x] Função: `calculateOrderTotal(items)`
+  - [x] Iterar por cada item
+  - [x] Se MenuItem: preço base + adicionais
+  - [x] Se Combo: preço fixo + adicionais extras
+  - [x] Retornar: `{ items: [...], totalAmount: 123.45 }`
 
-- [ ] **2.17 Implementar criação de pedido**
-  - [ ] POST `/api/orders`
-  - [ ] Validar payload (items, quantities)
-  - [ ] Calcular total automaticamente
-  - [ ] Salvar Order + OrderItems + OrderItemAddons
-  - [ ] Gerar orderNumber (ex: `2026-001`)
-  - [ ] Registrar OrderStatusHistory (PENDING)
-  - [ ] Retornar pedido completo + número
+- [x] **2.17 Implementar criação de pedido**
+  - [x] POST `/api/orders`
+  - [x] Validar payload (items, quantities)
+  - [x] Calcular total automaticamente
+  - [x] Salvar Order + OrderItems + OrderItemAddons
+  - [x] Gerar orderNumber sequencial inteiro
+  - [x] Registrar OrderStatusHistory (PENDING)
+  - [x] Retornar pedido completo + número
 
-- [ ] **2.18 Implementar listagem de pedidos**
-  - [ ] GET `/api/orders` (com filtros: status, date)
-  - [ ] GET `/api/orders/:id` (detalhes completos com items)
+- [x] **2.18 Implementar listagem de pedidos**
+  - [x] GET `/api/orders` (com filtros: status, date)
+  - [x] GET `/api/orders/:id` (detalhes completos com items)
 
-- [ ] **2.19 Implementar atualização de status**
-  - [ ] PATCH `/api/orders/:id/status`
-  - [ ] Validar transições (PENDING → CONFIRMED → PREPARING → READY → COMPLETED)
-  - [ ] Registrar histórico (OrderStatusHistory)
+- [x] **2.19 Implementar atualização de status**
+  - [x] PATCH `/api/orders/:id/status`
+  - [x] Validar transições (PENDING → CONFIRMED → PREPARING → READY → COMPLETED)
+  - [x] Registrar histórico (OrderStatusHistory)
 
-- [ ] **2.20 Testar fluxo completo de pedido**
-  - [ ] Criar pedido com 2 itens + adicionais → 201
-  - [ ] Cálculo de total está correto
-  - [ ] Listar pedidos → inclui o novo
-  - [ ] Atualizar status → histórico registrado
-  - [ ] Buscar detalhes → itens completos
+- [x] **2.20 Testar fluxo completo de pedido**
+  - [x] Criar pedido com 2 itens + adicionais → 201
+  - [x] Cálculo de total está correto
+  - [x] Listar pedidos → inclui o novo
+  - [x] Atualizar status → histórico registrado
+  - [x] Buscar detalhes → itens completos
 
 ---
 
 ### Module: Addons
 
-- [ ] **2.21 Implementar endpoints**
-  - [ ] GET `/api/addons` (listar todos os adicionais ativos)
-  - [ ] GET `/api/menu/:menuItemId/addons` (adicionais permitidos para um item)
+- [x] **2.21 Implementar endpoints**
+  - [x] GET `/api/addons` (listar todos os adicionais ativos)
+  - [x] GET `/api/menu/:menuItemId/addons` (adicionais permitidos para um item)
 
-- [ ] **2.22 Testar**
-  - [ ] Listar adicionais → array correto
-  - [ ] Filtrar por item → apenas addons permitidos
+- [x] **2.22 Testar**
+  - [x] Listar adicionais → array correto
+  - [x] Filtrar por item → apenas addons permitidos
 
 ---
 
 ### Documentação da API
 
-- [ ] **2.23 Documentar rotas (opcional: Swagger)**
-  - [ ] Instalar `@fastify/swagger`
-  - [ ] Adicionar schemas nas rotas
-  - [ ] Acessar `/docs` → documentação interativa
+- [x] **2.23 Documentar rotas (opcional: Swagger)**
+  - [x] Instalar `@fastify/swagger`
+  - [x] Adicionar schemas nas rotas de Auth, Menu, Combos, Orders e Addons
+  - [x] Acessar `/docs` → documentação interativa
+  - [x] Acessar `/docs/json` → OpenAPI JSON
 
-- [ ] **2.24 Criar collection Postman/Insomnia**
-  - [ ] Exportar requests de exemplo
-  - [ ] Incluir no repositório (`/docs/api-collection.json`)
+- [x] **2.24 Criar collection Postman/Insomnia**
+  - [x] Cobrir endpoints públicos e administrativos da fase 2
+  - [x] Incluir no repositório (`/docs/api-collection.json`)
 
 ---
 

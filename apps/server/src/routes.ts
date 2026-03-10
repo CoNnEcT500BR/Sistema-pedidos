@@ -1,20 +1,25 @@
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance } from 'fastify';
+import { registerAuthRoutes } from '@/modules/auth/auth.routes';
+import { registerMenuRoutes } from '@/modules/menu/menu.routes';
+import { registerCombosRoutes } from '@/modules/combos/combos.routes';
+import { registerOrdersRoutes } from '@/modules/orders/orders.routes';
+import { registerAddonsRoutes } from '@/modules/addons/addons.routes';
 
-/**
- * Registro de rotas básicas do sistema
- * Mais rotas serão adicionadas na Fase 2
- */
 export async function registerRoutes(fastify: FastifyInstance) {
-  // Status route
   fastify.get('/status', async () => ({
     message: 'System operational',
     timestamp: new Date().toISOString(),
-  }))
+  }));
 
-  // Health check
   fastify.get('/ping', async () => ({
     pong: true,
-  }))
+  }));
 
-  console.log('✅ Rotas básicas registradas')
+  await fastify.register(registerAuthRoutes, { prefix: '/api' });
+  await fastify.register(registerMenuRoutes, { prefix: '/api' });
+  await fastify.register(registerCombosRoutes, { prefix: '/api' });
+  await fastify.register(registerOrdersRoutes, { prefix: '/api' });
+  await fastify.register(registerAddonsRoutes, { prefix: '/api' });
+
+  console.log('Rotas da Fase 2 (Auth/Menu/Combos/Orders/Addons) registradas');
 }

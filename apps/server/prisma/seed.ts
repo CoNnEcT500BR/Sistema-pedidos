@@ -1,15 +1,26 @@
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
 const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  const [adminPasswordHash, staffPasswordHash] = await Promise.all([
+    bcrypt.hash('admin123', 10),
+    bcrypt.hash('staff123', 10),
+  ]);
+
   await prisma.$transaction([
+    prisma.orderStatusHistory.deleteMany(),
+    prisma.orderItemAddon.deleteMany(),
+    prisma.orderItem.deleteMany(),
+    prisma.order.deleteMany(),
     prisma.comboItem.deleteMany(),
     prisma.combo.deleteMany(),
     prisma.menuItemAddon.deleteMany(),
+    prisma.addon.deleteMany(),
     prisma.menuItem.deleteMany(),
     prisma.category.deleteMany(),
     prisma.user.deleteMany(),
@@ -64,6 +75,46 @@ async function main() {
 
   const itemByName = new Map(comboItems.map((item) => [item.name, item]));
 
+  const [baconExtra, queijoExtra] = await prisma.$transaction([
+    prisma.addon.create({
+      data: {
+        name: 'Bacon Extra',
+        addonType: 'EXTRA',
+        price: 3.5,
+        description: 'Bacon crocante',
+      },
+    }),
+    prisma.addon.create({
+      data: {
+        name: 'Queijo Extra',
+        addonType: 'EXTRA',
+        price: 2.5,
+        description: 'Fatia adicional de queijo',
+      },
+    }),
+  ]);
+
+  await prisma.menuItemAddon.createMany({
+    data: [
+      {
+        menuItemId: itemByName.get('Classic Burger')!.id,
+        addonId: baconExtra.id,
+      },
+      {
+        menuItemId: itemByName.get('Classic Burger')!.id,
+        addonId: queijoExtra.id,
+      },
+      {
+        menuItemId: itemByName.get('Cheese Burger')!.id,
+        addonId: baconExtra.id,
+      },
+      {
+        menuItemId: itemByName.get('Cheese Burger')!.id,
+        addonId: queijoExtra.id,
+      },
+    ],
+  });
+
   await prisma.combo.create({
     data: {
       name: 'Combo Classico',
@@ -116,14 +167,14 @@ async function main() {
     data: [
       {
         email: 'admin@sistema.local',
-        password: 'admin123',
+        password: adminPasswordHash,
         role: 'ADMIN',
         name: 'Administrador',
         isActive: true,
       },
       {
         email: 'staff@sistema.local',
-        password: 'staff123',
+        password: staffPasswordHash,
         role: 'STAFF',
         name: 'Atendente',
         isActive: true,
@@ -131,7 +182,7 @@ async function main() {
     ],
   });
 
-  console.log('Categorias, itens, combos e usuarios padrao criados.');
+  console.log('Categorias, itens, combos, addons e usuarios padrao criados.');
 }
 
 main()
