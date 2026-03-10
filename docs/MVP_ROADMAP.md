@@ -175,29 +175,29 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 #### Backend
 
-- [ ] Inicializar projeto Node.js + TypeScript + Fastify
-- [ ] Configurar Prisma + SQLite
-- [ ] Criar schema Prisma (entidades principais)
-- [ ] Gerar migrations iniciais
-- [ ] Criar seed script (dados de exemplo)
-- [ ] Configurar linting (ESLint + Prettier)
-- [ ] Estrutura de pastas (modules, routes, services)
+- [x] Inicializar projeto Node.js + TypeScript + Fastify
+- [x] Configurar Prisma + SQLite
+- [x] Criar schema Prisma (entidades principais)
+- [x] Gerar migrations iniciais
+- [x] Criar seed script (dados de exemplo)
+- [x] Configurar linting (ESLint + Prettier)
+- [x] Estrutura de pastas (modules, routes, services)
 
 #### Frontend
 
-- [ ] Inicializar projeto React + Vite + TypeScript
-- [ ] Configurar Tailwind CSS
-- [ ] Instalar shadcn/ui (componentes base)
-- [ ] Estrutura de pastas (routes, features, components)
-- [ ] Configurar React Router
-- [ ] Configurar Zustand (state management)
+- [x] Inicializar projeto React + Vite + TypeScript
+- [x] Configurar Tailwind CSS
+- [x] Instalar shadcn/ui (componentes base)
+- [x] Estrutura de pastas (routes, features, components)
+- [x] Configurar React Router
+- [x] Configurar Zustand (state management)
 
 #### DevOps
 
-- [ ] Scripts de build
-- [ ] Scripts de dev (hot reload)
-- [ ] README com instruções
-- [ ] .env.example
+- [x] Scripts de build
+- [x] Scripts de dev (hot reload)
+- [x] README com instruções
+- [x] .env.example
 
 **Entregável:** Projeto inicializado, estrutura de pastas, build funcional, seed data no banco.
 
@@ -207,35 +207,35 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 **Duração estimada:** 7-10 dias
 
-- [ ] Module: Auth
-  - [ ] POST /api/auth/login (JWT)
-  - [ ] Middleware: verificar JWT
-  - [ ] Middleware: checkRole
+- [x] Module: Auth
+  - [x] POST /api/auth/login (JWT)
+  - [x] Middleware: verificar JWT
+  - [x] Middleware: checkRole
 
-- [ ] Module: Menu
-  - [ ] GET /api/categories (listar categorias)
-  - [ ] GET /api/menu (listar todos os itens)
-  - [ ] GET /api/menu?category=:id (filtrar por categoria)
-  - [ ] POST /api/menu (criar item - admin)
-  - [ ] PUT /api/menu/:id (editar - admin)
-  - [ ] PATCH /api/menu/:id/availability (disponível/indisponível - admin)
+- [x] Module: Menu
+  - [x] GET /api/categories (listar categorias)
+  - [x] GET /api/menu (listar todos os itens)
+  - [x] GET /api/menu?category=:id (filtrar por categoria)
+  - [x] POST /api/menu (criar item - admin)
+  - [x] PUT /api/menu/:id (editar - admin)
+  - [x] PATCH /api/menu/:id/availability (disponível/indisponível - admin)
 
-- [ ] Module: Combos (simplificado)
-  - [ ] GET /api/combos (listar combos ativos)
-  - [ ] GET /api/combos/:id (detalhes do combo)
-  - [ ] POST /api/combos (criar - admin)
-  - [ ] PUT /api/combos/:id (editar - admin)
+- [x] Module: Combos (simplificado)
+  - [x] GET /api/combos (listar combos ativos)
+  - [x] GET /api/combos/:id (detalhes do combo)
+  - [x] POST /api/combos (criar - admin)
+  - [x] PUT /api/combos/:id (editar - admin)
 
-- [ ] Module: Orders
-  - [ ] POST /api/orders (criar pedido)
-  - [ ] GET /api/orders (listar, com filtros: status, date)
-  - [ ] GET /api/orders/:id (detalhes)
-  - [ ] PATCH /api/orders/:id/status (atualizar status)
-  - [ ] Service: calculateOrderTotal (lógica de precificação)
+- [x] Module: Orders
+  - [x] POST /api/orders (criar pedido)
+  - [x] GET /api/orders (listar, com filtros: status, date)
+  - [x] GET /api/orders/:id (detalhes)
+  - [x] PATCH /api/orders/:id/status (atualizar status)
+  - [x] Service: calculateOrderTotal (lógica de precificação)
 
-- [ ] Module: Addons
-  - [ ] GET /api/addons (listar)
-  - [ ] Relação MenuItemAddon (quais addons por item)
+- [x] Module: Addons
+  - [x] GET /api/addons (listar)
+  - [x] Relação MenuItemAddon (quais addons por item)
 
 **Entregável:** API completa e testável via Postman/Insomnia, documentação das rotas (OpenAPI/Swagger opcional).
 
@@ -355,9 +355,11 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 ## 4. Critérios de Aceite do MVP
 
+Status atual: os critérios abaixo definem o alvo para considerar o MVP completo em produção. No momento, apenas os critérios de backend podem ser parcialmente validados.
+
 ### 4.1 Fluxo Kiosk (Cliente)
 
-✅ Cliente acessa totem → vê categorias → escolhe item → personaliza → adiciona ao carrinho → confirma pedido → recebe número do pedido
+[ ] Cliente acessa totem → vê categorias → escolhe item → personaliza → adiciona ao carrinho → confirma pedido → recebe número do pedido
 
 **Testado com:**
 
@@ -370,7 +372,7 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 ### 4.2 Fluxo Staff (Funcionário)
 
-✅ Funcionário faz login → vê dashboard → cria novo pedido para cliente (balcão) → monitora lista de pedidos → atualiza status (Preparando → Pronto) → marca como entregue
+[ ] Funcionário faz login → vê dashboard → cria novo pedido para cliente (balcão) → monitora lista de pedidos → atualiza status (Preparando → Pronto) → marca como entregue
 
 **Testado com:**
 
@@ -382,7 +384,7 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 ### 4.3 Fluxo Admin (Gerente)
 
-✅ Gerente faz login → vê dashboard com métricas → edita item do cardápio (preço, disponibilidade) → cria novo combo → visualiza pedidos do dia
+[ ] Gerente faz login → vê dashboard com métricas → edita item do cardápio (preço, disponibilidade) → cria novo combo → visualiza pedidos do dia
 
 **Testado com:**
 
@@ -394,17 +396,17 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 ### 4.4 Performance
 
-✅ Tempo de resposta API < 200ms para queries simples (rede local)
-✅ Interface responsiva (60 FPS em tablets/totems)
-✅ Sem travamentos com 10+ dispositivos simultâneos
+[~] Tempo de resposta API < 200ms para queries simples (rede local)
+[ ] Interface responsiva (60 FPS em tablets/totems)
+[ ] Sem travamentos com 10+ dispositivos simultâneos
 
 ---
 
 ### 4.5 Usabilidade
 
-✅ Cliente consegue fazer pedido sozinho em menos de 3 minutos
-✅ Funcionário consegue criar pedido em menos de 1 minuto
-✅ Interface intuitiva, sem necessidade de manual
+[ ] Cliente consegue fazer pedido sozinho em menos de 3 minutos
+[ ] Funcionário consegue criar pedido em menos de 1 minuto
+[ ] Interface intuitiva, sem necessidade de manual
 
 ---
 
@@ -569,19 +571,21 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 ## 9. Métricas de Sucesso
 
+Status atual: métricas-alvo para a etapa de go-live. Ainda nao medidas de forma consolidada no ambiente de operacao.
+
 ### Operacionais
 
-- ✅ **Tempo médio de criação de pedido (Kiosk)** < 3 minutos
-- ✅ **Tempo médio de atendimento no balcão** < 1 minuto
-- ✅ **Uptime do sistema** > 99% (durante horário de operação)
-- ✅ **Erros reportados** < 5 por semana
+- [ ] **Tempo médio de criação de pedido (Kiosk)** < 3 minutos
+- [ ] **Tempo médio de atendimento no balcão** < 1 minuto
+- [ ] **Uptime do sistema** > 99% (durante horário de operação)
+- [ ] **Erros reportados** < 5 por semana
 
 ### Negócio
 
-- ✅ **Redução de filas** em 30%+ (comparado a atendimento manual)
-- ✅ **Aumento de ticket médio** (clientes adicionam mais itens no totem)
-- ✅ **Satisfação do cliente** (pesquisa pós-pedido - futuro)
-- ✅ **Redução de erros de pedido** em 50%+
+- [ ] **Redução de filas** em 30%+ (comparado a atendimento manual)
+- [ ] **Aumento de ticket médio** (clientes adicionam mais itens no totem)
+- [ ] **Satisfação do cliente** (pesquisa pós-pedido - futuro)
+- [ ] **Redução de erros de pedido** em 50%+
 
 ---
 
@@ -617,11 +621,11 @@ Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o 
 
 ## 11. Conclusão
 
-Este MVP é **ambicioso, mas viável** em 6-8 semanas com desenvolvedor(es) dedicado(s). A stack escolhida é moderna, produtiva e adequada para off-grid.
+O MVP continua **viavel**, com base tecnica ja entregue no backend e principal concentracao de esforco agora nas jornadas de frontend e validacao operacional em campo.
 
-**Próximo Passo:** Validar este documento com stakeholders e iniciar a **Fase 1** (Setup).
+**Próximo Passo:** iniciar implementacao das fases 3 a 5 (Kiosk, Staff e Admin), conectando o frontend aos endpoints ja existentes.
 
-**Após MVP em Produção:** Coletar feedback real, medir métricas e iterar rapidamente. A arquitetura preparada permite evoluir sem reescrita.
+**Após MVP em Produção:** coletar feedback real, medir as métricas da seção 9 e iterar rapidamente. A arquitetura preparada permite evoluir sem reescrita.
 
 ---
 
