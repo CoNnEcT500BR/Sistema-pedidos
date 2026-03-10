@@ -1,10 +1,13 @@
 # MVP Roadmap - Sistema de Pedidos
 
+> Status em 10/03/2026: fundacao do monorepo e backend da Fase 2 ja entregues; frontend ainda esta em shell inicial com paginas placeholder em `/kiosk`, `/staff` e `/admin`.
+
 ## 1. Filosofia do MVP
 
 **Objetivo**: Criar a **versão mínima funcional** que permita operar o restaurante completamente, validar o conceito e coletar feedback real antes de adicionar funcionalidades avançadas.
 
 **Princípios:**
+
 - ✅ **Funcional, não perfeito**: Foco em features que agregam valor imediato
 - ✅ **Validação rápida**: Colocar em uso real o quanto antes
 - ✅ **Arquitetura sólida**: Base bem estruturada para crescimento futuro
@@ -14,16 +17,18 @@
 
 ## 2. Escopo do MVP
 
-### 2.1 O QUE ENTRA NO MVP ✅
+### 2.1 O QUE JA FOI ENTREGUE OU JA ESTA EM ESCOPO IMEDIATO
 
 #### Backend
 
 **Banco de Dados e Migrations:**
+
 - ✅ Schema Prisma com todas as entidades principais
 - ✅ Migrations funcionais
 - ✅ Seed data (categorias, itens, combos, usuários padrão)
 
 **API REST:**
+
 - ✅ CRUD de Menu (categorias, itens, adicionais)
 - ✅ CRUD de Combos (básico: preço fixo + itens inclusos, sem regras complexas)
 - ✅ Criação de pedidos (POST /api/orders)
@@ -34,6 +39,7 @@
 - ✅ Cálculo automático de preço de pedidos
 
 **Funcionalidades Adicionais:**
+
 - ✅ Validação de payloads (Zod)
 - ✅ Logging básico (Pino)
 - ✅ Error handling centralizado
@@ -43,36 +49,46 @@
 
 #### Frontend
 
+Status atual: base de frontend pronta, mas os fluxos abaixo ainda representam o alvo planejado do MVP e nao funcionalidades ja implementadas.
+
 **Kiosk (Cliente):**
-- ✅ Splash screen
-- ✅ Navegação de categorias
-- ✅ Listagem de itens por categoria
-- ✅ Modal de personalização (adicionais + observações)
-- ✅ Carrinho com cálculo de total em tempo real
-- ✅ Confirmação de pedido
-- ✅ Tela de número do pedido
+
+- 🚧 Shell inicial em `/kiosk`
+- ⏳ Splash screen
+- ⏳ Navegação de categorias
+- ⏳ Listagem de itens por categoria
+- ⏳ Modal de personalização (adicionais + observações)
+- ⏳ Carrinho com cálculo de total em tempo real
+- ⏳ Confirmação de pedido
+- ⏳ Tela de número do pedido
 
 **Staff (Funcionário):**
-- ✅ Login
-- ✅ Dashboard com métricas básicas (pedidos do dia)
-- ✅ Novo pedido (seleção rápida de itens)
-- ✅ Lista de pedidos (filtros: pendente, preparando, pronto)
-- ✅ Atualização de status de pedido
-- ✅ Visualização de detalhes do pedido
+
+- 🚧 Shell inicial em `/staff`
+- ⏳ Login
+- ⏳ Dashboard com métricas básicas (pedidos do dia)
+- ⏳ Novo pedido (seleção rápida de itens)
+- ⏳ Lista de pedidos (filtros: pendente, preparando, pronto)
+- ⏳ Atualização de status de pedido
+- ⏳ Visualização de detalhes do pedido
 
 **Admin (Gerente):**
-- ✅ Login
-- ✅ Dashboard com métricas (vendas, pedidos, ticket médio)
-- ✅ Gerenciar cardápio (CRUD de itens)
-- ✅ Gerenciar categorias (CRUD)
-- ✅ Marcar itens como disponível/indisponível
-- ✅ Visualizar pedidos do dia/período
+
+- 🚧 Shell inicial em `/admin`
+- ⏳ Login
+- ⏳ Dashboard com métricas (vendas, pedidos, ticket médio)
+- ⏳ Gerenciar cardápio (CRUD de itens)
+- ⏳ Gerenciar categorias (CRUD)
+- ⏳ Marcar itens como disponível/indisponível
+- ⏳ Visualizar pedidos do dia/período
 
 **UI/UX:**
-- ✅ Design responsivo (totem, tablet, desktop)
+
 - ✅ Componentes shadcn/ui integrados
 - ✅ Tailwind CSS configurado
-- ✅ Loading states e feedback visual básico
+- ✅ React Router configurado
+- ⏳ Design responsivo final das telas operacionais
+- ⏳ Loading states e feedback visual básico nas jornadas reais
 
 ---
 
@@ -83,7 +99,7 @@
 - ✅ Build scripts (Vite, tsc)
 - ✅ SQLite como banco de dados
 - ✅ Servidor local (Fastify)
-- ✅ Script de inicialização (setup.sh ou npm run setup)
+- ✅ Scripts de execucao e validacao por workspace
 - ✅ README com instruções de instalação
 
 ---
@@ -153,10 +169,12 @@
 
 ## 3. Fases de Implementação
 
-### FASE 1: Setup e Estrutura Base (Semana 1)
+### FASE 1: Setup e Estrutura Base (Semana 1) - CONCLUIDA
+
 **Duração estimada:** 5-7 dias
 
 #### Backend
+
 - [ ] Inicializar projeto Node.js + TypeScript + Fastify
 - [ ] Configurar Prisma + SQLite
 - [ ] Criar schema Prisma (entidades principais)
@@ -166,6 +184,7 @@
 - [ ] Estrutura de pastas (modules, routes, services)
 
 #### Frontend
+
 - [ ] Inicializar projeto React + Vite + TypeScript
 - [ ] Configurar Tailwind CSS
 - [ ] Instalar shadcn/ui (componentes base)
@@ -174,6 +193,7 @@
 - [ ] Configurar Zustand (state management)
 
 #### DevOps
+
 - [ ] Scripts de build
 - [ ] Scripts de dev (hot reload)
 - [ ] README com instruções
@@ -183,7 +203,8 @@
 
 ---
 
-### FASE 2: Backend API (Semana 2)
+### FASE 2: Backend API (Semana 2) - CONCLUIDA
+
 **Duração estimada:** 7-10 dias
 
 - [ ] Module: Auth
@@ -220,7 +241,8 @@
 
 ---
 
-### FASE 3: Frontend Kiosk (Semana 3)
+### FASE 3: Frontend Kiosk (Semana 3) - PENDENTE
+
 **Duração estimada:** 7-10 dias
 
 - [ ] Splash Screen (/kiosk)
@@ -253,7 +275,8 @@
 
 ---
 
-### FASE 4: Frontend Staff (Semana 4)
+### FASE 4: Frontend Staff (Semana 4) - PENDENTE
+
 **Duração estimada:** 5-7 dias
 
 - [ ] Login (/staff/login)
@@ -281,7 +304,8 @@
 
 ---
 
-### FASE 5: Frontend Admin (Semana 5)
+### FASE 5: Frontend Admin (Semana 5) - PENDENTE
+
 **Duração estimada:** 5-7 dias
 
 - [ ] Login (/admin/login)
@@ -307,7 +331,8 @@
 
 ---
 
-### FASE 6: Polimento e Deploy (Semana 6)
+### FASE 6: Polimento e Deploy (Semana 6) - PENDENTE
+
 **Duração estimada:** 3-5 dias
 
 - [ ] Ajustes de UX (botões grandes, contraste, feedback visual)
@@ -331,9 +356,11 @@
 ## 4. Critérios de Aceite do MVP
 
 ### 4.1 Fluxo Kiosk (Cliente)
+
 ✅ Cliente acessa totem → vê categorias → escolhe item → personaliza → adiciona ao carrinho → confirma pedido → recebe número do pedido
 
 **Testado com:**
+
 - Cardápio com 20+ itens
 - 3-5 categorias diferentes
 - Combos simples (preço fixo)
@@ -342,9 +369,11 @@
 ---
 
 ### 4.2 Fluxo Staff (Funcionário)
+
 ✅ Funcionário faz login → vê dashboard → cria novo pedido para cliente (balcão) → monitora lista de pedidos → atualiza status (Preparando → Pronto) → marca como entregue
 
 **Testado com:**
+
 - Múltiplos pedidos simultâneos (10+)
 - Atualização de status sem refresh
 - Filtros funcionando
@@ -352,9 +381,11 @@
 ---
 
 ### 4.3 Fluxo Admin (Gerente)
+
 ✅ Gerente faz login → vê dashboard com métricas → edita item do cardápio (preço, disponibilidade) → cria novo combo → visualiza pedidos do dia
 
 **Testado com:**
+
 - Edição de item refletida instantaneamente no Kiosk
 - Marcar item indisponível oculta do cardápio
 - Métricas calculadas corretamente
@@ -362,6 +393,7 @@
 ---
 
 ### 4.4 Performance
+
 ✅ Tempo de resposta API < 200ms para queries simples (rede local)
 ✅ Interface responsiva (60 FPS em tablets/totems)
 ✅ Sem travamentos com 10+ dispositivos simultâneos
@@ -369,6 +401,7 @@
 ---
 
 ### 4.5 Usabilidade
+
 ✅ Cliente consegue fazer pedido sozinho em menos de 3 minutos
 ✅ Funcionário consegue criar pedido em menos de 1 minuto
 ✅ Interface intuitiva, sem necessidade de manual
@@ -379,15 +412,15 @@
 
 ### Por Fase
 
-| Fase | Descrição | Dias | Pessoa |
-|------|-----------|------|--------|
-| Fase 1 | Setup e estrutura | 5-7 | 1 dev full-stack |
-| Fase 2 | Backend API | 7-10 | 1 dev backend |
-| Fase 3 | Frontend Kiosk | 7-10 | 1 dev frontend |
-| Fase 4 | Frontend Staff | 5-7 | 1 dev frontend |
-| Fase 5 | Frontend Admin | 5-7 | 1 dev frontend |
-| Fase 6 | Polimento e deploy | 3-5 | 1 dev + 1 operador |
-| **TOTAL** | | **32-46 dias** | **1-2 devs** |
+| Fase      | Descrição          | Dias           | Pessoa             |
+| --------- | ------------------ | -------------- | ------------------ |
+| Fase 1    | Setup e estrutura  | 5-7            | 1 dev full-stack   |
+| Fase 2    | Backend API        | 7-10           | 1 dev backend      |
+| Fase 3    | Frontend Kiosk     | 7-10           | 1 dev frontend     |
+| Fase 4    | Frontend Staff     | 5-7            | 1 dev frontend     |
+| Fase 5    | Frontend Admin     | 5-7            | 1 dev frontend     |
+| Fase 6    | Polimento e deploy | 3-5            | 1 dev + 1 operador |
+| **TOTAL** |                    | **32-46 dias** | **1-2 devs**       |
 
 **Com 1 desenvolvedor full-stack solo:** ~6-8 semanas (1,5 a 2 meses)
 **Com 2 desenvolvedores (1 back + 1 front):** ~4-6 semanas (1 a 1,5 meses)
@@ -396,22 +429,23 @@
 
 ## 6. Stack Recap (MVP)
 
-| Camada | Tecnologia | Justificativa |
-|--------|------------|---------------|
-| **Backend** | Node.js + TypeScript + Fastify | Performance, type-safety, ecosystem rico |
-| **Database** | SQLite + Prisma | Zero config, migrations, ORM type-safe |
-| **Frontend** | React + TypeScript + Vite | Maduro, rápido, componentização |
-| **UI** | Tailwind CSS + shadcn/ui | Desenvolvimento rápido, acessível |
-| **State** | Zustand | Simples, sem boilerplate |
-| **Auth** | JWT | Stateless, simples para off-grid |
-| **HTTP Client** | Axios | Interceptors, retry logic |
-| **Validation** | Zod | Type-safe, runtime validation |
+| Camada          | Tecnologia                     | Justificativa                            |
+| --------------- | ------------------------------ | ---------------------------------------- |
+| **Backend**     | Node.js + TypeScript + Fastify | Performance, type-safety, ecosystem rico |
+| **Database**    | SQLite + Prisma                | Zero config, migrations, ORM type-safe   |
+| **Frontend**    | React + TypeScript + Vite      | Maduro, rápido, componentização          |
+| **UI**          | Tailwind CSS + shadcn/ui       | Desenvolvimento rápido, acessível        |
+| **State**       | Zustand                        | Simples, sem boilerplate                 |
+| **Auth**        | JWT                            | Stateless, simples para off-grid         |
+| **HTTP Client** | Axios                          | Interceptors, retry logic                |
+| **Validation**  | Zod                            | Type-safe, runtime validation            |
 
 ---
 
 ## 7. Próximos Passos Pós-MVP (Backlog v2.0)
 
 ### Prioridade Alta (Próxima Versão)
+
 1. **WebSocket (Tempo Real)**
    - Atualização automática de pedidos
    - Notificações push para staff
@@ -435,6 +469,7 @@
 ---
 
 ### Prioridade Média
+
 5. **Pagamento PIX**
    - Integração com gateway
    - QR Code dinâmico
@@ -457,6 +492,7 @@
 ---
 
 ### Prioridade Baixa (Futuro)
+
 9. **Multi-loja**
 10. **Delivery**
 11. **Inventário**
@@ -468,9 +504,11 @@
 ## 8. Riscos e Mitigações
 
 ### Risco 1: Performance do SQLite com Múltiplos Dispositivos
+
 **Impacto:** Alto | **Probabilidade:** Média
 
 **Mitigação:**
+
 - Habilitar WAL mode (Write-Ahead Logging)
 - Otimizar queries (índices)
 - Monitorar carga (se > 20 dispositivos, considerar PostgreSQL)
@@ -478,9 +516,11 @@
 ---
 
 ### Risco 2: Rede Wi-Fi Instável
+
 **Impacto:** Alto | **Probabilidade:** Média-Alta
 
 **Mitigação:**
+
 - Usar roteador profissional (não doméstico)
 - Configurar IP estático para servidor
 - Implementar retry logic no frontend
@@ -489,9 +529,11 @@
 ---
 
 ### Risco 3: PC Central Desligado/Travado
+
 **Impacto:** Alto | **Probabilidade:** Baixa
 
 **Mitigação:**
+
 - Configurar Windows para não hibernar
 - Processo do Node.js como serviço (pm2 ou Windows Service)
 - Script de monitoramento (restart automático)
@@ -500,9 +542,11 @@
 ---
 
 ### Risco 4: Cardápio Muito Grande (100+ itens)
+
 **Impacto:** Médio | **Probabilidade:** Baixa
 
 **Mitigação:**
+
 - Paginação na listagem
 - Busca eficiente (índices no banco)
 - Lazy loading de imagens
@@ -511,9 +555,11 @@
 ---
 
 ### Risco 5: Adoção pelos Usuários (Staff Resiste)
+
 **Impacto:** Alto | **Probabilidade:** Média
 
 **Mitigação:**
+
 - Treinamento adequado (hands-on)
 - Interface intuitiva (UX research)
 - Período de transição (sistema antigo + novo em paralelo)
@@ -524,12 +570,14 @@
 ## 9. Métricas de Sucesso
 
 ### Operacionais
+
 - ✅ **Tempo médio de criação de pedido (Kiosk)** < 3 minutos
 - ✅ **Tempo médio de atendimento no balcão** < 1 minuto
 - ✅ **Uptime do sistema** > 99% (durante horário de operação)
 - ✅ **Erros reportados** < 5 por semana
 
 ### Negócio
+
 - ✅ **Redução de filas** em 30%+ (comparado a atendimento manual)
 - ✅ **Aumento de ticket médio** (clientes adicionam mais itens no totem)
 - ✅ **Satisfação do cliente** (pesquisa pós-pedido - futuro)
@@ -540,6 +588,7 @@
 ## 10. Checklist de Go-Live
 
 ### Pré-Lançamento
+
 - [ ] Todos os fluxos principais testados (Kiosk, Staff, Admin)
 - [ ] Seed data com cardápio real do restaurante
 - [ ] Treinamento da equipe concluído
@@ -550,6 +599,7 @@
 - [ ] Plano de rollback (ter sistema antigo como fallback)
 
 ### Durante Soft Launch (1-2 semanas)
+
 - [ ] Operar em horário de menor movimento
 - [ ] Equipe técnica de prontidão
 - [ ] Coletar feedback de staff e clientes
@@ -557,6 +607,7 @@
 - [ ] Ajustes rápidos conforme necessário
 
 ### Pós-Lançamento
+
 - [ ] Reunião de retrospectiva com equipe
 - [ ] Documentar lições aprendidas
 - [ ] Priorizar backlog v2.0

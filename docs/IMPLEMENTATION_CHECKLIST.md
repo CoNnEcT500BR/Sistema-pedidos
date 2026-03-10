@@ -6,6 +6,8 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ## ✅ FASE 1: Setup e Estrutura Base (5-7 dias)
 
+Status atual: concluida, com excecao de itens desta lista que foram originalmente planejados mas nao existem mais exatamente nesse formato no repositorio.
+
 ### Backend Setup
 
 - [x] **1.1 Inicializar projeto Node.js**
@@ -145,10 +147,10 @@ Este checklist guia a implementação prática do MVP, fase por fase.
   - [x] Criar `.prettierrc` no root
   - [x] Adicionar scripts: `lint`, `format`
 
-- [x] **1.20 Criar scripts auxiliares**
-  - [x] `scripts/setup.sh` (Linux/Mac)
-  - [x] `scripts/setup.ps1` (Windows)
-  - [x] `scripts/backup.sh` (backup do .db)
+- [x] **1.20 Consolidar scripts auxiliares do repositorio**
+  - [x] Scripts de dev/build/type-check por workspace
+  - [x] Scripts manuais de validacao da Fase 2 em `scripts/`
+  - [ ] Script unico de setup automatizado multiplataforma
 
 - [x] **1.21 Documentação básica**
   - [x] Criar README.md no root (copiar de docs/)
@@ -314,7 +316,9 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ---
 
-## ✅ FASE 3: Frontend Kiosk (7-10 dias)
+## 🚧 FASE 3: Frontend Kiosk (7-10 dias)
+
+Status atual: apenas a pagina base `routes/kiosk/KioskPage.tsx` existe; os itens abaixo continuam pendentes.
 
 ### Setup Base
 
@@ -442,7 +446,9 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ---
 
-## ✅ FASE 4: Frontend Staff (5-7 dias)
+## 🚧 FASE 4: Frontend Staff (5-7 dias)
+
+Status atual: apenas a pagina base `routes/staff/StaffPage.tsx` existe; os itens abaixo continuam pendentes.
 
 ### Setup e Autenticação
 
@@ -565,7 +571,9 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ---
 
-## ✅ FASE 5: Frontend Admin (5-7 dias)
+## 🚧 FASE 5: Frontend Admin (5-7 dias)
+
+Status atual: apenas a pagina base `routes/admin/AdminPage.tsx` existe; os itens abaixo continuam pendentes.
 
 ### Dashboard Admin
 
@@ -680,7 +688,9 @@ Este checklist guia a implementação prática do MVP, fase por fase.
 
 ---
 
-## ✅ FASE 6: Polimento e Deploy (3-5 dias)
+## 🚧 FASE 6: Polimento e Deploy (3-5 dias)
+
+Status atual: pendente apos implementacao real das jornadas de frontend.
 
 ### Polimento Geral
 

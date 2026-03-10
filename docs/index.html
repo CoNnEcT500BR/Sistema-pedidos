@@ -240,7 +240,7 @@
                 </div>
                 <div class="text-right">
                     <span class="inline-block px-4 py-2 bg-accent-100 text-accent-700 rounded-full font-semibold text-sm">
-                        ✅ v1.0 Completo
+                        🚧 Backend Fase 2 ativo
                     </span>
                 </div>
             </div>
@@ -346,30 +346,30 @@
                 <h1>🍔 Sistema de Pedidos Off-Grid</h1>
 
                 <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
-                    <p class="text-lg font-semibold text-primary-900 mb-2">✨ Bem-vindo à documentação completa!</p>
-                    <p class="text-primary-800">Sistema completo de pedidos funcionando <strong>100% offline</strong>, acessado via navegador em rede local (LAN/Wi-Fi).</p>
+                    <p class="text-lg font-semibold text-primary-900 mb-2">✨ Estado atual do repositorio</p>
+                    <p class="text-primary-800">O backend da Fase 2 ja esta operacional com <strong>auth, menu, combos, addons e orders</strong>. O frontend possui roteamento base e paginas placeholder para kiosk, staff e admin.</p>
                 </div>
 
                 <h2>📋 Visão Geral do Sistema</h2>
-                <p>Sistema com <strong>3 interfaces principais</strong> para diferentes perfis de usuários:</p>
+                <p>O projeto continua organizado em <strong>3 interfaces principais</strong>, mas hoje elas representam a base de navegacao que sera conectada aos fluxos operacionais.</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
                     <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; border: none;">
                         <div style="font-size: 3rem; margin-bottom: 1rem;">🖥️</div>
                         <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem;">Kiosk</h3>
-                        <p style="color: #ffedd5;">Cliente monta seu pedido sozinho em tela touch grande</p>
+                        <p style="color: #ffedd5;">Rota base pronta para o fluxo de autoatendimento</p>
                     </div>
 
                     <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; border: none;">
                         <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
                         <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem;">Staff</h3>
-                        <p style="color: #fee2e2;">Atendente registra pedidos rapidamente no balcão</p>
+                        <p style="color: #fee2e2;">Rota base pronta para operacao de balcao e acompanhamento</p>
                     </div>
 
                     <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; border: none;">
                         <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍💼</div>
                         <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem;">Admin</h3>
-                        <p style="color: #dcfce7;">Gerencia cardápio, preços e visualiza relatórios</p>
+                        <p style="color: #dcfce7;">Rota base pronta para manutencao e configuracoes operacionais</p>
                     </div>
                 </div>
 
@@ -394,6 +394,35 @@
                     <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
                         <span class="text-2xl">✅</span>
                         <span><strong>Cardápio Completo:</strong> Categorias, itens avulsos, combos e adicionais</span>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-accent-50 rounded-lg border border-accent-200">
+                        <span class="text-2xl">✅</span>
+                        <span><strong>API documentada:</strong> Swagger UI em /docs para explorar e testar rotas</span>
+                    </div>
+                </div>
+
+                <h2>📦 Status de Implementacao</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                    <div class="card border-l-4 border-accent-500">
+                        <h3 class="text-accent-700 font-bold text-lg mb-4">Backend entregue</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>✓ Auth com JWT e /api/auth/me</li>
+                            <li>✓ CRUD operacional de menu com soft delete</li>
+                            <li>✓ Combos com criacao, edicao e disponibilidade</li>
+                            <li>✓ Addons listados globalmente e por item</li>
+                            <li>✓ Orders com calculo e transicao de status</li>
+                        </ul>
+                    </div>
+
+                    <div class="card border-l-4 border-secondary-500">
+                        <h3 class="text-secondary-700 font-bold text-lg mb-4">Frontend em base inicial</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>✓ React Router com /kiosk, /staff e /admin</li>
+                            <li>✓ Cliente HTTP com fetch e Axios</li>
+                            <li>✓ Zustand e componentes UI base instalados</li>
+                            <li>• Telas de negocio ainda nao implementadas</li>
+                            <li>• Fluxos de login, menu e pedidos ainda pendentes</li>
+                        </ul>
                     </div>
                 </div>
 
@@ -456,18 +485,18 @@
 
                     <div class="card cursor-pointer hover:bg-primary-50" onclick="showDoc('data-model')">
                         <h4 class="font-bold text-gray-900 mb-2">🗄️ Modelo de Dados</h4>
-                        <p class="text-sm text-gray-600">14 entidades e relacionamentos</p>
+                        <p class="text-sm text-gray-600">Modelo atual do Prisma para menu, combos, addons e pedidos</p>
                     </div>
 
                     <div class="card cursor-pointer hover:bg-primary-50" onclick="showDoc('roadmap')">
                         <h4 class="font-bold text-gray-900 mb-2">🗺️ Roadmap MVP</h4>
-                        <p class="text-sm text-gray-600">6 fases em 6-8 semanas</p>
+                        <p class="text-sm text-gray-600">Separacao entre o que ja foi entregue e o que ainda falta</p>
                     </div>
                 </div>
 
                 <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
-                    <h3 class="text-accent-900 font-bold mb-3">🎯 Total de Documentação</h3>
-                    <p class="text-accent-800">~130 páginas de especificação técnica estruturada, pronta para implementação</p>
+                    <h3 class="text-accent-900 font-bold mb-3">🎯 Leitura recomendada</h3>
+                    <p class="text-accent-800">Use esta documentacao como apoio para evoluir o frontend e consolidar os fluxos operacionais em cima da API ja publicada.</p>
                 </div>
             `,
 
@@ -872,76 +901,76 @@ Ganho:   R$  7,00 (22%)</code></pre>
                     <span class="breadcrumb-item active">🗺️ Roadmap MVP</span>
                 </div>
 
-                <h1>🗺️ MVP Roadmap - 6 Fases</h1>
+                <h1>🗺️ Roadmap Atual do Projeto</h1>
 
                 <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
-                    <p class="text-primary-900 font-semibold"><strong>Timeline:</strong> 6-8 semanas para MVP completo e funcional</p>
+                    <p class="text-primary-900 font-semibold"><strong>Foco atual:</strong> manter o backend consolidado e avancar o frontend alem do shell inicial.</p>
                 </div>
 
-                <h2>⏱️ Estimativa por Fase</h2>
+                <h2>📍 Estado por Bloco</h2>
                 <table>
                     <thead>
                         <tr>
-                            <th>Fase</th>
-                            <th>Timeline</th>
-                            <th>Atividades Principais</th>
+                            <th>Bloco</th>
+                            <th>Status</th>
+                            <th>Escopo</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>📅 Setup</strong></td>
-                            <td><strong>5-7 dias</strong></td>
-                            <td>Monorepo, TypeScript, SQLite, Prisma, Fastify, React, Tailwind</td>
+                            <td><strong>🏗️ Fundacao</strong></td>
+                            <td><strong>Concluido</strong></td>
+                            <td>Monorepo, TypeScript, Prisma 7, SQLite, Fastify, React, Tailwind e package shared</td>
                         </tr>
                         <tr>
-                            <td><strong>📅 Backend API</strong></td>
-                            <td><strong>7-10 dias</strong></td>
-                            <td>CRUD Menu, Pedidos, Autenticação, Validação com Zod</td>
+                            <td><strong>🔌 Backend API</strong></td>
+                            <td><strong>Concluido</strong></td>
+                            <td>Auth, menu, combos, addons, orders, Zod, JWT e Swagger UI</td>
                         </tr>
                         <tr>
-                            <td><strong>📅 Kiosk Frontend</strong></td>
-                            <td><strong>7-10 dias</strong></td>
-                            <td>Categorias, Itens, Carrinho, Checkout, Confirmação</td>
+                            <td><strong>🖥️ Frontend shell</strong></td>
+                            <td><strong>Parcial</strong></td>
+                            <td>Rotas /kiosk, /staff e /admin criadas; paginas ainda placeholder</td>
                         </tr>
                         <tr>
-                            <td><strong>📅 Staff Frontend</strong></td>
-                            <td><strong>5-7 dias</strong></td>
-                            <td>Login, Dashboard, Novo Pedido, Lista, Detalhes</td>
+                            <td><strong>🧾 Fluxos operacionais</strong></td>
+                            <td><strong>Pendente</strong></td>
+                            <td>Login, listagem de menu, carrinho, checkout, dashboard e gestao administrativa</td>
                         </tr>
                         <tr>
-                            <td><strong>📅 Admin Frontend</strong></td>
-                            <td><strong>5-7 dias</strong></td>
-                            <td>Gerenciar Cardápio, Combos, Usuários, Relatórios</td>
+                            <td><strong>🧪 Cobertura de validacao</strong></td>
+                            <td><strong>Parcial</strong></td>
+                            <td>Build, lint e type-check ativos; scripts manuais existem para modulos da Fase 2</td>
                         </tr>
                         <tr>
-                            <td><strong>📅 Deploy</strong></td>
-                            <td><strong>3-5 dias</strong></td>
-                            <td>Testes, Build, Setup, Documentação, Go-live</td>
+                            <td><strong>🚀 Go-live local</strong></td>
+                            <td><strong>Pendente</strong></td>
+                            <td>Empacotamento operacional, setup do ambiente alvo e treinamento de uso</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h2 class="mt-10">✅ Escopo MVP</h2>
+                <h2 class="mt-10">✅ Ja Entregue</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="card border-l-4 border-accent-500">
-                        <h4 class="font-bold text-accent-700 mb-3">✅ Entra no MVP</h4>
+                        <h4 class="font-bold text-accent-700 mb-3">✅ Disponivel no codigo</h4>
                         <ul class="space-y-1 text-sm">
-                            <li>• CRUD Menu completo</li>
-                            <li>• Combos com preço fixo</li>
-                            <li>• 3 interfaces (Kiosk, Staff, Admin)</li>
-                            <li>• Autenticação JWT</li>
-                            <li>• Pagamento manual</li>
+                            <li>• Auth com JWT e perfis ADMIN / STAFF</li>
+                            <li>• Menu com criacao, edicao, disponibilidade e soft delete</li>
+                            <li>• Combos com leitura e manutencao basica</li>
+                            <li>• Orders com calculo automatico e historico de status</li>
+                            <li>• Swagger UI e seed inicial do ambiente</li>
                         </ul>
                     </div>
 
                     <div class="card border-l-4 border-secondary-500">
-                        <h4 class="font-bold text-secondary-700 mb-3">❌ Fica para Depois</h4>
+                        <h4 class="font-bold text-secondary-700 mb-3">⏭️ Proxima onda</h4>
                         <ul class="space-y-1 text-sm">
-                            <li>• Combos complexos</li>
-                            <li>• Integração gateways</li>
-                            <li>• WebSocket (polling ok)</li>
-                            <li>• Relatórios avançados</li>
-                            <li>• Impressoras/Kitchen Display</li>
+                            <li>• Implementar telas reais de kiosk, staff e admin</li>
+                            <li>• Conectar frontend aos endpoints ja publicados</li>
+                            <li>• Completar CRUD administrativo de categorias e addons</li>
+                            <li>• Expandir testes automatizados e scripts de regressao</li>
+                            <li>• Preparar empacotamento para operacao local</li>
                         </ul>
                     </div>
                 </div>
@@ -954,19 +983,24 @@ Ganho:   R$  7,00 (22%)</code></pre>
                     <span class="breadcrumb-item active">🖼️ Wireframes</span>
                 </div>
 
-                <h1>🖼️ Wireframes e Mapa de Telas</h1>
+                <h1>🖼️ Wireframes e Mapa de Telas Planejado</h1>
 
                 <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
-                    <p class="text-primary-900 font-semibold">19 telas distribuídas entre Kiosk, Staff e Admin</p>
+                    <p class="text-primary-900 font-semibold">Estas 19 telas representam o alvo de produto para Kiosk, Staff e Admin. No codigo atual, o frontend ainda expõe apenas paginas placeholder em /kiosk, /staff e /admin.</p>
                 </div>
 
-                <h2>🎯 Kiosk (Cliente) - 7 Telas</h2>
+                <div class="card border-l-4 border-secondary-500 mb-8">
+                    <h3 class="font-bold text-secondary-700 mb-2">Leitura correta desta seção</h3>
+                    <p class="text-sm text-gray-700">Use os wireframes abaixo como mapa de implementacao. Eles descrevem jornadas previstas, nao telas que ja estejam entregues no frontend atual.</p>
+                </div>
+
+                <h2>🎯 Kiosk (Cliente) - 7 Telas Planejadas</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Tela</th>
-                            <th>Descrição</th>
+                            <th>Tela planejada</th>
+                            <th>Objetivo do fluxo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1008,13 +1042,13 @@ Ganho:   R$  7,00 (22%)</code></pre>
                     </tbody>
                 </table>
 
-                <h2 class="mt-10">👔 Staff (Funcionário) - 5 Telas</h2>
+                <h2 class="mt-10">👔 Staff (Funcionário) - 5 Telas Planejadas</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Tela</th>
-                            <th>Descrição</th>
+                            <th>Tela planejada</th>
+                            <th>Objetivo do fluxo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1046,13 +1080,13 @@ Ganho:   R$  7,00 (22%)</code></pre>
                     </tbody>
                 </table>
 
-                <h2 class="mt-10">👨‍💼 Admin (Gerente) - 7 Telas</h2>
+                <h2 class="mt-10">👨‍💼 Admin (Gerente) - 7 Telas Planejadas</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Tela</th>
-                            <th>Descrição</th>
+                            <th>Tela planejada</th>
+                            <th>Objetivo do fluxo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1131,32 +1165,37 @@ Ganho:   R$  7,00 (22%)</code></pre>
                 <pre><code>sistema-pedidos/
 ├── apps/
 │   ├── frontend/          # React + Vite
-│   │   ├── public/
+│   │   ├── components.json
 │   │   ├── src/
-│   │   │   ├── app/       # Bootstrap
-│   │   │   ├── routes/    # Páginas (kiosk, staff, admin)
-│   │   │   ├── features/  # Módulos (menu, orders, cart)
-│   │   │   ├── components/
-│   │   │   ├── services/  # API client
+│   │   │   ├── app/       # Router e bootstrap
+│   │   │   ├── routes/    # Paginas base (kiosk, staff, admin)
+│   │   │   ├── components/ # UI compartilhada
+│   │   │   ├── hooks/
+│   │   │   ├── services/  # fetch e axios client
 │   │   │   ├── stores/    # Zustand state
+│   │   │   ├── styles/
 │   │   │   └── types/
 │   │   └── package.json
 │   │
 │   └── server/            # Node.js + Fastify
 │       ├── prisma/
 │       │   ├── schema.prisma
+│       │   ├── seed.ts
 │       │   └── migrations/
 │       ├── src/
-│       │   ├── modules/   # auth, menu, orders, combos
-│       │   ├── shared/    # middleware, utils
+│       │   ├── config/
+│       │   ├── modules/   # auth, menu, combos, addons, orders
+│       │   ├── shared/    # database e http/openapi
+│       │   ├── app.ts
+│       │   ├── routes.ts
 │       │   └── server.ts
 │       └── package.json
 │
 └── packages/
     └── shared/            # Types, utils compartilhados
         └── src/
-            ├── types/
-            └── utils/</code></pre>
+            ├── index.ts
+            └── types/</code></pre>
 
                 <h2>🔗 Path Aliases</h2>
                 <pre><code>@/*              → src/*
@@ -1166,15 +1205,15 @@ Ganho:   R$  7,00 (22%)</code></pre>
                 <div class="space-y-3 mt-4">
                     <div class="card">
                         <h4 class="font-bold text-primary-700">TypeScript</h4>
-                        <p class="text-sm">Tipos explícitos, interfaces para contratos, never use \`any\`</p>
+                        <p class="text-sm">Tipos explicitos, schemas de entrada com Zod e foco em contratos claros</p>
                     </div>
                     <div class="card">
                         <h4 class="font-bold text-primary-700">Componentes React</h4>
-                        <p class="text-sm">PascalCase, Props interface, hooks customizados (useMenu, useCart)</p>
+                        <p class="text-sm">PascalCase, rotas separadas por dominio e componentes UI reutilizaveis</p>
                     </div>
                     <div class="card">
                         <h4 class="font-bold text-primary-700">Módulos</h4>
-                        <p class="text-sm">Cada módulo: routes, service, repository, types, schema, controller</p>
+                        <p class="text-sm">Cada modulo de backend concentra routes, service, repository e types</p>
                     </div>
                 </div>
             `,
@@ -1189,50 +1228,58 @@ Ganho:   R$  7,00 (22%)</code></pre>
                 <h1>✅ Checklist de Implementação</h1>
 
                 <div class="card bg-gradient-to-r from-primary-50 to-orange-50 border-2 border-primary-200 mb-8">
-                    <p class="text-primary-900 font-semibold">200+ itens práticos para completar todas as 6 fases</p>
+                    <p class="text-primary-900 font-semibold">Checklist resumido com o que ja foi entregue e o que ainda falta no codigo atual</p>
                 </div>
 
-                <h2>📋 Fase 1: Setup (5-7 dias)</h2>
+                <h2>📋 Fase 1: Fundacao</h2>
                 <h3>Backend</h3>
                 <ul class="space-y-1 mb-4 text-sm">
-                    <li>☐ Node.js + TypeScript setup</li>
-                    <li>☐ Workspaces configurados</li>
-                    <li>☐ Fastify instalado e testado</li>
-                    <li>☐ Prisma + SQLite configurados</li>
-                    <li>☐ Schema.prisma com todas entidades</li>
-                    <li>☐ Migrations geradas</li>
-                    <li>☐ Seed data carregado</li>
+                    <li>☑ Node.js + TypeScript setup</li>
+                    <li>☑ Workspaces configurados</li>
+                    <li>☑ Fastify instalado e testado</li>
+                    <li>☑ Prisma 7 + SQLite configurados</li>
+                    <li>☑ Schema.prisma e migration inicial aplicados</li>
+                    <li>☑ Seed com dados iniciais carregado</li>
                 </ul>
 
                 <h3>Frontend</h3>
                 <ul class="space-y-1">
-                    <li>☐ React + Vite criado</li>
-                    <li>☐ Tailwind CSS configurado</li>
-                    <li>☐ shadcn/ui instalado</li>
-                    <li>☐ React Router integrado</li>
-                    <li>☐ Zustand integrado</li>
-                    <li>☐ Path aliases configurados</li>
+                    <li>☑ React + Vite criado</li>
+                    <li>☑ Tailwind CSS configurado</li>
+                    <li>☑ shadcn/ui instalado</li>
+                    <li>☑ React Router integrado</li>
+                    <li>☑ Zustand integrado</li>
+                    <li>☑ Path aliases configurados</li>
                 </ul>
 
-                <h2 class="mt-10">📋 Fase 2: Backend API (7-10 dias)</h2>
+                <h2 class="mt-10">📋 Fase 2: Backend API</h2>
                 <ul class="space-y-1 text-sm">
-                    <li>☐ POST /auth/login</li>
-                    <li>☐ GET/POST/PATCH/DELETE /api/categories</li>
-                    <li>☐ GET/POST/PATCH/DELETE /api/items</li>
-                    <li>☐ GET/POST/PATCH/DELETE /api/addons</li>
-                    <li>☐ GET/POST /api/orders</li>
-                    <li>☐ PATCH /api/orders/:id/status</li>
-                    <li>☐ Validação com Zod em todas rotas</li>
-                    <li>☐ Error handling centralizado</li>
-                    <li>☐ Cálculo de preço automático</li>
+                    <li>☑ POST /api/auth/login</li>
+                    <li>☑ GET /api/auth/me</li>
+                    <li>☑ GET /api/categories</li>
+                    <li>☑ GET/POST/PUT/PATCH/DELETE /api/menu</li>
+                    <li>☑ GET/POST/PUT/PATCH /api/combos</li>
+                    <li>☑ GET /api/addons</li>
+                    <li>☑ GET /api/menu/:menuItemId/addons</li>
+                    <li>☑ POST /api/orders</li>
+                    <li>☑ GET /api/orders e GET /api/orders/:id</li>
+                    <li>☑ PATCH /api/orders/:id/status</li>
+                    <li>☑ Validacao com Zod nas rotas principais</li>
+                    <li>☑ Calculo automatico de pedidos</li>
                 </ul>
 
-                <h2 class="mt-10">📋 Fase 3-6</h2>
-                <p class="text-sm text-gray-600">Veja documentação completa para todos os 200+ itens</p>
+                <h2 class="mt-10">📋 Proxima etapa pratica</h2>
+                <ul class="space-y-1 text-sm">
+                    <li>☐ Implementar telas reais de kiosk</li>
+                    <li>☐ Implementar autenticacao e fluxos de staff</li>
+                    <li>☐ Implementar operacao admin conectada a menu e combos</li>
+                    <li>☐ Expandir CRUD administrativo de categorias e addons</li>
+                    <li>☐ Consolidar testes de regressao da Fase 2</li>
+                </ul>
 
                 <div class="card bg-accent-50 border-2 border-accent-300 mt-8">
-                    <h3 class="text-accent-900 font-bold mb-2">💡 Dica</h3>
-                    <p class="text-sm text-accent-800">Seguir sequencialmente garante implementação sólida. Use branches git para cada fase!</p>
+                    <h3 class="text-accent-900 font-bold mb-2">💡 Direcao recomendada</h3>
+                    <p class="text-sm text-accent-800">O melhor retorno agora vem de conectar o frontend existente aos endpoints ja estaveis do backend, em vez de continuar tratando todo o projeto como planejado.</p>
                 </div>
             `,
 
