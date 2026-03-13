@@ -6,6 +6,7 @@ import { StatusBadge } from '@/features/orders/components/StatusBadge';
 import { OrderTimeline } from '@/features/orders/components/OrderTimeline';
 import { ordersService } from '@/features/orders/services/orders.service';
 import type { OrderDetail, OrderStatus } from '@/features/orders/types/order.types';
+import { useI18n } from '@/i18n';
 
 const nextAction: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
   PENDING: { label: 'Confirmar Pedido', next: 'CONFIRMED' },
@@ -15,6 +16,7 @@ const nextAction: Partial<Record<OrderStatus, { label: string; next: OrderStatus
 };
 
 export function OrderDetailsPage() {
+  const { language, t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -31,13 +33,13 @@ export function OrderDetailsPage() {
       setOrder(data);
     } catch (err) {
       const message = isAxiosError(err)
-        ? err.response?.data?.message ?? 'Erro ao carregar pedido.'
-        : 'Erro ao carregar pedido.';
+        ? t(err.response?.data?.message ?? 'Erro ao carregar pedido.')
+        : t('Erro ao carregar pedido.');
       setError(message);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     fetchOrder();
@@ -51,8 +53,8 @@ export function OrderDetailsPage() {
       setOrder(updated);
     } catch (err) {
       const message = isAxiosError(err)
-        ? err.response?.data?.message ?? 'Não foi possível atualizar o status.'
-        : 'Não foi possível atualizar o status.';
+        ? t(err.response?.data?.message ?? 'Não foi possível atualizar o status.')
+        : t('Não foi possível atualizar o status.');
       setError(message);
     } finally {
       setUpdating(false);
@@ -63,7 +65,7 @@ export function OrderDetailsPage() {
     return (
       <div className="flex items-center justify-center py-24 text-gray-400">
         <RefreshCw size={24} className="animate-spin mr-2" />
-        Carregando pedido...
+        {t('Carregando pedido...')}
       </div>
     );
   }
@@ -73,7 +75,7 @@ export function OrderDetailsPage() {
       <div className="p-6">
         <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-xl p-4">
           <AlertCircle size={18} />
-          {error ?? 'Pedido não encontrado.'}
+          {error ?? t('Pedido não encontrado.')}
         </div>
       </div>
     );
@@ -81,7 +83,7 @@ export function OrderDetailsPage() {
 
   const action = nextAction[order.status];
   const price = (order.finalPrice ?? order.totalPrice).toFixed(2).replace('.', ',');
-  const createdAt = new Date(order.createdAt).toLocaleString('pt-BR');
+  const createdAt = new Date(order.createdAt).toLocaleString(language === 'en' ? 'en-US' : 'pt-BR');
 
   return (
     <div className="p-6 max-w-3xl space-y-6">
@@ -91,14 +93,14 @@ export function OrderDetailsPage() {
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
       >
         <ArrowLeft size={16} />
-        Voltar
+        {t('Voltar')}
       </button>
 
       {/* Header */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Pedido #{order.orderNumber}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('Pedido')} #{order.orderNumber}</h1>
             <p className="text-gray-400 text-sm mt-1">{createdAt}</p>
             {order.customerName && (
               <p className="text-gray-700 font-medium mt-2">👤 {order.customerName}</p>
@@ -115,7 +117,7 @@ export function OrderDetailsPage() {
             <p className="text-2xl font-bold text-gray-900 mt-3">R$ {price}</p>
             {order.discount ? (
               <p className="text-sm text-green-600 font-medium">
-                Desconto: -R$ {order.discount.toFixed(2).replace('.', ',')}
+                {t('Desconto')}: -R$ {order.discount.toFixed(2).replace('.', ',')}
               </p>
             ) : null}
           </div>
@@ -133,10 +135,10 @@ export function OrderDetailsPage() {
               {updating ? (
                 <>
                   <RefreshCw size={16} className="animate-spin" />
-                  Atualizando...
+                  {t('Atualizando...')}
                 </>
               ) : (
-                action.label
+                t(action.label)
               )}
             </button>
           </div>
@@ -145,17 +147,17 @@ export function OrderDetailsPage() {
 
       {/* Items */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Itens do Pedido</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('Itens do Pedido')}</h2>
         <ul className="divide-y divide-gray-100">
           {order.items.map((item) => {
-            const itemName = item.menuItem?.name ?? item.combo?.name ?? `Item`;
+            const itemName = item.menuItem?.name ?? item.combo?.name ?? t('Item');
             const itemPrice = item.subtotal.toFixed(2).replace('.', ',');
             return (
               <li key={item.id} className="py-3">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <span className="font-medium text-gray-900">
-                      {item.quantity}× {itemName}
+                      {item.quantity}× {t(itemName)}
                     </span>
                     {item.notes && (
                       <p className="text-xs text-gray-400 mt-0.5 italic">{item.notes}</p>
@@ -164,7 +166,7 @@ export function OrderDetailsPage() {
                       <ul className="mt-1 space-y-0.5">
                         {item.addons.map((a) => (
                           <li key={a.id} className="text-xs text-gray-500">
-                            + {a.quantity}× {a.addon?.name ?? a.addonId}
+                            + {a.quantity}× {t(a.addon?.name ?? a.addonId)}
                             {a.addonPrice > 0 && (
                               <span className="text-gray-400 ml-1">
                                 (R$ {(a.addonPrice * a.quantity).toFixed(2).replace('.', ',')})
@@ -184,14 +186,14 @@ export function OrderDetailsPage() {
           })}
         </ul>
         <div className="pt-3 border-t border-gray-200 flex justify-end">
-          <span className="text-lg font-bold text-gray-900">Total: R$ {price}</span>
+          <span className="text-lg font-bold text-gray-900">{t('Total')}: R$ {price}</span>
         </div>
       </div>
 
       {/* Timeline */}
       {order.statusHistory && order.statusHistory.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Histórico de Status</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('Histórico de Status')}</h2>
           <OrderTimeline history={order.statusHistory} />
         </div>
       )}

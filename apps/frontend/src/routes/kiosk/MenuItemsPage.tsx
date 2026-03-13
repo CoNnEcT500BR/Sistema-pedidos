@@ -11,10 +11,12 @@ import { useCartStore } from '@/features/cart/store/cart.store';
 import { CartSummary } from '@/features/cart/components/CartSummary';
 import { useToast } from '@/hooks/useToast';
 import { trackKioskEvent } from '@/features/telemetry/telemetry.service';
+import { useI18n } from '@/i18n';
 
 const INACTIVITY_TIMEOUT_MS = 120_000;
 
 export function MenuItemsPage() {
+  const { t } = useI18n();
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const { categories } = useCategories();
@@ -76,7 +78,11 @@ export function MenuItemsPage() {
       quantity,
       addonsCount: addons.length,
     });
-    toast({ title: '✓ Adicionado!', description: `${item.name} foi adicionado ao carrinho.`, variant: 'success' });
+    toast({
+      title: t('✓ Adicionado!'),
+      description: t('{name} foi adicionado ao carrinho.', { name: item.name }),
+      variant: 'success',
+    });
   }
 
   function handleAddCombo(combo: Combo) {
@@ -93,7 +99,11 @@ export function MenuItemsPage() {
       quantity,
       addonsCount: addons.length,
     });
-    toast({ title: '✓ Combo adicionado!', description: `${combo.name} foi adicionado ao carrinho.`, variant: 'success' });
+    toast({
+      title: t('✓ Combo adicionado!'),
+      description: t('{name} foi adicionado ao carrinho.', { name: combo.name }),
+      variant: 'success',
+    });
   }
 
   return (
@@ -103,20 +113,20 @@ export function MenuItemsPage() {
         <button
           onClick={() => navigate('/kiosk/menu')}
           className="flex items-center gap-1 rounded-xl px-3 py-2 text-gray-600 transition hover:bg-gray-100 active:scale-95"
-          aria-label="Voltar"
+          aria-label={t('Voltar')}
         >
           <ChevronLeft className="h-6 w-6" />
-          <span className="font-semibold">Voltar</span>
+          <span className="font-semibold">{t('Voltar')}</span>
         </button>
 
         <h1 className="flex-1 px-2 text-center text-base font-black uppercase leading-tight text-gray-900 sm:text-xl">
-          {category?.name ?? 'Cardápio'}
+          {category?.name ? t(category.name) : t('Cardápio')}
         </h1>
 
         <button
           onClick={() => navigate('/kiosk/cart')}
           className="relative flex items-center gap-2 rounded-xl px-3 py-2 text-gray-600 transition hover:bg-gray-100 active:scale-95"
-          aria-label="Carrinho"
+          aria-label={t('CARRINHO')}
         >
           <ShoppingCart className="h-6 w-6" />
           {totalItems > 0 && (
@@ -136,36 +146,36 @@ export function MenuItemsPage() {
 
         {!isComboCategory && error && !loading && (
           <div className="rounded-2xl bg-red-50 p-6 text-center">
-            <p className="text-lg font-semibold text-red-600">Erro ao carregar itens.</p>
-            <p className="mt-1 text-sm text-red-400">Confira a conexão e tente novamente.</p>
+            <p className="text-lg font-semibold text-red-600">{t('Erro ao carregar itens.')}</p>
+            <p className="mt-1 text-sm text-red-400">{t('Confira a conexão e tente novamente.')}</p>
             <button
               onClick={refetch}
               className="mt-4 rounded-xl bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
             >
-              Tentar novamente
+              {t('Tentar novamente')}
             </button>
           </div>
         )}
 
         {isComboCategory && combosError && !combosLoading && (
           <div className="rounded-2xl bg-red-50 p-6 text-center">
-            <p className="text-lg font-semibold text-red-600">Erro ao carregar combos.</p>
-            <p className="mt-1 text-sm text-red-400">Confira a conexão e tente novamente.</p>
+            <p className="text-lg font-semibold text-red-600">{t('Erro ao carregar combos.')}</p>
+            <p className="mt-1 text-sm text-red-400">{t('Confira a conexão e tente novamente.')}</p>
             <button
               onClick={refetchCombos}
               className="mt-4 rounded-xl bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
             >
-              Tentar novamente
+              {t('Tentar novamente')}
             </button>
           </div>
         )}
 
         {!isComboCategory && !loading && !error && items.length === 0 && (
-          <p className="mt-10 text-center text-gray-400">Nenhum item disponível nesta categoria.</p>
+          <p className="mt-10 text-center text-gray-400">{t('Nenhum item disponível nesta categoria.')}</p>
         )}
 
         {isComboCategory && !combosLoading && !combosError && combos.filter((combo) => combo.isActive).length === 0 && (
-          <p className="mt-10 text-center text-gray-400">Nenhum combo disponível nesta categoria.</p>
+          <p className="mt-10 text-center text-gray-400">{t('Nenhum combo disponível nesta categoria.')}</p>
         )}
 
         {!isComboCategory && !loading &&

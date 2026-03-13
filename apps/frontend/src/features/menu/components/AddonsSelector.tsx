@@ -1,6 +1,7 @@
 import { Minus, Plus } from 'lucide-react';
 import type { Addon } from '../types/menu.types';
 import type { CartAddon } from '@/features/cart/store/cart.store';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 interface AddonsSelectorProps {
@@ -10,6 +11,7 @@ interface AddonsSelectorProps {
 }
 
 export function AddonsSelector({ addons, selected, onChange }: AddonsSelectorProps) {
+  const { t } = useI18n();
   if (addons.length === 0) return null;
 
   function getQuantity(addonId: string): number {
@@ -36,13 +38,13 @@ export function AddonsSelector({ addons, selected, onChange }: AddonsSelectorPro
   return (
     <div className="flex flex-col gap-4">
       {extras.length > 0 && (
-        <AddonGroup label="Adicionais" addons={extras} getQuantity={getQuantity} onAdjust={adjust} />
+        <AddonGroup label={t('Adicionais')} addons={extras} getQuantity={getQuantity} onAdjust={adjust} />
       )}
       {removals.length > 0 && (
-        <AddonGroup label="Remover" addons={removals} getQuantity={getQuantity} onAdjust={adjust} />
+        <AddonGroup label={t('Remover')} addons={removals} getQuantity={getQuantity} onAdjust={adjust} />
       )}
       {substitutions.length > 0 && (
-        <AddonGroup label="Substituições" addons={substitutions} getQuantity={getQuantity} onAdjust={adjust} />
+        <AddonGroup label={t('Substituições')} addons={substitutions} getQuantity={getQuantity} onAdjust={adjust} />
       )}
     </div>
   );
@@ -56,6 +58,8 @@ interface AddonGroupProps {
 }
 
 function AddonGroup({ label, addons, getQuantity, onAdjust }: AddonGroupProps) {
+  const { t } = useI18n();
+
   return (
     <div>
       <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">{label}</h4>
@@ -72,14 +76,14 @@ function AddonGroup({ label, addons, getQuantity, onAdjust }: AddonGroupProps) {
               )}
             >
               <div className="flex flex-col">
-                <span className="font-medium text-gray-800">{addon.name}</span>
+                <span className="font-medium text-gray-800">{t(addon.name)}</span>
                 {addon.price > 0 && (
                   <span className="text-sm text-primary-600">
                     +R$ {addon.price.toFixed(2).replace('.', ',')}
                   </span>
                 )}
                 {isRemoval && addon.price === 0 && (
-                  <span className="text-sm text-gray-400">sem custo</span>
+                  <span className="text-sm text-gray-400">{t('sem custo')}</span>
                 )}
               </div>
 
@@ -89,7 +93,7 @@ function AddonGroup({ label, addons, getQuantity, onAdjust }: AddonGroupProps) {
                     <button
                       onClick={() => onAdjust(addon, -1)}
                       className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition hover:bg-gray-200 active:scale-90"
-                      aria-label={`Diminuir ${addon.name}`}
+                      aria-label={t('Diminuir {name}', { name: t(addon.name) })}
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -99,7 +103,7 @@ function AddonGroup({ label, addons, getQuantity, onAdjust }: AddonGroupProps) {
                 <button
                   onClick={() => onAdjust(addon, 1)}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white shadow transition hover:bg-primary-600 active:scale-90"
-                  aria-label={`Adicionar ${addon.name}`}
+                  aria-label={t('Adicionar {name}', { name: t(addon.name) })}
                 >
                   <Plus className="h-4 w-4" strokeWidth={3} />
                 </button>

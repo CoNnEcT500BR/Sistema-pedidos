@@ -10,6 +10,7 @@ import { useCategories, useCombos, useMenuItems } from '@/features/menu/hooks/us
 import type { Combo, MenuItem } from '@/features/menu/types/menu.types';
 import type { ItemValidationError, OrderValidationErrorResponse } from '@/features/orders/services/orders.service';
 import { ordersService } from '@/features/orders/services/orders.service';
+import { useI18n } from '@/i18n';
 
 type PaymentMethod = 'CASH' | 'CARD' | 'PIX';
 
@@ -91,18 +92,20 @@ function getCartPageCapacity(viewportHeight: number): number {
   return CART_PAGE_CAPACITY_DESKTOP;
 }
 
-function getPaymentLabel(method: PaymentMethod): string {
+function getPaymentLabel(method: PaymentMethod, t: (text: string) => string): string {
   switch (method) {
     case 'CASH':
-      return 'Dinheiro';
+      return t('Dinheiro');
     case 'CARD':
-      return 'Cartão';
+      return t('Cartão');
     case 'PIX':
-      return 'Pix';
+      return t('Pix');
   }
 }
 
 function TouchMenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: MenuItem) => void }) {
+  const { t } = useI18n();
+
   return (
     <button
       type="button"
@@ -116,27 +119,27 @@ function TouchMenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: Me
       <div className="flex items-start justify-between">
         <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-orange-50 text-3xl shrink-0">
           {item.imageUrl ? (
-            <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+            <img src={item.imageUrl} alt={t(item.name)} className="h-full w-full object-cover" />
           ) : (
             item.icon ?? '🍔'
           )}
         </div>
         {!item.isAvailable && (
           <span className="rounded-full bg-stone-200 px-2.5 py-1 text-xs font-semibold text-stone-600">
-            Esgotado
+            {t('Esgotado')}
           </span>
         )}
       </div>
 
-      <h3 className="mt-2.5 line-clamp-1 text-lg font-bold text-stone-900">{item.name}</h3>
+      <h3 className="mt-2.5 line-clamp-1 text-lg font-bold text-stone-900">{t(item.name)}</h3>
       <p className="mt-1 line-clamp-2 min-h-[40px] text-xs leading-5 text-stone-700">
-        {item.description || 'Toque para personalizar e adicionar ao pedido.'}
+        {item.description ? t(item.description) : t('Toque para personalizar e adicionar ao pedido.')}
       </p>
 
       <div className="mt-3 flex items-end justify-between gap-2">
         <p className="text-xl font-bold text-primary-600">R$ {formatCurrency(item.price)}</p>
         <span className="inline-flex min-w-[106px] items-center justify-center rounded-xl bg-primary-500 px-3 py-2 text-xs font-bold text-white shadow-sm">
-          + Adicionar
+          + {t('Adicionar')}
         </span>
       </div>
     </button>
@@ -144,6 +147,7 @@ function TouchMenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: Me
 }
 
 export function TouchOrderPage() {
+  const { t } = useI18n();
   const { categories } = useCategories();
   const [activeCategoryId, setActiveCategoryId] = useState<string | undefined>(undefined);
   const { items: menuItems, loading: itemsLoading } = useMenuItems(activeCategoryId);
@@ -339,8 +343,8 @@ export function TouchOrderPage() {
     try {
       const paymentSummary =
         paymentMethod === 'CASH'
-          ? `Pagamento: Dinheiro | Recebido R$ ${formatCurrency(cashReceivedValue)} | Troco R$ ${formatCurrency(Math.max(changeDue, 0))}`
-          : `Pagamento: ${getPaymentLabel(paymentMethod)} | Confirmado no balcão`;
+          ? `${t('Pagamento')}: ${t('Dinheiro')} | ${t('Recebido')} R$ ${formatCurrency(cashReceivedValue)} | ${t('Troco')} R$ ${formatCurrency(Math.max(changeDue, 0))}`
+          : `${t('Pagamento')}: ${getPaymentLabel(paymentMethod, t)} | ${t('Confirmado no balcão')}`;
 
       const combinedNotes = [notes.trim(), paymentSummary].filter(Boolean).join(' | ');
 
@@ -360,10 +364,10 @@ export function TouchOrderPage() {
         if (response?.itemErrors && response.itemErrors.length > 0) {
           setValidationErrors(response.itemErrors);
         } else {
-          setSubmitError(response?.message ?? 'Não foi possível criar o pedido.');
+          setSubmitError(response?.message ?? t('Não foi possível criar o pedido.'));
         }
       } else {
-        setSubmitError('Não foi possível criar o pedido.');
+        setSubmitError(t('Não foi possível criar o pedido.'));
       }
     } finally {
       setSubmitting(false);
@@ -377,15 +381,15 @@ export function TouchOrderPage() {
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-green-100 text-green-700">
             <CheckCircle2 size={42} />
           </div>
-          <p className="mt-6 text-sm font-bold uppercase tracking-[0.22em] text-green-700">Pagamento confirmado</p>
-          <h1 className="mt-3 text-4xl font-bold text-stone-900 lg:text-5xl">Pedido #{lastOrderNumber}</h1>
+          <p className="mt-6 text-sm font-bold uppercase tracking-[0.22em] text-green-700">{t('Pagamento confirmado')}</p>
+          <h1 className="mt-3 text-4xl font-bold text-stone-900 lg:text-5xl">{t('Pedido')} #{lastOrderNumber}</h1>
           <p className="mt-4 text-lg leading-8 text-stone-700">
-            O pedido foi registrado com sucesso. A tela voltara automaticamente para um novo atendimento.
+            {t('O pedido foi registrado com sucesso. A tela voltara automaticamente para um novo atendimento.')}
           </p>
 
           <div className="mt-8 rounded-[2rem] bg-stone-900 px-6 py-5 text-white">
-            <p className="text-sm uppercase tracking-[0.2em] text-white/75">Proximo atendimento</p>
-            <p className="mt-2 text-3xl font-bold">em {autoReturnCountdown}s</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-white/75">{t('Próximo atendimento')}</p>
+            <p className="mt-2 text-3xl font-bold">{t('em {seconds}s', { seconds: autoReturnCountdown })}</p>
           </div>
 
           <button
@@ -398,7 +402,7 @@ export function TouchOrderPage() {
             }}
             className="mt-8 inline-flex items-center justify-center rounded-2xl border border-stone-300 px-6 py-3 text-base font-bold text-stone-800 transition-colors hover:bg-stone-50"
           >
-            Iniciar novo pedido agora
+            {t('Iniciar novo pedido agora')}
           </button>
         </div>
       </div>
@@ -408,21 +412,7 @@ export function TouchOrderPage() {
   return (
     <div className="grid h-full overflow-hidden bg-stone-100 xl:grid-cols-[minmax(0,1fr)_30rem]">
       <section className="flex min-h-0 flex-col p-4 lg:p-5">
-        <div className="rounded-[2rem] bg-gradient-to-r from-stone-900 via-stone-800 to-primary-700 p-4 text-white shadow-lg">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/80">Modo touch sem rolagem</p>
-              <h1 className="mt-1 text-2xl font-bold text-white">Atendimento em tela única</h1>
-              <p className="mt-1 text-xs text-white/85">Categorias vazias são ocultadas automaticamente.</p>
-            </div>
-            <div className="rounded-2xl bg-white/15 px-4 py-2 text-right backdrop-blur">
-              <p className="text-xs text-white/80">Itens no pedido</p>
-              <p className="text-xl font-bold text-white">{cartItems.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 grid flex-1 min-h-0 overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
+        <div className="grid flex-1 min-h-0 overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
               <button
@@ -434,7 +424,7 @@ export function TouchOrderPage() {
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors
                   ${activeCategoryId === undefined ? 'bg-primary-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
               >
-                Todos
+                {t('Todos')}
               </button>
               {visibleCategories.map((cat) => (
                 <button
@@ -447,7 +437,7 @@ export function TouchOrderPage() {
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors
                     ${activeCategoryId === cat.id ? 'bg-primary-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
                 >
-                  {cat.name}
+                  {t(cat.name)}
                   <span className="ml-1 opacity-80">
                     ({comboCategoryIds.includes(cat.id) ? activeCombos.length : (itemCountByCategory.get(cat.id) ?? 0)})
                   </span>
@@ -464,7 +454,7 @@ export function TouchOrderPage() {
               >
                 <StepBack size={16} />
               </button>
-              <span>Página {pageIndex + 1}/{pagesCount}</span>
+              <span>{t('Página {current}/{total}', { current: pageIndex + 1, total: pagesCount })}</span>
               <button
                 type="button"
                 onClick={handleNextPage}
@@ -479,11 +469,11 @@ export function TouchOrderPage() {
           <div className="mt-4 min-h-0 overflow-hidden">
             {(isComboCategorySelected ? combosLoading : itemsLoading) ? (
               <div className="grid h-full place-items-center rounded-2xl border border-stone-200 bg-stone-50 text-stone-500">
-                {isComboCategorySelected ? 'Carregando combos...' : 'Carregando itens...'}
+                {isComboCategorySelected ? t('Carregando combos...') : t('Carregando itens...')}
               </div>
             ) : paginatedItems.length === 0 ? (
               <div className="grid h-full place-items-center rounded-2xl border border-stone-200 bg-stone-50 text-stone-500">
-                {isComboCategorySelected ? 'Nenhum combo ativo nesta categoria.' : 'Nenhum item nesta categoria.'}
+                {isComboCategorySelected ? t('Nenhum combo ativo nesta categoria.') : t('Nenhum item nesta categoria.')}
               </div>
             ) : (
               <div className="grid h-full grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-4">
@@ -501,19 +491,19 @@ export function TouchOrderPage() {
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-stone-900">
               <ShoppingBag size={18} />
-              Pedido atual
+              {t('Pedido atual')}
             </h2>
             <button
               type="button"
               onClick={clearCart}
               className="text-xs font-semibold text-stone-600 hover:text-red-600"
             >
-              Limpar
+              {t('Limpar')}
             </button>
           </div>
 
           <div className="mt-3 rounded-2xl bg-white px-3 py-2 text-sm text-stone-700">
-            Total: <span className="font-bold text-stone-900">R$ {formatCurrency(totalPrice)}</span>
+            {t('Total')}: <span className="font-bold text-stone-900">R$ {formatCurrency(totalPrice)}</span>
           </div>
 
           <div className="mt-3 flex gap-2">
@@ -522,7 +512,7 @@ export function TouchOrderPage() {
               onClick={() => setStep('items')}
               className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${step === 'items' ? 'bg-primary-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}
             >
-              Itens
+              {t('Itens')}
             </button>
             <button
               type="button"
@@ -530,7 +520,7 @@ export function TouchOrderPage() {
               className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${step === 'payment' ? 'bg-primary-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}
               disabled={cartItems.length === 0}
             >
-              Pagamento
+              {t('Pagamento')}
             </button>
           </div>
         </div>
@@ -540,7 +530,7 @@ export function TouchOrderPage() {
             <div className="h-full space-y-3 overflow-hidden">
               {cartItems.length === 0 ? (
                 <div className="grid h-full place-items-center rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-6 text-center text-sm text-stone-600">
-                  Selecione os itens ao lado.
+                  {t('Selecione os itens ao lado.')}
                 </div>
               ) : (
                 <div className="flex h-full flex-col overflow-hidden">
@@ -551,7 +541,7 @@ export function TouchOrderPage() {
                       disabled={cartPageIndex === 0}
                       className="rounded border border-stone-300 px-2 py-0.5 disabled:opacity-40"
                     >
-                      Ant.
+                      {t('Ant.')}
                     </button>
                     <span>{cartPageIndex + 1}/{cartPagesCount}</span>
                     <button
@@ -560,7 +550,7 @@ export function TouchOrderPage() {
                       disabled={cartPageIndex + 1 >= cartPagesCount}
                       className="rounded border border-stone-300 px-2 py-0.5 disabled:opacity-40"
                     >
-                      Prox.
+                      {t('Prox.')}
                     </button>
                   </div>
 
@@ -572,7 +562,10 @@ export function TouchOrderPage() {
 
                   {cartItems.length > paginatedCartItems.length && (
                     <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
-                      Exibindo {paginatedCartItems.length} de {cartItems.length} item(ns).
+                      {t('Exibindo {shown} de {total} item(ns).', {
+                        shown: paginatedCartItems.length,
+                        total: cartItems.length,
+                      })}
                     </div>
                   )}
                 </div>
@@ -583,28 +576,28 @@ export function TouchOrderPage() {
           <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-hidden pr-1">
             <div>
               <label htmlFor="touchCustomerName" className="mb-1.5 block text-sm font-semibold text-stone-700">
-                Nome do cliente
+                {t('Nome do cliente')}
               </label>
               <input
                 id="touchCustomerName"
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Opcional"
+                placeholder={t('Opcional')}
                 className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <div>
               <label htmlFor="touchOrderNotes" className="mb-1.5 block text-sm font-semibold text-stone-700">
-                Observações
+                {t('Observações')}
               </label>
               <textarea
                 id="touchOrderNotes"
                 rows={2}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Sem cebola, bem passado, etc."
+                placeholder={t('Sem cebola, bem passado, etc.')}
                 className="w-full resize-none rounded-xl border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
@@ -622,8 +615,8 @@ export function TouchOrderPage() {
                       <Icon size={16} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-stone-900">{label}</p>
-                      <p className="text-xs text-stone-600">{helper}</p>
+                      <p className="text-sm font-bold text-stone-900">{t(label)}</p>
+                      <p className="text-xs text-stone-600">{t(helper)}</p>
                     </div>
                   </div>
                 </button>
@@ -633,7 +626,7 @@ export function TouchOrderPage() {
             {paymentMethod === 'CASH' && (
               <div className="space-y-2 rounded-2xl border border-stone-200 bg-stone-50 p-3">
                 <label htmlFor="touchCashReceived" className="block text-sm font-semibold text-stone-700">
-                  Valor recebido
+                  {t('Valor recebido')}
                 </label>
                 <input
                   id="touchCashReceived"
@@ -641,23 +634,23 @@ export function TouchOrderPage() {
                   inputMode="decimal"
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
-                  placeholder="0,00"
+                  placeholder={t('0,00')}
                   className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm">
-                  <span className="text-stone-700">Troco</span>
+                  <span className="text-stone-700">{t('Troco')}</span>
                   <span className={changeDue < 0 ? 'font-semibold text-red-600' : 'font-semibold text-green-700'}>
                     R$ {formatCurrency(Math.max(changeDue, 0))}
                   </span>
                 </div>
-                {hasInsufficientCash && <p className="text-xs font-medium text-red-600">Valor insuficiente para cobrir o pedido.</p>}
+                {hasInsufficientCash && <p className="text-xs font-medium text-red-600">{t('Valor insuficiente para cobrir o pedido.')}</p>}
               </div>
             )}
 
             {validationErrors.length > 0 && (
               <ul className="space-y-1 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
                 {validationErrors.map((e, i) => (
-                  <li key={i}>• {e.itemName}: {e.message}</li>
+                  <li key={i}>• {t(e.itemName)}: {t(e.message)}</li>
                 ))}
               </ul>
             )}
@@ -672,7 +665,7 @@ export function TouchOrderPage() {
               disabled={!isPaymentValid || submitting}
               className="w-full rounded-2xl bg-primary-500 py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {submitting ? 'Registrando pedido...' : `Confirmar pagamento (${getPaymentLabel(paymentMethod)})`}
+              {submitting ? t('Registrando pedido...') : t('Confirmar pagamento ({method})', { method: getPaymentLabel(paymentMethod, t) })}
             </button>
           </div>
         )}

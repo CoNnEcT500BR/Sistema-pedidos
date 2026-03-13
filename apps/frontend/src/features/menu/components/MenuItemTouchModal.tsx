@@ -10,6 +10,7 @@ import {
 import type { CartAddon } from '@/features/cart/store/cart.store';
 import { useAddons } from '@/features/menu/hooks/useMenu';
 import type { Addon, MenuItem } from '@/features/menu/types/menu.types';
+import { useI18n } from '@/i18n';
 
 const INGREDIENTS_PER_PAGE = 4;
 
@@ -58,6 +59,7 @@ function TouchAddonRow({
   onToggleRemove: (addon: Addon) => void;
   onChangeQuantity: (addon: Addon, delta: number) => void;
 }) {
+  const { t } = useI18n();
   const quantityToAdd = status?.quantityToAdd ?? 0;
   const isRemoved = status?.removed ?? false;
 
@@ -71,14 +73,14 @@ function TouchAddonRow({
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className={`text-sm font-bold ${isRemoved ? 'text-red-700 line-through' : 'text-stone-900'}`}>
-              {addon.name}
+              {t(addon.name)}
             </p>
             <p className="text-xs text-stone-600">
-              {isRemoved ? 'Ingrediente removido' : 'Ingrediente padrão'}
+              {isRemoved ? t('Ingrediente removido') : t('Ingrediente padrão')}
             </p>
           </div>
           <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isRemoved ? 'bg-red-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
-            {isRemoved ? 'Removido' : 'Manter'}
+            {isRemoved ? t('Removido') : t('Manter')}
           </span>
         </div>
       </button>
@@ -89,7 +91,7 @@ function TouchAddonRow({
     <div className={`w-full rounded-2xl border px-4 py-3 ${quantityToAdd > 0 ? 'border-primary-300 bg-primary-50' : 'border-stone-200 bg-white'}`}>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-bold text-stone-900">{addon.name}</p>
+          <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
           {addon.price > 0 && <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p>}
         </div>
 
@@ -99,7 +101,7 @@ function TouchAddonRow({
             onClick={() => onChangeQuantity(addon, -1)}
             className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-stone-300 bg-white text-stone-700 disabled:opacity-40"
             disabled={quantityToAdd <= 0}
-            aria-label={`Remover ${addon.name}`}
+            aria-label={t('Remover {name}', { name: t(addon.name) })}
           >
             <Minus size={18} />
           </button>
@@ -108,7 +110,7 @@ function TouchAddonRow({
             type="button"
             onClick={() => onChangeQuantity(addon, 1)}
             className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-500 text-white"
-            aria-label={`Adicionar ${addon.name}`}
+            aria-label={t('Adicionar {name}', { name: t(addon.name) })}
           >
             <Plus size={18} />
           </button>
@@ -119,6 +121,7 @@ function TouchAddonRow({
 }
 
 export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuItemTouchModalProps) {
+  const { t } = useI18n();
   const [quantity, setQuantity] = useState(1);
   const [selectedIngredients, setSelectedIngredients] = useState<SelectedIngredient[]>([]);
   const [ingredientsPageIndex, setIngredientsPageIndex] = useState(0);
@@ -300,9 +303,9 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
         }}
       >
         <DialogHeader className="border-b border-stone-200 bg-white px-5 py-4">
-          <DialogTitle className="text-xl font-bold text-stone-900">{item.name}</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-stone-900">{t(item.name)}</DialogTitle>
           <DialogDescription className="sr-only">
-            Modal touch para personalizar item, quantidade e ingredientes antes de adicionar ao pedido.
+            {t('Modal touch para personalizar item, quantidade e ingredientes antes de adicionar ao pedido.')}
           </DialogDescription>
         </DialogHeader>
 
@@ -311,27 +314,27 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
             <div className="flex items-start gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-orange-50 text-4xl">
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                  <img src={item.imageUrl} alt={t(item.name)} className="h-full w-full object-cover" />
                 ) : (
                   item.icon ?? '🍔'
                 )}
               </div>
 
               <div>
-                {item.description && <p className="text-sm leading-6 text-stone-700">{item.description}</p>}
+                {item.description && <p className="text-sm leading-6 text-stone-700">{t(item.description)}</p>}
                 <p className="mt-2 text-3xl font-bold text-primary-600">R$ {formatCurrency(item.price)}</p>
               </div>
             </div>
 
             <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">Quantidade</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">{t('Quantidade')}</p>
               <div className="mt-2 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setQuantity((current) => Math.max(1, current - 1))}
                   className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-stone-300 bg-white text-stone-700 disabled:opacity-40"
                   disabled={quantity <= 1}
-                  aria-label="Diminuir quantidade"
+                  aria-label={t('Diminuir quantidade')}
                 >
                   <Minus size={20} />
                 </button>
@@ -343,7 +346,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
                   type="button"
                   onClick={() => setQuantity((current) => current + 1)}
                   className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary-500 text-white"
-                  aria-label="Aumentar quantidade"
+                  aria-label={t('Aumentar quantidade')}
                 >
                   <Plus size={20} />
                 </button>
@@ -352,19 +355,19 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
 
             {addonsLoading ? (
               <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-500">
-                Carregando adicionais...
+                {t('Carregando adicionais...')}
               </div>
             ) : (
               <div className="mt-4 h-[364px] rounded-2xl border border-stone-200 bg-stone-50 p-3">
                 {ingredientItems.length === 0 ? (
                   <div className="grid h-full place-items-center text-sm text-stone-500">
-                    Este item não possui personalizações.
+                    {t('Este item não possui personalizações.')}
                   </div>
                 ) : (
                   <div className="flex h-full flex-col">
                     <div className="mb-2 flex items-center justify-between">
                       <p className="text-xs font-bold uppercase tracking-wide text-stone-700">
-                        Personalização
+                        {t('Personalização')}
                       </p>
                       <div className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2 py-1 text-xs font-semibold text-stone-700">
                         <button
@@ -373,7 +376,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
                           disabled={ingredientsPageIndex === 0}
                           className="rounded-md border border-stone-200 px-2 py-0.5 disabled:opacity-40"
                         >
-                          Anterior
+                          {t('Anterior')}
                         </button>
                         <span>{ingredientsPageIndex + 1}/{ingredientsPagesCount}</span>
                         <button
@@ -382,7 +385,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
                           disabled={ingredientsPageIndex + 1 >= ingredientsPagesCount}
                           className="rounded-md border border-stone-200 px-2 py-0.5 disabled:opacity-40"
                         >
-                          Próxima
+                          {t('Próxima')}
                         </button>
                       </div>
                     </div>
@@ -405,22 +408,22 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
 
             {mustSelectFlavor && !hasSelectedFlavor && (
               <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
-                Para bebida, escolha um sabor antes de adicionar.
+                {t('Para bebida, escolha um sabor antes de adicionar.')}
               </p>
             )}
           </div>
 
           <aside className="flex flex-col rounded-3xl border border-stone-200 bg-white p-4">
-            <h4 className="text-sm font-bold uppercase tracking-wide text-stone-700">Resumo</h4>
-            <p className="mt-2 text-sm text-stone-600">Confira o total e confirme para incluir no pedido.</p>
+            <h4 className="text-sm font-bold uppercase tracking-wide text-stone-700">{t('Resumo')}</h4>
+            <p className="mt-2 text-sm text-stone-600">{t('Confira o total e confirme para incluir no pedido.')}</p>
 
             <div className="mt-4 rounded-2xl bg-primary-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Total deste item</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">{t('Total deste item')}</p>
               <p className="mt-1 text-3xl font-bold text-primary-700">R$ {formatCurrency(calcTotal())}</p>
             </div>
 
             <div className="mt-3 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm text-stone-700">
-              Quantidade: <span className="font-bold text-stone-900">{quantity}</span>
+              {t('Quantidade')}: <span className="font-bold text-stone-900">{quantity}</span>
             </div>
 
             <button
@@ -429,7 +432,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
               disabled={!isFlavorSelectionValid}
               className="mt-auto w-full rounded-2xl bg-primary-500 px-4 py-3.5 text-base font-bold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Adicionar ao pedido
+              {t('Adicionar ao pedido')}
             </button>
 
             <button
@@ -438,7 +441,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-300 px-4 py-3 text-sm font-semibold text-stone-700"
             >
               <X size={16} />
-              Cancelar
+              {t('Cancelar')}
             </button>
           </aside>
         </div>

@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import type { MenuItem } from '../types/menu.types';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -8,6 +9,7 @@ interface MenuItemCardProps {
 }
 
 export function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
+  const { t } = useI18n();
   return (
     <div
       className={cn(
@@ -20,7 +22,7 @@ export function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
         {item.imageUrl ? (
           <img
             src={item.imageUrl}
-            alt={item.name}
+            alt={t(item.name)}
             className="h-full w-full rounded-xl object-cover"
           />
         ) : (
@@ -31,15 +33,15 @@ export function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
       {/* Informações */}
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-bold text-gray-800 leading-tight">{item.name}</h3>
+          <h3 className="text-base font-bold text-gray-800 leading-tight">{t(item.name)}</h3>
           {!item.isAvailable && (
             <span className="shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-500">
-              Esgotado
+              {t('Esgotado')}
             </span>
           )}
         </div>
         {item.description && (
-          <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
+          <p className="text-sm text-gray-500 line-clamp-2">{t(item.description)}</p>
         )}
         <div className="mt-1 flex items-center justify-between">
           <span className="text-lg font-bold text-primary-600">
@@ -49,7 +51,7 @@ export function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
             <button
               onClick={() => onAdd(item)}
               className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow transition-colors hover:bg-primary-600 active:scale-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
-              aria-label={`Adicionar ${item.name}`}
+              aria-label={t('Adicionar {name}', { name: t(item.name) })}
             >
               <Plus className="h-6 w-6" strokeWidth={3} />
             </button>

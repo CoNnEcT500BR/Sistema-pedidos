@@ -10,6 +10,7 @@ import {
 import type { CartAddon } from '@/features/cart/store/cart.store';
 import { useAddons, useAllAddons } from '@/features/menu/hooks/useMenu';
 import type { Addon, Combo } from '@/features/menu/types/menu.types';
+import { useI18n } from '@/i18n';
 
 interface SelectedIngredient {
   addonId: string;
@@ -82,6 +83,7 @@ function TouchAddonRow({
   onToggleRemove: (addon: Addon) => void;
   onChangeQuantity: (addon: Addon, delta: number) => void;
 }) {
+  const { t } = useI18n();
   const quantityToAdd = status?.quantityToAdd ?? 0;
   const isRemoved = status?.removed ?? false;
 
@@ -95,12 +97,12 @@ function TouchAddonRow({
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className={`text-sm font-bold ${isRemoved ? 'text-red-700 line-through' : 'text-stone-900'}`}>
-              {addon.name}
+              {t(addon.name)}
             </p>
-            <p className="text-xs text-stone-600">{isRemoved ? 'Removido' : 'Padrao do combo'}</p>
+            <p className="text-xs text-stone-600">{isRemoved ? t('Removido') : t('Padrao do combo')}</p>
           </div>
           <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isRemoved ? 'bg-red-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
-            {isRemoved ? 'Sem' : 'Manter'}
+            {isRemoved ? t('Sem') : t('Manter')}
           </span>
         </div>
       </button>
@@ -111,7 +113,7 @@ function TouchAddonRow({
     <div className={`w-full rounded-2xl border px-4 py-3 ${quantityToAdd > 0 ? 'border-primary-300 bg-primary-50' : 'border-stone-200 bg-white'}`}>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-bold text-stone-900">{addon.name}</p>
+          <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
           {addon.price > 0 && <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p>}
         </div>
 
@@ -149,6 +151,7 @@ function TouchCustomizationPanel({
   selected: SelectedIngredient[];
   onChange: (next: SelectedIngredient[]) => void;
 }) {
+  const { t } = useI18n();
   const [pageIndex, setPageIndex] = useState(0);
 
   const pagesCount = Math.max(1, Math.ceil(addons.length / ADDONS_PER_PAGE));
@@ -245,7 +248,7 @@ function TouchCustomizationPanel({
             disabled={pageIndex === 0}
             className="rounded border border-stone-300 px-2 py-0.5 disabled:opacity-40"
           >
-            Ant.
+            {t('Anterior')}
           </button>
           <span>{pageIndex + 1}/{pagesCount}</span>
           <button
@@ -254,14 +257,14 @@ function TouchCustomizationPanel({
             disabled={pageIndex + 1 >= pagesCount}
             className="rounded border border-stone-300 px-2 py-0.5 disabled:opacity-40"
           >
-            Prox.
+            {t('Próxima')}
           </button>
         </div>
       </div>
 
       {addons.length === 0 ? (
         <div className="grid flex-1 place-items-center rounded-2xl border border-stone-200 bg-stone-50 text-sm text-stone-500">
-          Sem personalizacoes disponiveis.
+          {t('Sem personalizacoes disponiveis.')}
         </div>
       ) : (
         <div className="grid flex-1 grid-rows-4 gap-2 overflow-hidden">
@@ -281,6 +284,7 @@ function TouchCustomizationPanel({
 }
 
 export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouchModalProps) {
+  const { t } = useI18n();
   const [step, setStep] = useState<ComboStep>('overview');
   const [selectedUpgrade, setSelectedUpgrade] = useState<Record<string, number>>({});
   const [selectedBurgerIngredients, setSelectedBurgerIngredients] = useState<SelectedIngredient[]>([]);
@@ -447,9 +451,9 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
       <DialogContent className="h-[88vh] w-[95vw] max-w-[1020px] overflow-hidden rounded-[2rem] border border-stone-200 p-0">
         <DialogHeader className="border-b border-stone-200 bg-white px-5 py-4">
-          <DialogTitle className="text-xl font-bold text-stone-900">{combo.name}</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-stone-900">{t(combo.name)}</DialogTitle>
           <DialogDescription className="sr-only">
-            Modal touch de personalizacao de combo com etapas para lanche, bebida e upgrades.
+            {t('Modal touch de personalizacao de combo com etapas para lanche, bebida e upgrades.')}
           </DialogDescription>
         </DialogHeader>
 
@@ -461,7 +465,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                 onClick={() => setStep('overview')}
                 className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'overview' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
               >
-                Visao geral
+                {t('Visao geral')}
               </button>
               <button
                 type="button"
@@ -469,7 +473,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                 className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'burger' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
                 disabled={!burgerItem}
               >
-                Lanche
+                {t('Lanche')}
               </button>
               <button
                 type="button"
@@ -477,14 +481,14 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                 className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'drink' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
                 disabled={!drinkItem}
               >
-                Bebida
+                {t('Bebida')}
               </button>
               <button
                 type="button"
                 onClick={() => setStep('upgrades')}
                 className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'upgrades' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
               >
-                Upgrades
+                {t('Upgrades')}
               </button>
             </div>
 
@@ -492,29 +496,29 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               {step === 'overview' && (
                 <div className="grid h-full grid-rows-[auto_auto_1fr] gap-3">
                   <div className="rounded-2xl border border-stone-200 bg-stone-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">Itens do combo</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">{t('Itens do combo')}</p>
                     <p className="mt-1 text-sm text-stone-700">
-                      {combo.comboItems?.map((entry) => `${entry.quantity}x ${entry.menuItem.name}`).join(' | ') || 'Sem itens vinculados'}
+                      {combo.comboItems?.map((entry) => `${entry.quantity}x ${t(entry.menuItem.name)}`).join(' | ') || t('Sem itens vinculados')}
                     </p>
                   </div>
 
                   {mustSelectDrinkFlavor && !drinkHasSelectedFlavor && (
                     <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
-                      Defina um sabor na etapa Bebida antes de adicionar o combo.
+                      {t('Defina um sabor na etapa Bebida antes de adicionar o combo.')}
                     </p>
                   )}
 
                   <div className="rounded-2xl border border-stone-200 bg-white p-3 text-sm text-stone-700">
-                    <p className="font-semibold text-stone-900">Resumo rapido</p>
-                    <p className="mt-1">Use as etapas para ajustar lanche, bebida e upgrades.</p>
-                    <p className="mt-2 text-xs text-stone-500">O combo personalizado e adicionado como 1 unidade.</p>
+                    <p className="font-semibold text-stone-900">{t('Resumo rapido')}</p>
+                    <p className="mt-1">{t('Use as etapas para ajustar lanche, bebida e upgrades.')}</p>
+                    <p className="mt-2 text-xs text-stone-500">{t('O combo personalizado e adicionado como 1 unidade.')}</p>
                   </div>
                 </div>
               )}
 
               {step === 'burger' && (
                 <TouchCustomizationPanel
-                  title={burgerItem ? `Lanche: ${burgerItem.name}` : 'Lanche'}
+                  title={burgerItem ? t('Lanche: {name}', { name: t(burgerItem.name) }) : t('Lanche')}
                   addons={burgerAddons}
                   selected={selectedBurgerIngredients}
                   onChange={setSelectedBurgerIngredients}
@@ -523,7 +527,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
 
               {step === 'drink' && (
                 <TouchCustomizationPanel
-                  title={drinkItem ? `Bebida: ${drinkItem.name}` : 'Bebida'}
+                  title={drinkItem ? t('Bebida: {name}', { name: t(drinkItem.name) }) : t('Bebida')}
                   addons={drinkAddons}
                   selected={selectedDrinkIngredients}
                   onChange={setSelectedDrinkIngredients}
@@ -533,10 +537,10 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               {step === 'upgrades' && (
                 <div className="h-full space-y-3 rounded-3xl border border-stone-200 bg-white p-4 overflow-hidden">
                   <div className="space-y-2">
-                    <p className="text-sm font-bold uppercase tracking-wide text-stone-700">Upgrade batata</p>
+                    <p className="text-sm font-bold uppercase tracking-wide text-stone-700">{t('Upgrade batata')}</p>
                     {potatoUpgrades.length === 0 ? (
                       <p className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm text-stone-500">
-                        Sem upgrades de batata para este combo.
+                        {t('Sem upgrades de batata para este combo.')}
                       </p>
                     ) : (
                       potatoUpgrades.map((addon) => {
@@ -544,7 +548,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                         return (
                           <div key={addon.id} className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5">
                             <div>
-                              <p className="text-sm font-semibold text-stone-900">{addon.name}</p>
+                              <p className="text-sm font-semibold text-stone-900">{t(addon.name)}</p>
                               <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -572,10 +576,10 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm font-bold uppercase tracking-wide text-stone-700">Upgrade bebida</p>
+                    <p className="text-sm font-bold uppercase tracking-wide text-stone-700">{t('Upgrade bebida')}</p>
                     {drinkUpgrades.length === 0 ? (
                       <p className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm text-stone-500">
-                        Sem upgrades de bebida para este combo.
+                        {t('Sem upgrades de bebida para este combo.')}
                       </p>
                     ) : (
                       drinkUpgrades.map((addon) => {
@@ -583,7 +587,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                         return (
                           <div key={addon.id} className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5">
                             <div>
-                              <p className="text-sm font-semibold text-stone-900">{addon.name}</p>
+                              <p className="text-sm font-semibold text-stone-900">{t(addon.name)}</p>
                               <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -615,11 +619,11 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
           </section>
 
           <aside className="flex flex-col rounded-3xl border border-stone-200 bg-white p-4">
-            <h4 className="text-sm font-bold uppercase tracking-wide text-stone-700">Resumo</h4>
-            <p className="mt-2 text-sm text-stone-600">Total do combo personalizado.</p>
+            <h4 className="text-sm font-bold uppercase tracking-wide text-stone-700">{t('Resumo')}</h4>
+            <p className="mt-2 text-sm text-stone-600">{t('Total do combo personalizado.')}</p>
 
             <div className="mt-4 rounded-2xl bg-primary-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Total</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">{t('Total')}</p>
               <p className="mt-1 text-3xl font-bold text-primary-700">R$ {formatCurrency(calcTotal())}</p>
             </div>
 
@@ -629,7 +633,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               disabled={!isDrinkFlavorValid}
               className="mt-auto w-full rounded-2xl bg-primary-500 px-4 py-3.5 text-base font-bold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Adicionar combo
+              {t('Adicionar combo')}
             </button>
 
             <button
@@ -638,7 +642,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-300 px-4 py-3 text-sm font-semibold text-stone-700"
             >
               <X size={16} />
-              Cancelar
+              {t('Cancelar')}
             </button>
           </aside>
         </div>

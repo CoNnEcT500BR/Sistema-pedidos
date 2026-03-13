@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Addon, Category, Combo, MenuItem } from '../types/menu.types';
 import { menuService } from '../services/menu.service';
+import { useI18n } from '@/i18n';
 
 export function useCategories() {
+  const { t } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,11 +16,11 @@ export function useCategories() {
       const data = await menuService.getCategories();
       setCategories(data);
     } catch {
-      setError('Não foi possível carregar as categorias.');
+      setError(t('Não foi possível carregar as categorias.'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetch();
@@ -28,6 +30,7 @@ export function useCategories() {
 }
 
 export function useMenuItems(categoryId?: string) {
+  const { t } = useI18n();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,11 +42,11 @@ export function useMenuItems(categoryId?: string) {
       const data = await menuService.getMenuItems(categoryId);
       setItems(data);
     } catch {
-      setError('Não foi possível carregar os itens.');
+      setError(t('Não foi possível carregar os itens.'));
     } finally {
       setLoading(false);
     }
-  }, [categoryId]);
+  }, [categoryId, t]);
 
   useEffect(() => {
     fetch();
@@ -85,6 +88,7 @@ export function useAllAddons() {
 }
 
 export function useCombos() {
+  const { t } = useI18n();
   const [combos, setCombos] = useState<Combo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,12 +100,12 @@ export function useCombos() {
       const data = await menuService.getCombos();
       setCombos(data);
     } catch {
-      setError('Nao foi possivel carregar os combos.');
+      setError(t('Nao foi possivel carregar os combos.'));
       setCombos([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetch();

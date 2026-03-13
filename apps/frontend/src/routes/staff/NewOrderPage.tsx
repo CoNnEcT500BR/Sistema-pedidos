@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios';
-import { Banknote, CheckCircle2, CreditCard, QrCode, Search, ShoppingBag, Sparkles, Trash2 } from 'lucide-react';
+import { Banknote, CheckCircle2, CreditCard, QrCode, Search, ShoppingBag, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { CartItemRow } from '@/features/cart/components/CartItem';
 import { useStaffCartStore } from '@/features/cart/store/staff-cart.store';
@@ -10,6 +10,7 @@ import { useCategories, useCombos, useMenuItems } from '@/features/menu/hooks/us
 import type { Combo, MenuItem } from '@/features/menu/types/menu.types';
 import type { ItemValidationError, OrderValidationErrorResponse } from '@/features/orders/services/orders.service';
 import { ordersService } from '@/features/orders/services/orders.service';
+import { useI18n } from '@/i18n';
 
 type PaymentMethod = 'CASH' | 'CARD' | 'PIX';
 
@@ -37,14 +38,14 @@ function formatCurrency(value: number): string {
   return value.toFixed(2).replace('.', ',');
 }
 
-function getPaymentLabel(method: PaymentMethod): string {
+function getPaymentLabel(method: PaymentMethod, t: (text: string) => string): string {
   switch (method) {
     case 'CASH':
-      return 'Dinheiro';
+      return t('Dinheiro');
     case 'CARD':
-      return 'Cartão';
+      return t('Cartão');
     case 'PIX':
-      return 'Pix';
+      return t('Pix');
   }
 }
 
@@ -87,6 +88,8 @@ interface StaffMenuCardProps {
 }
 
 function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
+  const { t } = useI18n();
+
   return (
     <button
       type="button"
@@ -100,7 +103,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-50 text-4xl overflow-hidden shrink-0">
           {item.imageUrl ? (
-            <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+            <img src={item.imageUrl} alt={t(item.name)} className="h-full w-full object-cover" />
           ) : (
             item.icon ?? '🍔'
           )}
@@ -108,21 +111,21 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
 
         {!item.isAvailable && (
           <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-600">
-            Esgotado
+            {t('Esgotado')}
           </span>
         )}
       </div>
 
       <div className="mt-4">
-        <h3 className="text-xl font-bold text-stone-900 leading-tight">{item.name}</h3>
+        <h3 className="text-xl font-bold text-stone-900 leading-tight">{t(item.name)}</h3>
         <p className="mt-2 text-sm leading-6 text-stone-700 min-h-[56px] line-clamp-3">
-          {item.description || 'Toque para personalizar e adicionar ao pedido.'}
+          {item.description ? t(item.description) : t('Toque para personalizar e adicionar ao pedido.')}
         </p>
       </div>
 
       <div className="mt-5 flex items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">Preço</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-600">{t('Preço')}</p>
           <p className="text-2xl font-bold text-primary-600">R$ {formatCurrency(item.price)}</p>
         </div>
         <div
@@ -131,7 +134,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
               ? 'bg-primary-500 text-white group-hover:bg-primary-600'
               : 'bg-stone-200 text-stone-500'}`}
         >
-          Adicionar
+          {t('Adicionar')}
         </div>
       </div>
     </button>
@@ -139,6 +142,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
 }
 
 export function NewOrderPage() {
+  const { t } = useI18n();
   const cartItems = useStaffCartStore((s) => s.items);
   const addMenuItem = useStaffCartStore((s) => s.addMenuItem);
   const addCombo = useStaffCartStore((s) => s.addCombo);
@@ -220,10 +224,6 @@ export function NewOrderPage() {
   const isPaymentValid =
     cartItems.length > 0 &&
     (paymentMethod !== 'CASH' || (cashReceived.trim().length > 0 && changeDue >= 0));
-  const activeCategory = categories.find((category) => category.id === activeCategoryId);
-  const categoryLabel = isFavoritesSelected
-    ? 'Favoritos sugeridos automaticamente'
-    : (activeCategory?.name ?? 'Todos os itens');
 
   useEffect(() => {
     if (!lastOrderNumber) {
@@ -318,8 +318,8 @@ export function NewOrderPage() {
     try {
       const paymentSummary =
         paymentMethod === 'CASH'
-          ? `Pagamento: Dinheiro | Recebido R$ ${formatCurrency(cashReceivedValue)} | Troco R$ ${formatCurrency(Math.max(changeDue, 0))}`
-          : `Pagamento: ${getPaymentLabel(paymentMethod)} | Confirmado no balcão`;
+          ? `${t('Pagamento')}: ${t('Dinheiro')} | ${t('Recebido')} R$ ${formatCurrency(cashReceivedValue)} | ${t('Troco')} R$ ${formatCurrency(Math.max(changeDue, 0))}`
+          : `${t('Pagamento')}: ${getPaymentLabel(paymentMethod, t)} | ${t('Confirmado no balcão')}`;
       const combinedNotes = [notes.trim(), paymentSummary].filter(Boolean).join(' | ');
 
       const order = await ordersService.createOrder(
@@ -341,10 +341,10 @@ export function NewOrderPage() {
         if (response?.itemErrors && response.itemErrors.length > 0) {
           setValidationErrors(response.itemErrors);
         } else {
-          setSubmitError(response?.message ?? 'Não foi possível criar o pedido.');
+          setSubmitError(response?.message ?? t('Não foi possível criar o pedido.'));
         }
       } else {
-        setSubmitError('Não foi possível criar o pedido.');
+        setSubmitError(t('Não foi possível criar o pedido.'));
       }
     } finally {
       setSubmitting(false);
@@ -359,18 +359,18 @@ export function NewOrderPage() {
             <CheckCircle2 size={42} />
           </div>
           <p className="mt-6 text-sm font-bold uppercase tracking-[0.22em] text-green-700">
-            Pedido confirmado
+            {t('Pedido confirmado')}
           </p>
           <h1 className="mt-3 text-4xl font-bold text-stone-900 lg:text-5xl">
-            Pedido #{lastOrderNumber}
+            {t('Pedido')} #{lastOrderNumber}
           </h1>
           <p className="mt-4 text-lg leading-8 text-stone-700">
-            O pedido foi registrado com pagamento confirmado. A tela voltará automaticamente para um novo atendimento.
+            {t('O pedido foi registrado com pagamento confirmado. A tela voltará automaticamente para um novo atendimento.')}
           </p>
 
           <div className="mt-8 rounded-[2rem] bg-stone-900 px-6 py-5 text-white">
-            <p className="text-sm uppercase tracking-[0.2em] text-white/75">Próximo atendimento</p>
-            <p className="mt-2 text-3xl font-bold">em {autoReturnCountdown}s</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-white/75">{t('Próximo atendimento')}</p>
+            <p className="mt-2 text-3xl font-bold">{t('em {seconds}s', { seconds: autoReturnCountdown })}</p>
           </div>
 
           <button
@@ -383,7 +383,7 @@ export function NewOrderPage() {
             }}
             className="mt-8 inline-flex items-center justify-center rounded-2xl border border-stone-300 px-6 py-3 text-base font-bold text-stone-800 transition-colors hover:bg-stone-50"
           >
-            Iniciar novo pedido agora
+            {t('Iniciar novo pedido agora')}
           </button>
         </div>
       </div>
@@ -394,43 +394,11 @@ export function NewOrderPage() {
     <div className="grid h-full overflow-hidden bg-stone-100 xl:grid-cols-[minmax(0,1fr)_28rem]">
       <div className="flex min-h-0 flex-col p-4 lg:p-6">
         <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-6">
-          <section className="rounded-[2rem] bg-gradient-to-r from-stone-900 via-stone-800 to-primary-700 p-5 text-white shadow-xl">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-              <div className="max-w-2xl">
-                <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/95">
-                  <Sparkles size={14} />
-                  Atendimento rápido
-                </p>
-                <h1 className="mt-3 text-3xl lg:text-4xl font-bold leading-tight text-white [text-shadow:0_6px_22px_rgba(0,0,0,0.55)]">
-                  Registrar pedido no balcão
-                </h1>
-                <p className="mt-2 max-w-xl text-sm lg:text-base leading-6 text-white/95">
-                  Selecione os lanches, confira o pedido e confirme o pagamento na mesma tela.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-                <div className="rounded-2xl bg-white/15 px-3 py-2 backdrop-blur">
-                  <p className="text-white/85">Categoria</p>
-                  <p className="mt-1 font-semibold text-white">{categoryLabel}</p>
-                </div>
-                <div className="rounded-2xl bg-white/15 px-3 py-2 backdrop-blur">
-                  <p className="text-white/85">Itens visíveis</p>
-                  <p className="mt-1 font-semibold text-white">{filteredItems.length}</p>
-                </div>
-                <div className="rounded-2xl bg-white/15 px-3 py-2 backdrop-blur">
-                  <p className="text-white/85">No pedido</p>
-                  <p className="mt-1 font-semibold text-white">{cartItems.length}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
           <section className="rounded-[2rem] bg-white border border-stone-200 p-4 shadow-sm">
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
               <div>
                 <label htmlFor="search-item" className="mb-2 block text-sm font-semibold text-stone-800">
-                  Buscar lanche ou bebida
+                  {t('Buscar lanche ou bebida')}
                 </label>
                 <div className="relative">
                   <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" />
@@ -439,7 +407,7 @@ export function NewOrderPage() {
                     type="search"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Ex.: X-Bacon, batata, refrigerante..."
+                    placeholder={t('Ex.: X-Bacon, batata, refrigerante...')}
                     className="w-full rounded-2xl border border-stone-300 bg-stone-50 py-4 pl-12 pr-4 text-base font-medium text-stone-900 placeholder:text-stone-500
                       focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100"
                   />
@@ -448,10 +416,10 @@ export function NewOrderPage() {
 
               <div className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-800">
                 {search.trim()
-                  ? `Resultados para "${search.trim()}"`
+                  ? t('Resultados para "{value}"', { value: search.trim() })
                   : isFavoritesSelected
-                    ? 'Exibindo somente os favoritos do restaurante'
-                    : 'Use as categorias para acelerar o atendimento'}
+                    ? t('Exibindo somente os favoritos do restaurante')
+                    : t('Use as categorias para acelerar o atendimento')}
               </div>
             </div>
 
@@ -464,7 +432,7 @@ export function NewOrderPage() {
                     ? 'bg-primary-500 text-white shadow'
                     : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
               >
-                Todos
+                {t('Todos')}
               </button>
               <button
                 type="button"
@@ -474,7 +442,7 @@ export function NewOrderPage() {
                     ? 'bg-amber-500 text-white shadow'
                     : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}`}
               >
-                Favoritos
+                {t('Favoritos')}
               </button>
               {categories.map((cat) => (
                 <button
@@ -487,7 +455,7 @@ export function NewOrderPage() {
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
                 >
                   {cat.icon ? `${cat.icon} ` : ''}
-                  {cat.name}
+                  {t(cat.name)}
                 </button>
               ))}
             </div>
@@ -499,10 +467,10 @@ export function NewOrderPage() {
                 <section className="rounded-[2rem] border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">Mais vendidos</p>
-                      <h2 className="mt-2 text-2xl font-bold text-stone-900">Itens puxados do histórico de pedidos</h2>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">{t('Mais vendidos')}</p>
+                      <h2 className="mt-2 text-2xl font-bold text-stone-900">{t('Itens puxados do histórico de pedidos')}</h2>
                       <p className="mt-2 text-sm font-medium text-stone-700">
-                        Destaques baseados nos itens mais registrados no backend para acelerar o atendimento.
+                        {t('Destaques baseados nos itens mais registrados no backend para acelerar o atendimento.')}
                       </p>
                     </div>
                   </div>
@@ -522,11 +490,11 @@ export function NewOrderPage() {
               <section>
                 {(isComboCategorySelected ? combosLoading : itemsLoading) ? (
                   <div className="rounded-[2rem] border border-stone-200 bg-white p-8 text-center text-stone-400">
-                    {isComboCategorySelected ? 'Carregando combos...' : 'Carregando itens...'}
+                    {isComboCategorySelected ? t('Carregando combos...') : t('Carregando itens...')}
                   </div>
                 ) : filteredItems.length === 0 ? (
                   <div className="rounded-[2rem] border border-stone-200 bg-white p-8 text-center text-stone-400">
-                    {isComboCategorySelected ? 'Nenhum combo ativo encontrado.' : 'Nenhum item encontrado.'}
+                    {isComboCategorySelected ? t('Nenhum combo ativo encontrado.') : t('Nenhum item encontrado.')}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
@@ -550,7 +518,7 @@ export function NewOrderPage() {
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-stone-900 flex items-center gap-2 text-lg">
               <ShoppingBag size={18} />
-              Resumo do pedido
+              {t('Resumo do pedido')}
             </h2>
             {cartItems.length > 0 && (
               <button
@@ -559,7 +527,7 @@ export function NewOrderPage() {
                 className="flex items-center gap-1 text-xs font-semibold text-stone-600 hover:text-red-500 transition-colors"
               >
                 <Trash2 size={13} />
-                Limpar
+                {t('Limpar')}
               </button>
             )}
           </div>
@@ -568,14 +536,14 @@ export function NewOrderPage() {
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
           {lastOrderNumber ? (
             <div className="rounded-2xl border border-green-200 bg-green-50 p-4 text-green-800">
-              <p className="text-xs font-semibold uppercase tracking-wide">Pedido registrado</p>
-              <p className="mt-1 text-lg font-bold">Pedido #{lastOrderNumber} confirmado com pagamento.</p>
+              <p className="text-xs font-semibold uppercase tracking-wide">{t('Pedido registrado')}</p>
+              <p className="mt-1 text-lg font-bold">{t('Pedido #{number} confirmado com pagamento.', { number: lastOrderNumber })}</p>
             </div>
           ) : null}
 
           {cartItems.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-6 text-center text-stone-600 text-sm font-medium">
-              Selecione os lanches do lado esquerdo para montar o pedido.
+              {t('Selecione os lanches do lado esquerdo para montar o pedido.')}
             </div>
           ) : (
             cartItems.map((item) => (
@@ -591,14 +559,14 @@ export function NewOrderPage() {
           <div className="space-y-3 rounded-3xl border border-stone-200 bg-stone-50 p-4">
             <div>
               <label htmlFor="customerName" className="block text-sm font-semibold text-stone-700 mb-1.5">
-                Nome do cliente
+                {t('Nome do cliente')}
               </label>
               <input
                 id="customerName"
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Opcional"
+                placeholder={t('Opcional')}
                 className="w-full px-3 py-3 rounded-xl border border-stone-300 bg-white text-sm text-stone-900 placeholder:text-stone-500
                   focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
@@ -606,13 +574,13 @@ export function NewOrderPage() {
 
             <div>
               <label htmlFor="orderNotes" className="block text-sm font-semibold text-stone-800 mb-1.5">
-                Observações do pedido
+                {t('Observações do pedido')}
               </label>
               <textarea
                 id="orderNotes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Sem cebola, entregar rápido, etc."
+                placeholder={t('Sem cebola, entregar rápido, etc.')}
                 rows={3}
                 className="w-full px-3 py-3 rounded-xl border border-stone-300 bg-white text-sm text-stone-900 placeholder:text-stone-500 resize-none
                   focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -622,8 +590,8 @@ export function NewOrderPage() {
 
           <div className="space-y-3 rounded-3xl border border-stone-200 bg-white p-4 shadow-sm">
             <div>
-              <p className="text-base font-bold text-stone-900">Pagamento</p>
-              <p className="text-sm text-stone-700 mt-1">Escolha como o cliente pagou para liberar o registro do pedido.</p>
+              <p className="text-base font-bold text-stone-900">{t('Pagamento')}</p>
+              <p className="text-sm text-stone-700 mt-1">{t('Escolha como o cliente pagou para liberar o registro do pedido.')}</p>
             </div>
 
             <div className="space-y-2">
@@ -642,8 +610,8 @@ export function NewOrderPage() {
                       <Icon size={18} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-stone-900">{label}</p>
-                      <p className="text-xs text-stone-700 mt-0.5">{helper}</p>
+                      <p className="text-sm font-bold text-stone-900">{t(label)}</p>
+                      <p className="text-xs text-stone-700 mt-0.5">{t(helper)}</p>
                     </div>
                   </div>
                 </button>
@@ -653,7 +621,7 @@ export function NewOrderPage() {
             {paymentMethod === 'CASH' && (
               <div className="space-y-2 rounded-2xl border border-stone-200 bg-stone-50 p-4">
                 <label htmlFor="cashReceived" className="block text-sm font-semibold text-stone-700">
-                  Valor recebido
+                  {t('Valor recebido')}
                 </label>
                 <input
                   id="cashReceived"
@@ -661,19 +629,19 @@ export function NewOrderPage() {
                   inputMode="decimal"
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
-                  placeholder="0,00"
+                  placeholder={t('0,00')}
                   className="w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base font-medium text-stone-900 placeholder:text-stone-500
                     focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm border border-stone-200">
-                  <span className="font-medium text-stone-700">Troco</span>
+                  <span className="font-medium text-stone-700">{t('Troco')}</span>
                   <span className={`font-semibold ${changeDue < 0 ? 'text-red-600' : 'text-green-700'}`}>
                     R$ {formatCurrency(Math.max(changeDue, 0))}
                   </span>
                 </div>
                 {hasInsufficientCash && (
                   <p className="text-xs font-medium text-red-600">
-                    O valor recebido precisa cobrir o total do pedido.
+                    {t('Valor insuficiente para cobrir o pedido.')}
                   </p>
                 )}
               </div>
@@ -683,7 +651,7 @@ export function NewOrderPage() {
           {validationErrors.length > 0 && (
             <ul className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 space-y-1">
               {validationErrors.map((e, i) => (
-                <li key={i}>• {e.itemName}: {e.message}</li>
+                <li key={i}>• {t(e.itemName)}: {t(e.message)}</li>
               ))}
             </ul>
           )}
@@ -695,13 +663,13 @@ export function NewOrderPage() {
 
           <div className="rounded-3xl bg-gradient-to-r from-primary-700 to-primary-600 p-5 text-white shadow-lg shadow-primary-200/70">
             <div className="flex items-center justify-between text-sm text-white/90">
-              <span>Total do pedido</span>
-              <span>{cartItems.length} item(ns)</span>
+              <span>{t('Total do pedido')}</span>
+              <span>{t('{count} item(ns)', { count: cartItems.length })}</span>
             </div>
             <div className="mt-2 flex items-end justify-between gap-3">
               <span className="text-3xl font-bold">R$ {formatCurrency(totalPrice)}</span>
               <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                {getPaymentLabel(paymentMethod)}
+                {getPaymentLabel(paymentMethod, t)}
               </span>
             </div>
           </div>
@@ -713,7 +681,7 @@ export function NewOrderPage() {
             className="w-full py-4 rounded-2xl bg-primary-500 hover:bg-primary-600 disabled:opacity-50
               disabled:cursor-not-allowed text-white font-bold text-base transition-colors shadow-lg shadow-primary-200"
           >
-            {submitting ? 'Registrando pedido...' : 'Registrar pedido e confirmar pagamento'}
+            {submitting ? t('Registrando pedido...') : t('Registrar pedido e confirmar pagamento')}
           </button>
         </div>
       </aside>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authService, type AuthUser } from '../services/auth.service';
+import { translateStatic } from '@/i18n';
 
 interface AuthStore {
   user: AuthUser | null;
@@ -35,7 +36,7 @@ export const useAuthStore = create<AuthStore>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            error: 'Email ou senha inválidos.',
+            error: translateStatic('Email ou senha inválidos.'),
           });
           throw new Error('Login failed');
         }

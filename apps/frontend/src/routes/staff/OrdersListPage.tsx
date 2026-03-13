@@ -4,21 +4,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { OrderCard } from '@/features/orders/components/OrderCard';
 import { ordersService } from '@/features/orders/services/orders.service';
 import type { Order, OrderStatus } from '@/features/orders/types/order.types';
+import { useI18n } from '@/i18n';
 
 const POLL_INTERVAL = 15_000;
 
 type FilterTab = 'ALL' | OrderStatus;
 
-const tabs: { key: FilterTab; label: string }[] = [
-  { key: 'ALL', label: 'Todos' },
-  { key: 'PENDING', label: 'Aguardando' },
-  { key: 'CONFIRMED', label: 'Confirmados' },
-  { key: 'PREPARING', label: 'Preparando' },
-  { key: 'READY', label: 'Prontos' },
-  { key: 'COMPLETED', label: 'Concluídos' },
-];
-
 export function OrdersListPage() {
+  const { t } = useI18n();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,14 +28,14 @@ export function OrdersListPage() {
     } catch (err) {
       if (!silent) {
         const message = isAxiosError(err)
-          ? err.response?.data?.message ?? 'Erro ao carregar pedidos.'
-          : 'Erro ao carregar pedidos.';
+          ? t(err.response?.data?.message ?? 'Erro ao carregar pedidos.')
+          : t('Erro ao carregar pedidos.');
         setError(message);
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchOrders();
@@ -67,17 +60,26 @@ export function OrdersListPage() {
   const filtered =
     activeTab === 'ALL' ? orders : orders.filter((o) => o.status === activeTab);
 
+  const tabs: { key: FilterTab; label: string }[] = [
+    { key: 'ALL', label: t('Todos') },
+    { key: 'PENDING', label: t('Aguardando') },
+    { key: 'CONFIRMED', label: t('Confirmados') },
+    { key: 'PREPARING', label: t('Preparando') },
+    { key: 'READY', label: t('Prontos') },
+    { key: 'COMPLETED', label: t('Concluídos') },
+  ];
+
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('Pedidos')}</h1>
         <button
           onClick={() => fetchOrders()}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-600
             text-sm font-medium hover:bg-gray-50 transition-colors"
         >
           <RefreshCw size={14} />
-          Atualizar
+          {t('Atualizar')}
         </button>
       </div>
 
@@ -112,7 +114,7 @@ export function OrdersListPage() {
       {loading ? (
         <div className="flex items-center justify-center py-16 text-gray-400">
           <RefreshCw size={24} className="animate-spin mr-2" />
-          Carregando pedidos...
+          {t('Carregando pedidos...')}
         </div>
       ) : error ? (
         <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -121,7 +123,7 @@ export function OrdersListPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="font-medium">Nenhum pedido encontrado.</p>
+          <p className="font-medium">{t('Nenhum pedido encontrado.')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

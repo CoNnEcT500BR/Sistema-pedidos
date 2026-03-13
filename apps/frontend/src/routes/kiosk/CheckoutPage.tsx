@@ -7,8 +7,10 @@ import { ordersService } from '@/features/orders/services/orders.service';
 import { trackKioskEvent } from '@/features/telemetry/telemetry.service';
 import { ValidationErrorsDisplay } from '@/features/checkout/components/ValidationErrorsDisplay';
 import { isAxiosError } from 'axios';
+import { useI18n } from '@/i18n';
 
 export function CheckoutPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const items = useCartStore((s) => s.items);
   const totalPrice = useCartStore((s) => s.getTotalPrice());
@@ -57,11 +59,11 @@ export function CheckoutPage() {
           setValidationErrors(response.itemErrors);
           setError(null);
         } else {
-          setError(response?.message || 'Não foi possível enviar o pedido. Tente novamente.');
+          setError(response?.message || t('Não foi possível enviar o pedido. Tente novamente.'));
           setValidationErrors([]);
         }
       } else {
-        setError('Não foi possível enviar o pedido. Tente novamente.');
+        setError(t('Não foi possível enviar o pedido. Tente novamente.'));
         setValidationErrors([]);
       }
     } finally {
@@ -85,12 +87,12 @@ export function CheckoutPage() {
         <button
           onClick={() => navigate(-1)}
           className="flex min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-gray-600 transition hover:bg-gray-100 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-gray-200"
-          aria-label="Voltar"
+          aria-label={t('Voltar')}
         >
           <ChevronLeft className="h-6 w-6" />
-          <span className="font-semibold">Voltar</span>
+          <span className="font-semibold">{t('Voltar')}</span>
         </button>
-        <h1 className="text-xl font-black text-gray-900">CONFIRMAR PEDIDO</h1>
+        <h1 className="text-xl font-black text-gray-900">{t('CONFIRMAR PEDIDO')}</h1>
         <div className="w-24" />
       </header>
 
@@ -106,7 +108,7 @@ export function CheckoutPage() {
         {/* Resumo do pedido */}
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Resumo do Pedido
+            {t('Resumo do Pedido')}
           </h2>
           <ul className="flex flex-col gap-2">
             {items.map((item) => {
@@ -117,15 +119,15 @@ export function CheckoutPage() {
                 <li key={item.cartId} className="flex items-start justify-between gap-3 text-sm">
                   <div className="flex flex-col">
                     <span className="font-semibold text-gray-800">
-                      {item.quantity}× {item.name}
+                      {item.quantity}× {t(item.name)}
                     </span>
 
                     {removedAddons.length > 0 && (
                       <div className="mt-1 rounded-lg border border-red-100 bg-red-50 p-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-red-500">Removidos</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-red-500">{t('Removidos')}</p>
                         {removedAddons.map((a, index) => (
                           <span key={`${a.addonId}-removed-${index}`} className="block text-xs font-medium text-red-600 pl-1">
-                            - Sem {a.name}
+                            - {t('Sem {name}', { name: t(a.name) })}
                           </span>
                         ))}
                       </div>
@@ -133,10 +135,10 @@ export function CheckoutPage() {
 
                     {extraAddons.length > 0 && (
                       <div className="mt-1 rounded-lg border border-gray-100 bg-gray-50 p-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Adicionais</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">{t('Adicionais')}</p>
                         {extraAddons.map((a, index) => (
                           <span key={`${a.addonId}-${index}`} className="block text-xs text-gray-500 pl-1">
-                            + {a.name} ×{a.quantity}
+                            + {t(a.name)} ×{a.quantity}
                           </span>
                         ))}
                       </div>
@@ -155,7 +157,7 @@ export function CheckoutPage() {
           </ul>
 
           <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-            <span className="text-base font-semibold text-gray-700">Total</span>
+            <span className="text-base font-semibold text-gray-700">{t('Total')}</span>
             <span className="text-2xl font-black text-primary-600">
               R$ {totalPrice.toFixed(2).replace('.', ',')}
             </span>
@@ -165,13 +167,13 @@ export function CheckoutPage() {
         {/* Dados opcionais */}
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Identificação (opcional)
+            {t('Identificação (opcional)')}
           </h2>
           <input
             type="text"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Seu nome..."
+            placeholder={t('Seu nome...')}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-800 placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200"
             maxLength={100}
           />
@@ -179,12 +181,12 @@ export function CheckoutPage() {
 
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Observações gerais (opcional)
+            {t('Observações gerais (opcional)')}
           </h2>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Alguma observação geral para o pedido..."
+            placeholder={t('Alguma observação geral para o pedido...')}
             className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200"
             rows={3}
             maxLength={300}
@@ -194,7 +196,7 @@ export function CheckoutPage() {
         {/* Informação de pagamento */}
         <section className="rounded-2xl border-2 border-dashed border-primary-200 bg-primary-50 p-5">
           <p className="text-center text-base font-semibold text-primary-700">
-            💳 O pagamento é realizado no balcão ao retirar o pedido.
+            {t('💳 O pagamento é realizado no balcão ao retirar o pedido.')}
           </p>
         </section>
 
@@ -215,10 +217,10 @@ export function CheckoutPage() {
           {loading ? (
             <span className="flex items-center justify-center gap-3">
               <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Enviando pedido...
+              {t('Enviando pedido...')}
             </span>
           ) : (
-            '✓ Confirmar Pedido'
+            t('✓ Confirmar Pedido')
           )}
         </button>
       </div>

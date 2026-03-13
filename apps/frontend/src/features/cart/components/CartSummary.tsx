@@ -1,8 +1,10 @@
 import { ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cart.store';
+import { useI18n } from '@/i18n';
 
 export function CartSummary() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const totalItems = useCartStore((s) => s.getTotalItems());
   const totalPrice = useCartStore((s) => s.getTotalPrice());
@@ -21,7 +23,7 @@ export function CartSummary() {
             {totalItems}
           </span>
         </div>
-        <span className="text-lg font-bold">Ver Carrinho</span>
+        <span className="text-lg font-bold">{t('Ver Carrinho')}</span>
       </div>
       <span className="text-lg font-bold">
         R$ {totalPrice.toFixed(2).replace('.', ',')}

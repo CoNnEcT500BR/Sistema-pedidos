@@ -1,10 +1,13 @@
 import { LogOut, ReceiptText, User } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { useI18n } from '@/i18n';
 
 const STAFF_MODE_STORAGE_KEY = 'staff.mode.v1';
 
 export function StaffLayout() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
@@ -30,31 +33,33 @@ export function StaffLayout() {
             </div>
             <div>
               <p className="text-lg font-bold text-stone-900">
-                {isTouchMode ? 'Registrar pedido (Touch)' : 'Registrar pedido'}
+                {isTouchMode ? t('Registrar pedido (Touch)') : t('Registrar pedido')}
               </p>
               <p className="text-sm text-stone-600">
                 {isTouchMode
-                  ? 'Tela sem rolagem com etapas de itens e pagamento'
-                  : 'Balcão e confirmação de pagamento'}
+                  ? t('Tela sem rolagem com etapas de itens e pagamento')
+                  : t('Balcão e confirmação de pagamento')}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3">
+            <LanguageToggle className="inline-flex rounded-xl border border-stone-200 bg-stone-50 p-1" />
+
             <div className="inline-flex rounded-xl border border-stone-200 bg-stone-50 p-1">
               <button
                 type="button"
                 onClick={() => handleNavigateMode('classic')}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors lg:text-sm ${!isTouchMode ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
               >
-                Completa
+                {t('Completa')}
               </button>
               <button
                 type="button"
                 onClick={() => handleNavigateMode('touch')}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors lg:text-sm ${isTouchMode ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
               >
-                Touch
+                {t('Touch')}
               </button>
             </div>
 
@@ -64,9 +69,9 @@ export function StaffLayout() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-stone-900 truncate">
-                  {user?.name ?? user?.email ?? 'Atendente'}
+                  {user?.name ?? user?.email ?? t('Atendente')}
                 </p>
-                <p className="text-xs text-stone-600 truncate">Sessão ativa</p>
+                <p className="text-xs text-stone-600 truncate">{t('Sessão ativa')}</p>
               </div>
             </div>
 
@@ -75,7 +80,7 @@ export function StaffLayout() {
               className="inline-flex items-center gap-2 rounded-xl border border-stone-200 px-4 py-2.5 text-sm font-semibold text-stone-700 transition-colors hover:bg-red-50 hover:text-red-600 hover:border-red-200"
             >
               <LogOut size={16} />
-              Sair da conta
+              {t('Sair da conta')}
             </button>
           </div>
         </div>

@@ -8,9 +8,10 @@ import {
   XCircle,
 } from 'lucide-react';
 import type { OrderStatus, OrderStatusHistory } from '../types/order.types';
+import { useI18n } from '@/i18n';
 
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('pt-BR', {
+function formatDateTime(dateStr: string, language: 'pt' | 'en'): string {
+  return new Date(dateStr).toLocaleString(language === 'en' ? 'en-US' : 'pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -19,14 +20,14 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
-const statusMeta: Record<OrderStatus, { label: string; icon: React.ElementType; color: string }> =
+const statusMeta: Record<OrderStatus, { key: string; icon: React.ElementType; color: string }> =
   {
-    PENDING: { label: 'Aguardando', icon: Clock, color: 'text-yellow-500' },
-    CONFIRMED: { label: 'Confirmado', icon: CheckCircle, color: 'text-blue-500' },
-    PREPARING: { label: 'Preparando', icon: ChefHat, color: 'text-orange-500' },
-    READY: { label: 'Pronto para Retirada', icon: PackageCheck, color: 'text-green-500' },
-    COMPLETED: { label: 'Concluído', icon: CheckCircle, color: 'text-gray-400' },
-    CANCELLED: { label: 'Cancelado', icon: XCircle, color: 'text-red-500' },
+    PENDING: { key: 'Aguardando', icon: Clock, color: 'text-yellow-500' },
+    CONFIRMED: { key: 'Confirmado', icon: CheckCircle, color: 'text-blue-500' },
+    PREPARING: { key: 'Preparando', icon: ChefHat, color: 'text-orange-500' },
+    READY: { key: 'Pronto para Retirada', icon: PackageCheck, color: 'text-green-500' },
+    COMPLETED: { key: 'Concluído', icon: CheckCircle, color: 'text-gray-400' },
+    CANCELLED: { key: 'Cancelado', icon: XCircle, color: 'text-red-500' },
   };
 
 interface OrderTimelineProps {
@@ -34,11 +35,13 @@ interface OrderTimelineProps {
 }
 
 export function OrderTimeline({ history }: OrderTimelineProps) {
+  const { language, t } = useI18n();
+
   if (!history || history.length === 0) {
     return (
       <div className="flex items-center gap-2 text-gray-400 text-sm">
         <AlertCircle size={16} />
-        Sem histórico disponível.
+        {t('Sem histórico disponível.')}
       </div>
     );
   }
@@ -51,7 +54,7 @@ export function OrderTimeline({ history }: OrderTimelineProps) {
     <ol className="relative border-l border-gray-200 space-y-4 ml-2">
       {sorted.map((entry, idx) => {
         const meta = statusMeta[entry.status as OrderStatus] ?? {
-          label: entry.status,
+          key: entry.status,
           icon: Circle,
           color: 'text-gray-400',
         };
@@ -67,12 +70,12 @@ export function OrderTimeline({ history }: OrderTimelineProps) {
               <Icon size={16} className={meta.color} />
             </span>
             <div>
-              <p className={`text-sm font-semibold ${meta.color}`}>{meta.label}</p>
+              <p className={`text-sm font-semibold ${meta.color}`}>{t(meta.key)}</p>
               {entry.reason && (
-                <p className="text-xs text-gray-500 mt-0.5">{entry.reason}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t(entry.reason)}</p>
               )}
               <time className="text-xs text-gray-400">
-                {formatDateTime(entry.createdAt)}
+                {formatDateTime(entry.createdAt, language)}
               </time>
             </div>
           </li>

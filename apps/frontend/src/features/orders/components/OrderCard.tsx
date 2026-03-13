@@ -1,13 +1,19 @@
 import { Clock, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Order, OrderStatus } from '../types/order.types';
+import { useI18n } from '@/i18n';
 
-function formatRelative(dateStr: string): string {
+function formatRelative(dateStr: string, language: 'pt' | 'en', t: (text: string, vars?: Record<string, string | number>) => string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return 'agora mesmo';
-  if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
-  if (diff < 86400) return `há ${Math.floor(diff / 3600)} h`;
-  return `há ${Math.floor(diff / 86400)} dias`;
+  if (diff < 60) return t('agora mesmo');
+
+  const formatter = new Intl.RelativeTimeFormat(language === 'en' ? 'en-US' : 'pt-BR', {
+    numeric: 'always',
+  });
+
+  if (diff < 3600) return formatter.format(-Math.floor(diff / 60), 'minute');
+  if (diff < 86400) return formatter.format(-Math.floor(diff / 3600), 'hour');
+  return formatter.format(-Math.floor(diff / 86400), 'day');
 }
 import { StatusBadge } from './StatusBadge';
 
@@ -25,9 +31,10 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order, onStatusChange, isUpdating }: OrderCardProps) {
+  const { language, t } = useI18n();
   const navigate = useNavigate();
   const action = nextAction[order.status];
-  const timeAgo = formatRelative(order.createdAt);
+  const timeAgo = formatRelative(order.createdAt, language, t);
   const price = (order.finalPrice ?? order.totalPrice).toFixed(2).replace('.', ',');
 
   return (
@@ -57,7 +64,7 @@ export function OrderCard({ order, onStatusChange, isUpdating }: OrderCardProps)
             text-sm font-medium hover:bg-gray-50 transition-colors"
         >
           <Eye size={14} />
-          Detalhes
+          {t('Detalhes')}
         </button>
 
         {action && order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
@@ -67,7 +74,7 @@ export function OrderCard({ order, onStatusChange, isUpdating }: OrderCardProps)
             className="flex-1 px-3 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 disabled:opacity-50
               disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
           >
-            {isUpdating ? '...' : action.label}
+            {isUpdating ? '...' : t(action.label)}
           </button>
         )}
       </div>

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { OrderCard } from '@/features/orders/components/OrderCard';
 import { ordersService } from '@/features/orders/services/orders.service';
 import type { Order, OrderStatus } from '@/features/orders/types/order.types';
+import { useI18n } from '@/i18n';
 
 const POLL_INTERVAL = 15_000; // 15 seconds
 
@@ -29,6 +30,7 @@ function calcMetrics(orders: Order[]): Metrics {
 }
 
 export function DashboardPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,14 +51,14 @@ export function DashboardPage() {
     } catch (err) {
       if (!silent) {
         const message = isAxiosError(err)
-          ? err.response?.data?.message ?? 'Erro ao carregar pedidos.'
-          : 'Erro ao carregar pedidos.';
+          ? t(err.response?.data?.message ?? 'Erro ao carregar pedidos.')
+          : t('Erro ao carregar pedidos.');
         setError(message);
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchOrders();
@@ -85,9 +87,9 @@ export function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('Dashboard')}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Pedidos de hoje · atualiza automaticamente
+            {t('Pedidos de hoje · atualiza automaticamente')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -97,7 +99,7 @@ export function DashboardPage() {
               text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             <RefreshCw size={14} />
-            Atualizar
+            {t('Atualizar')}
           </button>
           <button
             onClick={() => navigate('/staff/orders/new')}
@@ -105,7 +107,7 @@ export function DashboardPage() {
               text-white text-sm font-semibold transition-colors"
           >
             <PlusCircle size={16} />
-            Novo Pedido
+            {t('Novo Pedido')}
           </button>
         </div>
       </div>
@@ -113,10 +115,10 @@ export function DashboardPage() {
       {/* Metrics */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {[
-          { label: 'Aguardando', value: metrics.waiting, color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
-          { label: 'Preparando', value: metrics.preparing, color: 'bg-orange-50 border-orange-200 text-orange-700' },
-          { label: 'Prontos', value: metrics.ready, color: 'bg-green-50 border-green-200 text-green-700' },
-          { label: 'Total Hoje', value: metrics.total, color: 'bg-gray-50 border-gray-200 text-gray-700' },
+          { label: t('Aguardando'), value: metrics.waiting, color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
+          { label: t('Preparando'), value: metrics.preparing, color: 'bg-orange-50 border-orange-200 text-orange-700' },
+          { label: t('Prontos'), value: metrics.ready, color: 'bg-green-50 border-green-200 text-green-700' },
+          { label: t('Total Hoje'), value: metrics.total, color: 'bg-gray-50 border-gray-200 text-gray-700' },
         ].map(({ label, value, color }) => (
           <div key={label} className={`rounded-xl border p-4 ${color}`}>
             <p className="text-3xl font-bold">{value}</p>
@@ -129,7 +131,7 @@ export function DashboardPage() {
       {loading ? (
         <div className="flex items-center justify-center py-16 text-gray-400">
           <RefreshCw size={24} className="animate-spin mr-2" />
-          Carregando pedidos...
+          {t('Carregando pedidos...')}
         </div>
       ) : error ? (
         <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -139,12 +141,12 @@ export function DashboardPage() {
       ) : orders.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <div className="text-5xl mb-4">🎉</div>
-          <p className="font-medium">Nenhum pedido ativo no momento.</p>
+          <p className="font-medium">{t('Nenhum pedido ativo no momento.')}</p>
         </div>
       ) : (
         <div>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            Pedidos Ativos ({orders.length})
+            {t('Pedidos Ativos')} ({orders.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {orders.map((order) => (

@@ -1,5 +1,6 @@
 import { Minus, Plus, X } from 'lucide-react';
 import type { Addon } from '../types/menu.types';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 export interface SelectedIngredient {
@@ -17,6 +18,7 @@ interface IngredientsEditorProps {
 }
 
 export function IngredientsEditor({ addons, selected, onChange }: IngredientsEditorProps) {
+  const { t } = useI18n();
   if (addons.length === 0) return null;
 
   // Separar ingredientes em dois grupos
@@ -113,7 +115,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
       {removableIngredients.length > 0 && (
         <div className="flex flex-col gap-2">
           <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-600">
-            🚫 Remover
+            🚫 {t('Remover')}
           </h4>
 
           <div className="flex flex-col gap-2">
@@ -141,8 +143,12 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                           ? 'border-red-500 bg-red-500 text-white'
                           : 'border-gray-300 bg-white hover:border-gray-400',
                       )}
-                      aria-label={isRemoved ? `Adicionar ${addon.name}` : `Remover ${addon.name}`}
-                      title={isRemoved ? `${addon.name} será retirado` : `Retirar ${addon.name}`}
+                      aria-label={isRemoved
+                        ? t('Adicionar {name}', { name: t(addon.name) })
+                        : t('Remover {name}', { name: t(addon.name) })}
+                      title={isRemoved
+                        ? t('{name} será retirado', { name: t(addon.name) })
+                        : t('Retirar {name}', { name: t(addon.name) })}
                     >
                       {isRemoved && <X className="h-4 w-4" strokeWidth={3} />}
                     </button>
@@ -154,7 +160,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                         isRemoved && 'line-through text-red-600',
                       )}
                     >
-                      {addon.name}
+                      {t(addon.name)}
                     </span>
                   </div>
                 </div>
@@ -168,7 +174,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
       {extraIngredients.length > 0 && (
         <div className="flex flex-col gap-2">
           <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-600">
-            ➕ Adicionar extras
+            ➕ {t('Adicionar extras')}
           </h4>
 
           <div className="flex flex-col gap-2">
@@ -188,10 +194,10 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                 >
                   <div className="flex flex-1 flex-col gap-0.5">
                     {/* Nome e preço */}
-                    <span className="font-medium text-gray-800">{addon.name}</span>
+                    <span className="font-medium text-gray-800">{t(addon.name)}</span>
                     {addon.price > 0 && (
                       <span className="text-xs text-gray-400">
-                        +R$ {addon.price.toFixed(2).replace('.', ',')} (adicional)
+                        +R$ {addon.price.toFixed(2).replace('.', ',')} ({t('adicional')})
                       </span>
                     )}
                   </div>
@@ -203,7 +209,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                         <button
                           onClick={() => updateQuantityToAdd(addon, -1)}
                           className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition hover:bg-gray-200 active:scale-90"
-                          aria-label={`Menos ${addon.name}`}
+                          aria-label={t('Menos {name}', { name: t(addon.name) })}
                         >
                           <Minus className="h-3 w-3" />
                         </button>
@@ -218,7 +224,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                           ? 'bg-primary-600 hover:bg-primary-700'
                           : 'bg-gray-400 hover:bg-gray-500',
                       )}
-                      title={`Adicionar mais ${addon.name}`}
+                      title={t('Adicionar mais {name}', { name: t(addon.name) })}
                     >
                       <Plus className="h-3 w-3" strokeWidth={3} />
                     </button>
@@ -233,8 +239,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
       {/* Dica */}
       {removableIngredients.length > 0 && (
         <p className="text-xs text-gray-400 italic">
-          💡 Clique no ✓ para remover do seu pedido (sem alterar preço). Use + para adicionar
-          extras. Em sabor, apenas uma opção pode ficar selecionada.
+          {t('💡 Clique no ✓ para remover do seu pedido (sem alterar preço). Use + para adicionar extras. Em sabor, apenas uma opção pode ficar selecionada.')}
         </p>
       )}
     </div>

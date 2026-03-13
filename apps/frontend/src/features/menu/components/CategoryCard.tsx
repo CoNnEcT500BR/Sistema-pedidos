@@ -1,4 +1,5 @@
 import type { Category } from '../types/menu.types';
+import { useI18n } from '@/i18n';
 
 interface CategoryCardProps {
   category: Category;
@@ -43,6 +44,7 @@ function getCategoryEmoji(name: string, icon?: string): string {
 }
 
 export function CategoryCard({ category, itemCount, onClick }: CategoryCardProps) {
+  const { t } = useI18n();
   const emoji = getCategoryEmoji(category.name, category.icon);
 
   return (
@@ -50,12 +52,12 @@ export function CategoryCard({ category, itemCount, onClick }: CategoryCardProps
       onClick={onClick}
       className="flex min-h-[180px] w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-gray-100 bg-white p-6 shadow-sm transition-all duration-200 active:scale-95 hover:border-primary-300 hover:shadow-md focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
     >
-      <span className="text-5xl leading-none" role="img" aria-label={category.name}>
+      <span className="text-5xl leading-none" role="img" aria-label={t(category.name)}>
         {emoji}
       </span>
-      <span className="text-center text-lg font-bold text-gray-800">{category.name}</span>
+      <span className="text-center text-lg font-bold text-gray-800">{t(category.name)}</span>
       {itemCount !== undefined && (
-        <span className="text-sm text-gray-400">{itemCount} {itemCount === 1 ? 'item' : 'itens'}</span>
+        <span className="text-sm text-gray-400">{itemCount} {itemCount === 1 ? t('item') : t('itens')}</span>
       )}
     </button>
   );
