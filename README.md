@@ -1,6 +1,6 @@
 # Sistema de Pedidos Off-Grid para Restaurante
 
-Sistema de pedidos para operacao local em rede LAN/Wi-Fi, com backend em Fastify + Prisma e frontend React. O repositorio ja entrega a base completa do monorepo, banco SQLite com seed, autenticacao JWT e a API principal da Fase 2.
+Sistema de pedidos para operacao local em rede LAN/Wi-Fi, com backend em Fastify + Prisma e frontend React. O repositorio ja entrega a base completa do monorepo, banco SQLite com seed, autenticacao JWT e a API principal da Fase 3.
 
 ## Visao Geral
 
@@ -15,7 +15,7 @@ No estado atual, o backend esta funcional com modulos de negocio ativos, enquant
 ## Status Atual
 
 - Fase 1 concluida: monorepo, TypeScript, Prisma 7, SQLite, Fastify, React e Tailwind configurados
-- Fase 2 backend implementada para auth, menu, combos, addons e orders
+- Fase 3 backend implementada para auth, menu, combos, addons, orders e telemetry
 - Seed inicial pronto com categorias, itens, combos, addons e usuarios padrao
 - Swagger UI disponivel para exploracao da API
 - Frontend com roteamento pronto para kiosk, staff e admin, ainda com paginas placeholder
@@ -28,6 +28,7 @@ Entregas de backend disponiveis hoje:
 - Combos: listagem, detalhe, criacao, edicao e disponibilidade
 - Addons: listagem global e listagem de addons permitidos por item
 - Orders: criacao publica, listagem autenticada, detalhe e atualizacao de status
+- Telemetry: ingestao e consulta de eventos recentes de jornada
 
 ---
 
@@ -178,6 +179,11 @@ Orders:
 - GET /api/orders/:id
 - PATCH /api/orders/:id/status
 
+Telemetry:
+
+- POST /api/telemetry/events
+- GET /api/telemetry/events
+
 ---
 
 ## Scripts Principais
@@ -216,7 +222,7 @@ npm run -w apps/frontend type-check
 npm run -w apps/frontend lint
 ```
 
-Scripts manuais adicionais estao na pasta scripts para validacoes por modulo da Fase 2.
+Scripts manuais adicionais estao na pasta scripts para validacoes por modulo das fases 2 e 3.
 
 ---
 
@@ -239,7 +245,7 @@ Validacoes disponiveis no projeto:
 - Lint por workspace
 - Build de backend e frontend
 - Swagger para inspecao rapida da API
-- Scripts manuais para fluxos da Fase 2
+- Scripts manuais para fluxos das fases 2 e 3
 
 Comandos recomendados antes de publicar alteracoes:
 
@@ -258,7 +264,7 @@ Os proximos passos mais evidentes no codigo atual sao:
 - Evoluir as paginas de kiosk, staff e admin alem dos placeholders
 - Conectar o frontend aos endpoints ja publicados
 - Completar telas operacionais de pedido, autenticacao e gestao
-- Expandir cobertura de testes manuais/automatizados da Fase 2
+- Expandir cobertura de testes manuais/automatizados das fases 2 e 3
 
 ---
 
@@ -269,145 +275,3 @@ Os proximos passos mais evidentes no codigo atual sao:
 - docs/DATA_MODEL.md
 - docs/IMPLEMENTATION_CHECKLIST.md
 - docs/MVP_ROADMAP.md
-- Pino + pino-pretty
-
-Frontend:
-
-- React 18 + TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui (base)
-- Zustand
-- Axios
-- React Router v6
-
-Compartilhado:
-
-- npm workspaces
-- ESLint + Prettier
-
----
-
-## Estrutura do Projeto
-
-```text
-sistema-pedidos/
-|- apps/
-|  |- frontend/
-|  |- server/
-|- packages/
-|  |- shared/
-|- docs/
-|- scripts/
-|- package.json
-```
-
----
-
-## Pre-requisitos
-
-- Node.js 20+ (recomendado LTS)
-- npm 10+
-
-Observacao:
-
-- O projeto funciona com npm workspaces.
-- pnpm pode ser usado, mas os scripts do root estao padronizados com npm.
-
----
-
-## Setup Rapido
-
-```bash
-# 1) instalar dependencias do monorepo
-npm install
-
-# 2) gerar client do prisma e aplicar migrations
-npm run -w apps/server db:migrate
-
-# 3) popular banco com seed inicial
-npm run -w apps/server db:seed
-
-# 4) subir backend e frontend
-npm run dev
-```
-
-Acessos locais:
-
-- Frontend: `http://localhost:5173`
-- Backend health: `http://localhost:3001/health`
-- Backend api health: `http://localhost:3001/api/v1/health`
-
----
-
-## Scripts Principais
-
-No root:
-
-```bash
-npm run dev         # sobe server + frontend
-npm run build       # build server + frontend
-npm run lint        # lint/checagens
-npm run test        # atualmente executa type-check
-npm run type-check  # type-check server + frontend
-npm run format      # prettier no repo
-```
-
-Backend (`apps/server`):
-
-```bash
-npm run -w apps/server dev
-npm run -w apps/server build
-npm run -w apps/server db:migrate
-npm run -w apps/server db:seed
-npm run -w apps/server db:studio
-```
-
-Frontend (`apps/frontend`):
-
-```bash
-npm run -w apps/frontend dev
-npm run -w apps/frontend build
-npm run -w apps/frontend lint
-```
-
----
-
-## Banco de Dados
-
-- Provedor: SQLite
-- Arquivo local: `apps/server/prisma/dev.db`
-- Schema: `apps/server/prisma/schema.prisma`
-- Config Prisma v7: `apps/server/prisma.config.ts`
-- Migration inicial: `apps/server/prisma/migrations/*_init/migration.sql`
-
----
-
-## Qualidade
-
-Validacoes usadas no projeto:
-
-- ESLint
-- TypeScript strict mode
-- Build de backend e frontend
-
-Comandos recomendados antes de commit:
-
-```bash
-npm run lint
-npm run test
-npm run build
-```
-
----
-
-## Proximos Passos
-
-A proxima etapa planejada no roadmap:
-
-- Fase 2: Backend API (Auth, Menu, Combos, Orders e Addons)
-
-Referencias:
-
-- `docs/MVP_ROADMAP.md`
-- `docs/IMPLEMENTATION_CHECKLIST.md`

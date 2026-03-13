@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "Sistema Pedidos API - Fase 2",
+    "name": "Sistema Pedidos API - Fase 3",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Collection completa da Fase 2 cobrindo Auth, Menu, Combos, Orders, Addons e Swagger."
+    "description": "Collection completa da Fase 3 cobrindo Auth, Menu, Combos, Orders, Addons, Telemetry e Swagger."
   },
   "variable": [
     {
@@ -578,6 +578,55 @@
                 "menu",
                 "{{menuItemId}}",
                 "addons"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Telemetry",
+      "item": [
+        {
+          "name": "Registrar Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"checkout_completed\",\n  \"sessionId\": \"kiosk-session-123\",\n  \"path\": \"/kiosk/checkout/success\",\n  \"timestamp\": \"2026-03-13T10:15:30.000Z\",\n  \"metadata\": {\n    \"orderId\": \"{{orderId}}\",\n    \"total\": 49.9\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/telemetry/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "telemetry",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Eventos Recentes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/telemetry/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "telemetry",
+                "events"
               ]
             }
           }
