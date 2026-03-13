@@ -457,128 +457,85 @@ Status: implementacao completa em 10/03/2026.
 
 ---
 
-## 🚧 FASE 4: Frontend Staff (5-7 dias)
+## ✅ FASE 4: Frontend Staff (concluida em 12/03/2026)
 
-Status atual: apenas a pagina base `routes/staff/StaffPage.tsx` existe; os itens abaixo continuam pendentes.
+Status atual: fluxo Staff reduzido ao essencial do balcão. A área ativa cobre login, registro de pedido e confirmação de pagamento na mesma tela. Dashboard e páginas de pedidos foram desabilitados por enquanto e ficam reservados para evoluções futuras na área administrativa.
 
 ### Setup e Autenticação
 
-- [ ] **4.1 Criar estrutura de rotas Staff**
-  - [ ] `routes/staff/LoginPage.tsx`
-  - [ ] `routes/staff/DashboardPage.tsx`
-  - [ ] `routes/staff/NewOrderPage.tsx`
-  - [ ] `routes/staff/OrdersListPage.tsx`
-  - [ ] `routes/staff/OrderDetailsPage.tsx`
+- [x] **4.1 Criar estrutura de rotas Staff**
+  - [x] `routes/staff/LoginPage.tsx`
+  - [x] `routes/staff/StaffLayout.tsx`
+  - [x] `routes/staff/NewOrderPage.tsx`
+  - [x] Fluxo ativo mantido apenas em `/staff/login` e `/staff`
+  - [x] `routes/staff/DashboardPage.tsx`, `routes/staff/OrdersListPage.tsx` e `routes/staff/OrderDetailsPage.tsx` preservadas fora do roteamento ativo
 
-- [ ] **4.2 Criar AuthStore (Zustand)**
-  - [ ] `features/auth/store/auth.store.ts`
-  - [ ] State: `user`, `token`, `isAuthenticated`
-  - [ ] Actions: `login`, `logout`, `checkAuth`
+- [x] **4.2 Criar AuthStore (Zustand)**
+  - [x] `features/auth/store/auth.store.ts`
+  - [x] State: `user`, `token`, `isAuthenticated`
+  - [x] Actions: `login`, `logout`, `checkAuth`
 
-- [ ] **4.3 Criar serviço de autenticação**
-  - [ ] `features/auth/services/auth.service.ts`
-  - [ ] Função: `login(username, password)`
-  - [ ] Função: `logout()`
+- [x] **4.3 Criar serviço de autenticação**
+  - [x] `features/auth/services/auth.service.ts`
+  - [x] Função: `login(email, password)` → salva token em localStorage
+  - [x] Função: `logout()` → remove token
+  - [x] Função: `me()` → GET /api/auth/me
 
-- [ ] **4.4 Implementar LoginPage**
-  - [ ] Formulário: username + password
-  - [ ] Validação básica (campos obrigatórios)
-  - [ ] Submit → POST `/api/auth/login`
-  - [ ] Salvar token no localStorage
-  - [ ] Redirecionar para `/staff` (dashboard)
+- [x] **4.4 Implementar LoginPage**
+  - [x] Formulário: email + password
+  - [x] Validação básica (campos obrigatórios)
+  - [x] Submit → POST `/api/auth/login`
+  - [x] Salvar token no localStorage
+  - [x] Redirecionar para `/staff` (balcão)
+  - [x] Mensagem de erro inline para credenciais inválidas
 
-- [ ] **4.5 Criar ProtectedRoute**
-  - [ ] Verificar se `isAuthenticated`
-  - [ ] Se não autenticado → redirecionar para `/staff/login`
+- [x] **4.5 Criar ProtectedRoute**
+  - [x] `features/auth/components/ProtectedRoute.tsx`
+  - [x] Verificar se `isAuthenticated`
+  - [x] Se não autenticado → redirecionar para `/staff/login`
+
+- [x] **4.6 Criar StaffCartStore separado**
+  - [x] `features/cart/store/staff-cart.store.ts`
+  - [x] Persist key `staff-cart-v1` (isolado do kiosk)
 
 ---
 
-### Dashboard Staff
+### StaffLayout
 
-- [ ] **4.6 Implementar DashboardPage**
-  - [ ] Cards com métricas (pedidos hoje, em preparo, prontos)
-  - [ ] Lista de próximos pedidos esperando
-  - [ ] Lista de pedidos em preparo
-  - [ ] Botão "Novo Pedido" (destaque)
-
-- [ ] **4.7 Buscar dados de pedidos**
-  - [ ] Fetch `/api/orders?status=PENDING,CONFIRMED,PREPARING`
-  - [ ] Calcular métricas (count, aggregations)
+- [x] **4.7 Implementar StaffLayout simplificado**
+  - [x] Navegação focada apenas em "Registrar Pedido"
+  - [x] Header com nome do usuário e role
+  - [x] Botão "Sair" com logout + redirect
+  - [x] Dashboard e páginas de pedidos removidos do fluxo ativo do Staff
 
 ---
 
 ### Novo Pedido (Staff)
 
-- [ ] **4.8 Implementar NewOrderPage**
-  - [ ] Busca rápida de itens (input de busca)
-  - [ ] Atalhos para combos/itens mais vendidos
-  - [ ] Grid de categorias (similar ao Kiosk)
-  - [ ] Carrinho lateral sempre visível
-  - [ ] Campo: nome do cliente (opcional)
-  - [ ] Campo: local/mesa (dropdown ou input)
-
-- [ ] **4.9 Reutilizar componentes do Kiosk**
-  - [ ] CategoryCard
-  - [ ] MenuItemCard (com ajustes de layout se necessário)
-  - [ ] CartSummary
-
-- [ ] **4.10 Implementar checkout rápido**
-  - [ ] Botão "Finalizar Pedido" → criar pedido
-  - [ ] Marcar `createdById` (user staff)
-  - [ ] Exibir confirmação (toast ou modal)
-  - [ ] Limpar carrinho e voltar para dashboard
+- [x] **4.8 Implementar NewOrderPage focado em balcão**
+  - [x] Layout: seleção de itens ampliada + painel lateral de resumo/pagamento
+  - [x] Cabeçalho forte de atendimento e busca maior
+  - [x] Tabs de categorias destacadas
+  - [x] Cards de lanches maiores e mais intuitivos para toque/clique rápido
+  - [x] Carrinho lateral (CartItemRow reutilizado)
+  - [x] Campos: nome do cliente + observações gerais
+  - [x] Seção de pagamento na mesma tela
+  - [x] Formas: Dinheiro, Cartão e Pix
+  - [x] Cálculo de troco em tempo real para dinheiro
+  - [x] Bloqueio de finalização quando o valor em dinheiro é insuficiente
+  - [x] Botão "Registrar pedido e confirmar pagamento"
+  - [x] POST `/api/orders` mantido sem alterações de backend
+  - [x] Informações de pagamento adicionadas às observações enviadas ao pedido
+  - [x] Tratamento de erros de validação por item
 
 ---
 
-### Lista de Pedidos
+### Testes
 
-- [ ] **4.11 Implementar OrdersListPage**
-  - [ ] Fetch pedidos com filtros (status, data)
-  - [ ] Cards por pedido (compact view)
-  - [ ] Exibir: #número, horário, status, total, quantidade de itens
-  - [ ] Filtros rápidos: [Todos] [Pendentes] [Preparando] [Prontos]
-
-- [ ] **4.12 Criar OrderCard**
-  - [ ] `features/orders/components/OrderCard.tsx`
-  - [ ] Badge de status (cores diferentes)
-  - [ ] Botão "Ver Detalhes"
-  - [ ] Ações rápidas: "Confirmar", "Marcar Pronto", "Finalizar"
-
-- [ ] **4.13 Implementar atualização de status inline**
-  - [ ] Click em botão de ação → PATCH `/api/orders/:id/status`
-  - [ ] Atualizar lista localmente (otimistic update)
-  - [ ] Toast de confirmação
-
----
-
-### Detalhes do Pedido
-
-- [ ] **4.14 Implementar OrderDetailsPage**
-  - [ ] Fetch `/api/orders/:id`
-  - [ ] Exibir: número, horário, status, cliente, local
-  - [ ] Lista completa de itens (com adicionais e observações)
-  - [ ] Timeline de status (histórico)
-  - [ ] Botões de ação (conforme status atual)
-
-- [ ] **4.15 Criar OrderTimeline**
-  - [ ] `features/orders/components/OrderTimeline.tsx`
-  - [ ] Exibir OrderStatusHistory formatado
-  - [ ] Ícones + timestamps
-
----
-
-### Polimento Staff
-
-- [ ] **4.16 Layout responsivo (tablet landscape)**
-  - [ ] Header com menu lateral (sidebar ou hamburger)
-  - [ ] Navegação entre Dashboard, Pedidos, Novo Pedido
-
-- [ ] **4.17 Atalhos de teclado (opcional)**
-  - [ ] Ctrl+N → Novo Pedido
-  - [ ] Esc → Voltar
-
-- [ ] **4.18 Testar fluxo completo Staff**
-  - [ ] Login → Dashboard → Novo Pedido → Criar → Ver em lista → Atualizar status
+- [x] **4.9 Validação técnica**
+  - [x] Fluxo Staff ativo reduzido para login + registrar pedido
+  - [x] Dashboard, lista de pedidos e detalhes removidos do roteamento ativo
+  - [x] Type-check do frontend sem erros
 
 ---
 

@@ -1,5 +1,6 @@
 import { apiClient } from '@/services/api.service';
 import type { CartItem } from '@/features/cart/store/cart.store';
+import type { Order, OrderDetail, OrderStatus } from '../types/order.types';
 
 interface CreateOrderPayload {
   customerName?: string;
@@ -61,6 +62,24 @@ export const ordersService = {
       items: cartItemsToPayload(items),
     };
     const res = await apiClient.post<ApiResponse<CreatedOrder>>('/api/orders', payload);
+    return res.data.data;
+  },
+
+  async getOrders(params?: { status?: OrderStatus; date?: string }): Promise<Order[]> {
+    const res = await apiClient.get<ApiResponse<Order[]>>('/api/orders', { params });
+    return res.data.data;
+  },
+
+  async getOrderById(id: string): Promise<OrderDetail> {
+    const res = await apiClient.get<ApiResponse<OrderDetail>>(`/api/orders/${id}`);
+    return res.data.data;
+  },
+
+  async updateOrderStatus(id: string, status: OrderStatus, reason?: string): Promise<OrderDetail> {
+    const res = await apiClient.patch<ApiResponse<OrderDetail>>(`/api/orders/${id}/status`, {
+      status,
+      reason,
+    });
     return res.data.data;
   },
 };

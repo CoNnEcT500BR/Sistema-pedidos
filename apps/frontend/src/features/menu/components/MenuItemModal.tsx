@@ -1,5 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,7 @@ interface MenuItemModalProps {
 export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedIngredients, setSelectedIngredients] = useState<SelectedIngredient[]>([]);
+  const increaseButtonRef = useRef<HTMLButtonElement | null>(null);
   const { addons, loading: addonsLoading } = useAddons(open && item ? item.id : null);
   const isDrinkItem = item ? isDrinkName(item.name) : false;
   const hasFlavorOptions = addons.some((addon) => isFlavorAddon(addon.name));
@@ -45,6 +46,16 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
   );
   const mustSelectFlavor = isDrinkItem && hasFlavorOptions;
   const isFlavorSelectionValid = !mustSelectFlavor || hasSelectedFlavor;
+
+  useEffect(() => {
+    if (!open) return;
+
+    const frame = requestAnimationFrame(() => {
+      increaseButtonRef.current?.focus();
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [open, item?.id]);
 
   function handleClose() {
     setQuantity(1);
@@ -92,7 +103,13 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-lg">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-lg"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          increaseButtonRef.current?.focus();
+        }}
+      >
         {/* Cabeçalho */}
         <DialogHeader className="sticky top-0 z-10 border-b border-gray-100 bg-white px-6 py-4">
           <DialogTitle className="text-xl font-bold text-gray-900">{item.name}</DialogTitle>
@@ -157,6 +174,7 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
               </button>
               <span className="w-8 text-center text-2xl font-bold text-gray-900">{quantity}</span>
               <button
+                ref={increaseButtonRef}
                 onClick={() => setQuantity((q) => q + 1)}
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow transition hover:bg-primary-600 active:scale-90"
                 aria-label="Aumentar quantidade"
