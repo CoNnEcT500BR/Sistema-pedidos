@@ -11,6 +11,7 @@ import { SplashScreen } from '@/routes/kiosk/SplashScreen';
 import { LoginPage } from '@/routes/staff/LoginPage';
 import { NewOrderPage } from '@/routes/staff/NewOrderPage';
 import { StaffLayout } from '@/routes/staff/StaffLayout';
+import { TouchOrderPage } from '@/routes/staff/TouchOrderPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/kiosk" replace /> },
@@ -27,7 +28,9 @@ export const router = createBrowserRouter([
       {
         element: <StaffLayout />,
         children: [
-          { path: '/staff', element: <NewOrderPage /> },
+          { path: '/staff', element: <Navigate to="/staff/classic" replace /> },
+          { path: '/staff/classic', element: <NewOrderPage /> },
+          { path: '/staff/touch', element: <TouchOrderPage /> },
         ],
       },
     ],

@@ -1,14 +1,23 @@
 import { LogOut, ReceiptText, User } from 'lucide-react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+
+const STAFF_MODE_STORAGE_KEY = 'staff.mode.v1';
 
 export function StaffLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
+  const isTouchMode = location.pathname.startsWith('/staff/touch');
 
   function handleLogout() {
     logout();
     navigate('/staff/login', { replace: true });
+  }
+
+  function handleNavigateMode(mode: 'classic' | 'touch') {
+    localStorage.setItem(STAFF_MODE_STORAGE_KEY, mode);
+    navigate(mode === 'touch' ? '/staff/touch' : '/staff/classic');
   }
 
   return (
@@ -20,12 +29,35 @@ export function StaffLayout() {
               <ReceiptText size={22} />
             </div>
             <div>
-              <p className="text-lg font-bold text-stone-900">Registrar pedido</p>
-              <p className="text-sm text-stone-600">Balcão e confirmação de pagamento</p>
+              <p className="text-lg font-bold text-stone-900">
+                {isTouchMode ? 'Registrar pedido (Touch)' : 'Registrar pedido'}
+              </p>
+              <p className="text-sm text-stone-600">
+                {isTouchMode
+                  ? 'Tela sem rolagem com etapas de itens e pagamento'
+                  : 'Balcão e confirmação de pagamento'}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="inline-flex rounded-xl border border-stone-200 bg-stone-50 p-1">
+              <button
+                type="button"
+                onClick={() => handleNavigateMode('classic')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors lg:text-sm ${!isTouchMode ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
+              >
+                Completa
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigateMode('touch')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors lg:text-sm ${isTouchMode ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600 hover:text-stone-900'}`}
+              >
+                Touch
+              </button>
+            </div>
+
             <div className="hidden rounded-2xl border border-stone-200 bg-stone-50 px-4 py-2 sm:flex sm:items-center sm:gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 shrink-0">
                 <User size={17} className="text-primary-600" />
@@ -49,7 +81,7 @@ export function StaffLayout() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>
     </div>

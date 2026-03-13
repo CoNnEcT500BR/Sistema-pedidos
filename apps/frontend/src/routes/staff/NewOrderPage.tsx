@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { CartItemRow } from '@/features/cart/components/CartItem';
 import { useStaffCartStore } from '@/features/cart/store/staff-cart.store';
 import type { CartAddon } from '@/features/cart/store/cart.store';
+import { ComboModal } from '@/features/menu/components/ComboModal';
 import { MenuItemModal } from '@/features/menu/components/MenuItemModal';
-import { useCategories, useMenuItems } from '@/features/menu/hooks/useMenu';
-import type { MenuItem } from '@/features/menu/types/menu.types';
+import { useCategories, useCombos, useMenuItems } from '@/features/menu/hooks/useMenu';
+import type { Combo, MenuItem } from '@/features/menu/types/menu.types';
 import type { ItemValidationError, OrderValidationErrorResponse } from '@/features/orders/services/orders.service';
 import { ordersService } from '@/features/orders/services/orders.service';
 
@@ -91,7 +92,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
       type="button"
       onClick={() => onSelect(item)}
       disabled={!item.isAvailable}
-      className={`group text-left rounded-3xl border p-4 transition-all shadow-sm min-h-[220px]
+      className={`rounded-3xl border p-4 transition-all shadow-sm min-h-[220px]
         ${item.isAvailable
           ? 'border-stone-200 bg-white hover:-translate-y-1 hover:shadow-xl hover:border-primary-200'
           : 'border-stone-200 bg-stone-100 opacity-60 cursor-not-allowed'}`}
@@ -104,6 +105,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
             item.icon ?? '🍔'
           )}
         </div>
+
         {!item.isAvailable && (
           <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-600">
             Esgotado
@@ -139,6 +141,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
 export function NewOrderPage() {
   const cartItems = useStaffCartStore((s) => s.items);
   const addMenuItem = useStaffCartStore((s) => s.addMenuItem);
+  const addCombo = useStaffCartStore((s) => s.addCombo);
   const removeItem = useStaffCartStore((s) => s.removeItem);
   const updateQuantity = useStaffCartStore((s) => s.updateQuantity);
   const clearCart = useStaffCartStore((s) => s.clear);
@@ -149,9 +152,32 @@ export function NewOrderPage() {
   const isFavoritesSelected = activeCategoryId === FAVORITES_CATEGORY_ID;
   const categoryIdForApi = isFavoritesSelected ? undefined : activeCategoryId;
   const { items: menuItems, loading: itemsLoading } = useMenuItems(categoryIdForApi);
+  const { combos, loading: combosLoading } = useCombos();
+  const activeCombos = useMemo(() => combos.filter((combo) => combo.isActive), [combos]);
+  const comboCategoryIds = useMemo(
+    () => categories.filter((category) => category.name.toLowerCase().includes('combo')).map((category) => category.id),
+    [categories],
+  );
+  const isComboCategorySelected = Boolean(activeCategoryId && comboCategoryIds.includes(activeCategoryId));
+
+  const comboAsMenuItems = useMemo<MenuItem[]>(
+    () =>
+      activeCombos.map((combo) => ({
+        id: combo.id,
+        categoryId: activeCategoryId ?? '',
+        name: combo.name,
+        description: combo.description,
+        price: combo.price,
+        imageUrl: combo.icon?.startsWith('http') ? combo.icon : undefined,
+        icon: combo.icon,
+        isAvailable: combo.isActive,
+      })),
+    [activeCategoryId, activeCombos],
+  );
 
   const [search, setSearch] = useState('');
   const [featuredItemIds, setFeaturedItemIds] = useState<string[]>([]);
+
   const featuredItems = useMemo(() => {
     const backendDriven = featuredItemIds
       .map((id) => menuItems.find((item) => item.id === id))
@@ -163,7 +189,10 @@ export function NewOrderPage() {
 
     return getFallbackFeaturedItems(menuItems);
   }, [featuredItemIds, menuItems]);
-  const sourceItems = isFavoritesSelected ? featuredItems : menuItems;
+
+  const sourceItems = isComboCategorySelected
+    ? comboAsMenuItems
+    : (isFavoritesSelected ? featuredItems : menuItems);
   const filteredItems = useMemo(() => {
     if (!search.trim()) return sourceItems;
     const q = search.toLowerCase();
@@ -172,6 +201,8 @@ export function NewOrderPage() {
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCombo, setSelectedCombo] = useState<Combo | null>(null);
+  const [comboModalOpen, setComboModalOpen] = useState(false);
 
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
@@ -191,7 +222,7 @@ export function NewOrderPage() {
     (paymentMethod !== 'CASH' || (cashReceived.trim().length > 0 && changeDue >= 0));
   const activeCategory = categories.find((category) => category.id === activeCategoryId);
   const categoryLabel = isFavoritesSelected
-    ? 'Favoritos do restaurante'
+    ? 'Favoritos sugeridos automaticamente'
     : (activeCategory?.name ?? 'Todos os itens');
 
   useEffect(() => {
@@ -256,12 +287,26 @@ export function NewOrderPage() {
 
   function handleOpenModal(item: MenuItem) {
     setLastOrderNumber(null);
+
+    if (isComboCategorySelected) {
+      const combo = activeCombos.find((entry) => entry.id === item.id);
+      if (combo) {
+        setSelectedCombo(combo);
+        setComboModalOpen(true);
+      }
+      return;
+    }
+
     setSelectedItem(item);
     setModalOpen(true);
   }
 
   function handleAddToCart(item: MenuItem, quantity: number, addons: CartAddon[]) {
     addMenuItem(item, quantity, addons);
+  }
+
+  function handleAddComboToCart(combo: Combo, quantity: number, addons: CartAddon[]) {
+    addCombo(combo, quantity, addons);
   }
 
   async function handleSubmitOrder() {
@@ -450,7 +495,7 @@ export function NewOrderPage() {
 
           <div className="min-h-0 flex-1 overflow-y-auto pr-2">
             <div className="space-y-6 pb-2">
-              {!search.trim() && !isFavoritesSelected && featuredItems.length > 0 ? (
+              {!search.trim() && !isFavoritesSelected && !isComboCategorySelected && featuredItems.length > 0 ? (
                 <section className="rounded-[2rem] border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div>
@@ -464,25 +509,33 @@ export function NewOrderPage() {
 
                   <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-4">
                     {featuredItems.map((item) => (
-                      <StaffMenuCard key={`featured-${item.id}`} item={item} onSelect={handleOpenModal} />
+                      <StaffMenuCard
+                        key={`featured-${item.id}`}
+                        item={item}
+                        onSelect={handleOpenModal}
+                      />
                     ))}
                   </div>
                 </section>
               ) : null}
 
               <section>
-                {itemsLoading ? (
+                {(isComboCategorySelected ? combosLoading : itemsLoading) ? (
                   <div className="rounded-[2rem] border border-stone-200 bg-white p-8 text-center text-stone-400">
-                    Carregando itens...
+                    {isComboCategorySelected ? 'Carregando combos...' : 'Carregando itens...'}
                   </div>
                 ) : filteredItems.length === 0 ? (
                   <div className="rounded-[2rem] border border-stone-200 bg-white p-8 text-center text-stone-400">
-                    Nenhum item encontrado.
+                    {isComboCategorySelected ? 'Nenhum combo ativo encontrado.' : 'Nenhum item encontrado.'}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                     {filteredItems.map((item) => (
-                      <StaffMenuCard key={item.id} item={item} onSelect={handleOpenModal} />
+                      <StaffMenuCard
+                        key={item.id}
+                        item={item}
+                        onSelect={handleOpenModal}
+                      />
                     ))}
                   </div>
                 )}
@@ -670,6 +723,16 @@ export function NewOrderPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onAddToCart={handleAddToCart}
+      />
+
+      <ComboModal
+        combo={selectedCombo}
+        open={comboModalOpen}
+        onClose={() => {
+          setComboModalOpen(false);
+          setSelectedCombo(null);
+        }}
+        onAddToCart={handleAddComboToCart}
       />
     </div>
   );

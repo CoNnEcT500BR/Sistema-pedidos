@@ -2,19 +2,30 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 
+type StaffMode = 'classic' | 'touch';
+const STAFF_MODE_STORAGE_KEY = 'staff.mode.v1';
+
+function getStaffPathByMode(mode: StaffMode): string {
+  return mode === 'touch' ? '/staff/touch' : '/staff/classic';
+}
+
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, isAuthenticated, isLoading, error, clearError } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<StaffMode>(() => {
+    const stored = localStorage.getItem(STAFF_MODE_STORAGE_KEY);
+    return stored === 'touch' ? 'touch' : 'classic';
+  });
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/staff', { replace: true });
+      navigate(getStaffPathByMode(mode), { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, mode, navigate]);
 
   function validate() {
     const errors = { email: '', password: '' };
@@ -30,7 +41,8 @@ export function LoginPage() {
     if (!validate()) return;
     try {
       await login(email.trim(), password);
-      navigate('/staff', { replace: true });
+      localStorage.setItem(STAFF_MODE_STORAGE_KEY, mode);
+      navigate(getStaffPathByMode(mode), { replace: true });
     } catch {
       // error is set in the store
     }
@@ -82,6 +94,28 @@ export function LoginPage() {
             {fieldErrors.password && (
               <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
             )}
+          </div>
+
+          <div>
+            <p className="block text-sm font-medium text-gray-700 mb-2">Tela de atendimento</p>
+            <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
+              <button
+                type="button"
+                onClick={() => setMode('classic')}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors
+                  ${mode === 'classic' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                Completa
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('touch')}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors
+                  ${mode === 'touch' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                Touch
+              </button>
+            </div>
           </div>
 
           {error && (
