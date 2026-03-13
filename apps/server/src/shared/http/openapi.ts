@@ -170,6 +170,19 @@ export const addonSchema = {
   },
 } as const;
 
+export const menuItemAddonOptionSchema = {
+  type: 'object',
+  required: ['id', 'name', 'addonType', 'price', 'description', 'isRequired'],
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    addonType: { type: 'string' },
+    price: { type: 'number' },
+    description: nullableString,
+    isRequired: { type: 'boolean' },
+  },
+} as const;
+
 export const menuItemSchema = {
   type: 'object',
   required: [
@@ -290,6 +303,14 @@ export const pathIdSchema = {
   required: ['id'],
   properties: {
     id: { type: 'string' },
+  },
+} as const;
+
+export const menuItemPathIdSchema = {
+  type: 'object',
+  required: ['menuItemId'],
+  properties: {
+    menuItemId: { type: 'string' },
   },
 } as const;
 
@@ -612,6 +633,77 @@ export const orderDetailSchema = {
       },
     },
   ],
+} as const;
+
+export const telemetryEventBodySchema = {
+  type: 'object',
+  description: 'Evento de telemetria enviado pelo frontend do kiosk.',
+  required: ['event', 'sessionId', 'path'],
+  properties: {
+    event: { type: 'string', minLength: 1 },
+    timestamp: { type: 'string', format: 'date-time' },
+    sessionId: { type: 'string', minLength: 1 },
+    path: { type: 'string', minLength: 1 },
+    metadata: {
+      type: 'object',
+      additionalProperties: true,
+    },
+  },
+  examples: [
+    {
+      event: 'checkout_completed',
+      sessionId: 'kiosk-session-123',
+      path: '/kiosk/checkout/success',
+      timestamp: '2026-03-13T10:15:30.000Z',
+      metadata: {
+        orderId: 'cuid-order',
+        total: 49.9,
+      },
+    },
+  ],
+} as const;
+
+export const telemetryEventSchema = {
+  type: 'object',
+  required: ['event', 'sessionId', 'path', 'receivedAt'],
+  properties: {
+    event: { type: 'string' },
+    timestamp: { type: 'string', format: 'date-time' },
+    sessionId: { type: 'string' },
+    path: { type: 'string' },
+    metadata: {
+      type: 'object',
+      additionalProperties: true,
+    },
+    receivedAt: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
+export const telemetryIngestResponseSchema = {
+  type: 'object',
+  required: ['ok'],
+  properties: {
+    ok: { type: 'boolean' },
+  },
+  examples: [{ ok: true }],
+} as const;
+
+export const telemetryRecentEventsResponseSchema = {
+  type: 'object',
+  required: ['data'],
+  properties: {
+    data: {
+      type: 'object',
+      required: ['count', 'events'],
+      properties: {
+        count: { type: 'integer', minimum: 0 },
+        events: {
+          type: 'array',
+          items: telemetryEventSchema,
+        },
+      },
+    },
+  },
 } as const;
 
 export const arrayDataResponse = (itemSchema: object) => ({

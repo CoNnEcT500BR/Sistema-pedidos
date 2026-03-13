@@ -44,8 +44,8 @@ export async function buildApp(): Promise<FastifyInstance> {
     openapi: {
       info: {
         title: 'Sistema de Pedidos API',
-        description: 'Documentacao da API da Fase 2',
-        version: '1.0.0',
+        description: 'Documentacao da API (Auth, Menu, Combos, Orders, Addons e Telemetry)',
+        version: '1.1.0',
       },
       servers: [{ url: 'http://localhost:3001' }],
       tags: [

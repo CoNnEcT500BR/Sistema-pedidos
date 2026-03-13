@@ -1,5 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 
+import {
+  addonSchema,
+  arrayDataResponse,
+  menuItemAddonOptionSchema,
+  menuItemPathIdSchema,
+  notFoundErrorSchema,
+} from '@/shared/http/openapi';
 import { addonsService, isAddonsServiceError } from './addons.service';
 
 export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> {
@@ -9,25 +16,9 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
       schema: {
         tags: ['addons'],
         summary: 'Listar addons ativos',
+        description: 'Retorna adicionais ativos disponiveis para composicao de itens e combos.',
         response: {
-          200: {
-            type: 'object',
-            properties: {
-              data: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    name: { type: 'string' },
-                    addonType: { type: 'string' },
-                    price: { type: 'number' },
-                    description: { type: ['string', 'null'] },
-                  },
-                },
-              },
-            },
-          },
+          200: arrayDataResponse(addonSchema),
         },
       },
     },
@@ -43,12 +34,12 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
       schema: {
         tags: ['addons'],
         summary: 'Listar addons permitidos por item de menu',
-        params: {
-          type: 'object',
-          required: ['menuItemId'],
-          properties: {
-            menuItemId: { type: 'string' },
-          },
+        description:
+          'Retorna os addons habilitados para o item, incluindo indicador de obrigatoriedade.',
+        params: menuItemPathIdSchema,
+        response: {
+          200: arrayDataResponse(menuItemAddonOptionSchema),
+          404: notFoundErrorSchema,
         },
       },
     },
