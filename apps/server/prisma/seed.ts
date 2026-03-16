@@ -353,27 +353,29 @@ async function main() {
 
     {
       name: 'Upgrade Batata para M',
-      addonType: 'EXTRA',
+      addonType: 'SIZE_CHANGE',
       price: 2.5,
-      description: 'Troca batata do combo para medio',
+      description: 'Troca batata para tamanho M [meta|station=SIDES|scope=SIDE|priority=CRITICAL]',
     },
     {
       name: 'Upgrade Batata para G',
-      addonType: 'EXTRA',
+      addonType: 'SIZE_CHANGE',
       price: 5.0,
-      description: 'Troca batata do combo para grande',
+      description: 'Troca batata para tamanho G [meta|station=SIDES|scope=SIDE|priority=CRITICAL]',
     },
     {
       name: 'Upgrade Bebida para M',
-      addonType: 'EXTRA',
+      addonType: 'SIZE_CHANGE',
       price: 1.5,
-      description: 'Troca bebida do combo para medio',
+      description:
+        'Troca bebida para tamanho M [meta|station=DRINKS|scope=DRINK|priority=CRITICAL]',
     },
     {
       name: 'Upgrade Bebida para G',
-      addonType: 'EXTRA',
+      addonType: 'SIZE_CHANGE',
       price: 3.0,
-      description: 'Troca bebida do combo para grande',
+      description:
+        'Troca bebida para tamanho G [meta|station=DRINKS|scope=DRINK|priority=CRITICAL]',
     },
   ] as const;
 
@@ -439,35 +441,75 @@ async function main() {
       item: 'Refrigerante P',
       removables: ['Gelo'],
       extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Refrigerante M',
       removables: ['Gelo'],
       extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Refrigerante G',
       removables: ['Gelo'],
       extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Suco P',
       removables: ['Gelo'],
       extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Suco M',
       removables: ['Gelo'],
       extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Suco G',
       removables: ['Gelo'],
       extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
-    { item: 'Cha Gelado P', removables: ['Gelo'], extras: ['Sabor Limao', 'Sabor Pessego'] },
-    { item: 'Cha Gelado M', removables: ['Gelo'], extras: ['Sabor Limao', 'Sabor Pessego'] },
-    { item: 'Cha Gelado G', removables: ['Gelo'], extras: ['Sabor Limao', 'Sabor Pessego'] },
+    {
+      item: 'Cha Gelado P',
+      removables: ['Gelo'],
+      extras: ['Sabor Limao', 'Sabor Pessego'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
+    },
+    {
+      item: 'Cha Gelado M',
+      removables: ['Gelo'],
+      extras: ['Sabor Limao', 'Sabor Pessego'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
+    },
+    {
+      item: 'Cha Gelado G',
+      removables: ['Gelo'],
+      extras: ['Sabor Limao', 'Sabor Pessego'],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
+    },
+
+    {
+      item: 'Batata Frita P',
+      removables: [],
+      extras: [],
+      sizeChanges: ['Upgrade Batata para M', 'Upgrade Batata para G'],
+    },
+    {
+      item: 'Batata Frita M',
+      removables: [],
+      extras: [],
+      sizeChanges: ['Upgrade Batata para M', 'Upgrade Batata para G'],
+    },
+    {
+      item: 'Batata Frita G',
+      removables: [],
+      extras: [],
+      sizeChanges: ['Upgrade Batata para M', 'Upgrade Batata para G'],
+    },
 
     {
       item: 'Milkshake P',
@@ -550,8 +592,30 @@ async function main() {
         } => row !== null,
       );
 
-    if (removables.length || extras.length) {
-      await prisma.menuItemAddon.createMany({ data: [...removables, ...extras] });
+    const sizeChanges = (config.sizeChanges ?? [])
+      .map((name, index) => {
+        const addon = addonByName.get(name);
+        if (!addon) return null;
+        return {
+          menuItemId: menuItem.id,
+          addonId: addon.id,
+          isRequired: false,
+          displayOrder: index + extras.length + 1,
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          menuItemId: string;
+          addonId: string;
+          isRequired: boolean;
+          displayOrder: number;
+        } => row !== null,
+      );
+
+    if (removables.length || extras.length || sizeChanges.length) {
+      await prisma.menuItemAddon.createMany({ data: [...removables, ...extras, ...sizeChanges] });
     }
   }
 

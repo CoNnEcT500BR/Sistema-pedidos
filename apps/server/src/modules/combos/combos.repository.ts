@@ -17,6 +17,19 @@ export const combosRepository = {
       orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
     }),
 
+  listAllCombos: () =>
+    prisma.combo.findMany({
+      include: {
+        comboItems: {
+          include: {
+            menuItem: true,
+          },
+          orderBy: { menuItem: { name: 'asc' } },
+        },
+      },
+      orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+    }),
+
   findById: (id: string) =>
     prisma.combo.findUnique({
       where: { id },
@@ -103,5 +116,24 @@ export const combosRepository = {
     prisma.combo.update({
       where: { id },
       data: { isActive: isAvailable },
+      include: {
+        comboItems: {
+          include: {
+            menuItem: true,
+          },
+        },
+      },
+    }),
+
+  delete: (id: string) =>
+    prisma.combo.delete({
+      where: { id },
+      include: {
+        comboItems: {
+          include: {
+            menuItem: true,
+          },
+        },
+      },
     }),
 };

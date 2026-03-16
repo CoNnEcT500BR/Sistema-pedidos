@@ -18,10 +18,212 @@ import {
   updateMenuItemBodySchema,
   validationErrorSchema,
 } from '@/shared/http/openapi';
-import { createMenuItemSchema, updateAvailabilitySchema, updateMenuItemSchema } from './menu.types';
-import { menuService } from './menu.service';
+import {
+  createCategorySchema,
+  createMenuItemSchema,
+  updateAvailabilitySchema,
+  updateCategorySchema,
+  updateCategoryStatusSchema,
+  updateMenuItemSchema,
+} from './menu.types';
+import { isMenuServiceError, menuService } from './menu.service';
 
 export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
+  app.get(
+    '/admin/categories',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Listar categorias para a area administrativa',
+        description: 'Retorna categorias ativas e inativas para gestao interna.',
+        security: bearerAuthSecurity,
+        response: {
+          200: arrayDataResponse(categorySchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async () => {
+      const categories = await menuService.listAllCategories();
+      return { data: categories };
+    },
+  );
+
+  app.post(
+    '/admin/categories',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Criar categoria para a area administrativa',
+        description: 'Cria nova categoria para organizacao do cardapio interno.',
+        security: bearerAuthSecurity,
+        body: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string', minLength: 2 },
+            description: { type: 'string' },
+            icon: { type: 'string' },
+            displayOrder: { type: 'integer', minimum: 0 },
+            isActive: { type: 'boolean' },
+          },
+        },
+        response: {
+          201: dataResponse(categorySchema),
+          400: validationErrorSchema,
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const parsed = createCategorySchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply
+          .code(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
+      }
+
+      const category = await menuService.createCategory(parsed.data);
+      return reply.code(201).send({ data: category });
+    },
+  );
+
+  app.put(
+    '/admin/categories/:id',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Atualizar categoria para a area administrativa',
+        description: 'Atualiza dados cadastrais de categoria existente.',
+        security: bearerAuthSecurity,
+        params: pathIdSchema,
+        body: {
+          type: 'object',
+          minProperties: 1,
+          properties: {
+            name: { type: 'string', minLength: 2 },
+            description: { type: 'string' },
+            icon: { type: 'string' },
+            displayOrder: { type: 'integer', minimum: 0 },
+            isActive: { type: 'boolean' },
+          },
+        },
+        response: {
+          200: dataResponse(categorySchema),
+          400: validationErrorSchema,
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = request.params as { id: string };
+      const parsed = updateCategorySchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply
+          .code(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
+      }
+
+      try {
+        const category = await menuService.updateCategory(params.id, parsed.data);
+        return reply.code(200).send({ data: category });
+      } catch (error) {
+        if (isMenuServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
+    },
+  );
+
+  app.patch(
+    '/admin/categories/:id/status',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Atualizar status de categoria para a area administrativa',
+        description: 'Ativa ou desativa categoria para organizacao de catalogo.',
+        security: bearerAuthSecurity,
+        params: pathIdSchema,
+        body: {
+          type: 'object',
+          required: ['isActive'],
+          properties: {
+            isActive: { type: 'boolean' },
+          },
+        },
+        response: {
+          200: dataResponse(categorySchema),
+          400: validationErrorSchema,
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = request.params as { id: string };
+      const parsed = updateCategoryStatusSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply
+          .code(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
+      }
+
+      const category = await menuService.updateCategoryStatus(params.id, parsed.data.isActive);
+      return reply.code(200).send({ data: category });
+    },
+  );
+
+  app.delete(
+    '/admin/categories/:id',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Remover categoria da area administrativa',
+        description: 'Remove categoria e itens relacionados conforme regras de banco.',
+        security: bearerAuthSecurity,
+        params: pathIdSchema,
+        response: {
+          200: dataResponse(categorySchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = request.params as { id: string };
+      const category = await menuService.deleteCategory(params.id);
+      return reply.code(200).send({ data: category });
+    },
+  );
+
+  app.get(
+    '/admin/menu',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Listar itens do cardapio para a area administrativa',
+        description: 'Retorna todos os itens, inclusive indisponiveis, com categoria associada.',
+        security: bearerAuthSecurity,
+        querystring: menuListQuerySchema,
+        response: {
+          200: arrayDataResponse(menuItemWithCategorySchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request) => {
+      const query = request.query as { category?: string };
+      const items = await menuService.listAdminMenuItems(query.category);
+      return { data: items };
+    },
+  );
+
   app.get(
     '/categories',
     {
@@ -112,8 +314,16 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const item = await menuService.createMenuItem(parsed.data);
-      return reply.code(201).send({ data: item });
+      try {
+        const item = await menuService.createMenuItem(parsed.data);
+        return reply.code(201).send({ data: item });
+      } catch (error) {
+        if (isMenuServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -144,8 +354,16 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const item = await menuService.updateMenuItem(params.id, parsed.data);
-      return reply.code(200).send({ data: item });
+      try {
+        const item = await menuService.updateMenuItem(params.id, parsed.data);
+        return reply.code(200).send({ data: item });
+      } catch (error) {
+        if (isMenuServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -177,6 +395,29 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const item = await menuService.updateAvailability(params.id, parsed.data.isAvailable);
+      return reply.code(200).send({ data: item });
+    },
+  );
+
+  app.delete(
+    '/admin/menu/:id',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Remover item de cardapio da area administrativa',
+        description: 'Remove item e relacoes dependentes conforme regras de banco.',
+        security: bearerAuthSecurity,
+        params: pathIdSchema,
+        response: {
+          200: dataResponse(menuItemSchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = request.params as { id: string };
+      const item = await menuService.deleteMenuItem(params.id);
       return reply.code(200).send({ data: item });
     },
   );

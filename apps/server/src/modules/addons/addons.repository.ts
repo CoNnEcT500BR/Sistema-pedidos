@@ -7,6 +7,33 @@ export const addonsRepository = {
       orderBy: { name: 'asc' },
     }),
 
+  listAllAddons: () =>
+    prisma.addon.findMany({
+      orderBy: [{ isActive: 'desc' }, { name: 'asc' }],
+    }),
+
+  createAddon: (data: {
+    name: string;
+    addonType: string;
+    price: number;
+    description?: string;
+    isActive?: boolean;
+  }) =>
+    prisma.addon.create({
+      data,
+    }),
+
+  updateAddon: (id: string, data: Record<string, unknown>) =>
+    prisma.addon.update({
+      where: { id },
+      data,
+    }),
+
+  deleteAddon: (id: string) =>
+    prisma.addon.delete({
+      where: { id },
+    }),
+
   listAllowedAddonsByMenuItem: (menuItemId: string) =>
     prisma.menuItemAddon.findMany({
       where: { menuItemId },

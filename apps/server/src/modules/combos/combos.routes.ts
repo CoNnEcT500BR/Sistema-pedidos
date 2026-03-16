@@ -24,6 +24,27 @@ import {
 
 export async function registerCombosRoutes(app: FastifyInstance): Promise<void> {
   app.get(
+    '/admin/combos',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['combos', 'admin'],
+        summary: 'Listar combos para a area administrativa',
+        description: 'Retorna combos ativos e inativos com seus itens para gestao.',
+        security: bearerAuthSecurity,
+        response: {
+          200: arrayDataResponse(comboDetailSchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async () => {
+      const combos = await combosService.listAdminCombos();
+      return { data: combos };
+    },
+  );
+
+  app.get(
     '/combos',
     {
       schema: {
@@ -160,6 +181,29 @@ export async function registerCombosRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const combo = await combosService.updateAvailability(params.id, parsed.data.isAvailable);
+      return reply.code(200).send({ data: combo });
+    },
+  );
+
+  app.delete(
+    '/combos/:id',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['combos'],
+        summary: 'Remover combo',
+        description: 'Remove combo e itens vinculados. Operacao restrita ao perfil ADMIN.',
+        security: bearerAuthSecurity,
+        params: pathIdSchema,
+        response: {
+          200: dataResponse(comboDetailSchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = request.params as { id: string };
+      const combo = await combosService.deleteCombo(params.id);
       return reply.code(200).send({ data: combo });
     },
   );

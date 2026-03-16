@@ -1,4 +1,24 @@
 import { addonsRepository } from './addons.repository';
+import { z } from 'zod';
+
+export const createAddonSchema = z.object({
+  name: z.string().min(2, 'name obrigatorio'),
+  addonType: z.enum(['EXTRA', 'SUBSTITUTION', 'REMOVAL', 'SIZE_CHANGE']),
+  price: z.number().min(0, 'price deve ser maior ou igual a zero'),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const updateAddonSchema = createAddonSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, 'Informe ao menos um campo para atualizar');
+
+export const updateAddonStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
+type CreateAddonInput = z.infer<typeof createAddonSchema>;
+type UpdateAddonInput = z.infer<typeof updateAddonSchema>;
 
 export class AddonsServiceError extends Error {
   statusCode: number;
@@ -15,6 +35,18 @@ export function isAddonsServiceError(error: unknown): error is AddonsServiceErro
 
 export const addonsService = {
   listAddons: async () => addonsRepository.listActiveAddons(),
+
+  listAllAddons: async () => addonsRepository.listAllAddons(),
+
+  createAddon: async (payload: CreateAddonInput) => addonsRepository.createAddon(payload),
+
+  updateAddon: async (id: string, payload: UpdateAddonInput) =>
+    addonsRepository.updateAddon(id, payload as Record<string, unknown>),
+
+  updateAddonStatus: async (id: string, isActive: boolean) =>
+    addonsRepository.updateAddon(id, { isActive }),
+
+  deleteAddon: async (id: string) => addonsRepository.deleteAddon(id),
 
   listMenuItemAddons: async (menuItemId: string) => {
     const menuItem = await addonsRepository.findMenuItemById(menuItemId);

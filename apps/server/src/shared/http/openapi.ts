@@ -269,6 +269,11 @@ export const createMenuItemBodySchema = {
     icon: { type: 'string' },
     imageUrl: { type: 'string', format: 'uri' },
     displayOrder: { type: 'integer', minimum: 0 },
+    isAvailable: { type: 'boolean' },
+    addonIds: {
+      type: 'array',
+      items: { type: 'string' },
+    },
   },
   examples: [
     {
@@ -278,6 +283,8 @@ export const createMenuItemBodySchema = {
       price: 24.9,
       icon: '🍔',
       displayOrder: 10,
+      isAvailable: true,
+      addonIds: ['cuid-addon'],
     },
   ],
 } as const;

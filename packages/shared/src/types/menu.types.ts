@@ -21,7 +21,7 @@ export interface IMenuItem {
 export interface IAddon {
   id: string;
   name: string;
-  addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL';
+  addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL' | 'SIZE_CHANGE';
   price: number;
   description?: string;
   isActive: boolean;
