@@ -18,7 +18,7 @@ export function ConfirmationPage() {
       navigate('/kiosk');
     }, AUTO_REDIRECT_MS);
     return () => clearTimeout(timerRef.current);
-  }, [navigate]);
+  }, [navigate, orderNumber]);
 
   function handleNewOrder() {
     clearTimeout(timerRef.current);

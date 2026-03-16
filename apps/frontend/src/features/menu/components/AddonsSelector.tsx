@@ -34,6 +34,7 @@ export function AddonsSelector({ addons, selected, onChange }: AddonsSelectorPro
   const extras = addons.filter((a) => a.addonType === 'EXTRA');
   const removals = addons.filter((a) => a.addonType === 'REMOVAL');
   const substitutions = addons.filter((a) => a.addonType === 'SUBSTITUTION');
+  const sizeChanges = addons.filter((a) => a.addonType === 'SIZE_CHANGE');
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,6 +46,9 @@ export function AddonsSelector({ addons, selected, onChange }: AddonsSelectorPro
       )}
       {substitutions.length > 0 && (
         <AddonGroup label={t('Substituições')} addons={substitutions} getQuantity={getQuantity} onAdjust={adjust} />
+      )}
+      {sizeChanges.length > 0 && (
+        <AddonGroup label={t('Alterar tamanho')} addons={sizeChanges} getQuantity={getQuantity} onAdjust={adjust} />
       )}
     </div>
   );

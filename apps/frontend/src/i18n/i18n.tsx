@@ -7,7 +7,7 @@ import {
   type Language,
   getInitialLanguage,
   interpolate,
-  translations,
+  resolveTranslation,
 } from './shared';
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     language,
     setLanguage,
     t: (text, vars) => {
-      const base = language === 'en' ? (translations[text] ?? text) : text;
+      const base = language === 'en' ? resolveTranslation(text) : text;
       return interpolate(base, vars);
     },
   }), [language]);

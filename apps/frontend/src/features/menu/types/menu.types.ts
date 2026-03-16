@@ -16,13 +16,14 @@ export interface MenuItem {
   icon?: string;
   imageUrl?: string;
   isAvailable: boolean;
+  displayOrder?: number;
   category?: Category;
 }
 
 export interface Addon {
   id: string;
   name: string;
-  addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL';
+  addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL' | 'SIZE_CHANGE';
   price: number;
   description?: string;
   isRequired?: boolean;
@@ -36,6 +37,7 @@ export interface Combo {
   price: number;
   icon?: string;
   isActive: boolean;
+  displayOrder?: number;
   items?: ComboItem[];
   comboItems?: ComboItem[];
 }

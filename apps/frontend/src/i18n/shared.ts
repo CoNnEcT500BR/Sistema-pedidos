@@ -189,6 +189,351 @@ export const translations: Record<string, string> = {
   Admin: 'Admin',
   Kiosk: 'Kiosk',
   Staff: 'Staff',
+  'Painel administrativo': 'Admin control panel',
+  'Central de Operações': 'Operations hub',
+  Administrador: 'Administrator',
+  'Entrar no Admin': 'Sign in to Admin',
+  'Esta área é exclusiva para administradores.': 'This area is restricted to administrators.',
+  'Controle operação, cardápio e equipe em um único lugar.':
+    'Control operations, menu and team in one place.',
+  'Acesse indicadores, organize o catálogo e mantenha o atendimento alinhado com o ritmo da operação.':
+    'Track metrics, organize the catalog and keep service aligned with the pace of operations.',
+  'Visão do dia': 'Today overview',
+  'Pedidos, vendas e gargalos': 'Orders, sales and bottlenecks',
+  'Ações rápidas': 'Quick actions',
+  'Editar cardápio sem sair da operação': 'Edit the menu without leaving operations',
+  'Use uma conta com permissão de administrador para continuar.':
+    'Use an administrator account to continue.',
+  'Dashboard operacional': 'Operational dashboard',
+  'Resumo de {period}': 'Summary for {period}',
+  'Acompanhe vendas, pedidos e sinais da operação em tempo real.':
+    'Track sales, orders and operation signals in real time.',
+  'Vendas no período': 'Sales in period',
+  'Pedidos no período': 'Orders in period',
+  'Item líder': 'Top item',
+  'Top itens': 'Top items',
+  'Os mais vendidos no período atual.': 'Best sellers in the current period.',
+  'Abrir relatórios': 'Open reports',
+  'Carregando dashboard...': 'Loading dashboard...',
+  '{count} itens': '{count} items',
+  '{count} pedidos': '{count} orders',
+  'Pedidos recentes': 'Recent orders',
+  'Últimos pedidos registrados para acompanhamento rápido.':
+    'Latest recorded orders for quick follow-up.',
+  'Cliente não identificado': 'Unidentified customer',
+  'Vendas por categoria': 'Sales by category',
+  'Distribuição de receita por frente do cardápio.': 'Revenue distribution by menu front.',
+  'Status dos pedidos': 'Order statuses',
+  'Volume atual por etapa de operação.': 'Current volume by operation stage.',
+  'Sem dados': 'No data',
+  'Não foi possível carregar o dashboard administrativo.': 'Could not load the admin dashboard.',
+  'Gerenciar cardápio': 'Manage menu',
+  'Edite itens, disponibilidade e adicionais sem sair do fluxo administrativo.':
+    'Edit items, availability and addons without leaving the admin flow.',
+  'Visual do cardápio por categoria': 'Menu visual by category',
+  'Distribuição de itens e taxa de disponibilidade por categoria.':
+    'Item distribution and availability rate by category.',
+  'Sem categoria': 'No category',
+  'Todas as categorias': 'All categories',
+  'Novo item': 'New item',
+  Status: 'Status',
+  Ações: 'Actions',
+  'Carregando cardápio administrativo...': 'Loading admin menu...',
+  'Sem descrição': 'No description',
+  Disponível: 'Available',
+  Indisponível: 'Unavailable',
+  'Duplicar item': 'Duplicate item',
+  'Alternar disponibilidade': 'Toggle availability',
+  'Desativar item': 'Deactivate item',
+  'Deseja remover este item permanentemente?': 'Do you want to permanently remove this item?',
+  'Item removido com sucesso.': 'Item removed successfully.',
+  'Não foi possível remover o item.': 'Could not remove the item.',
+  'Nenhum item encontrado para o filtro atual.': 'No items found for the current filter.',
+  'Editar item': 'Edit item',
+  'Atualize dados principais, disponibilidade e adicionais permitidos para o item.':
+    'Update main data, availability and allowed addons for the item.',
+  Nome: 'Name',
+  Descrição: 'Description',
+  'Ordem de exibição': 'Display order',
+  Ícone: 'Icon',
+  'Selecionar emoji': 'Choose emoji',
+  'Imagem URL': 'Image URL',
+  'Item disponível para venda': 'Item available for sale',
+  'Adicionais permitidos': 'Allowed addons',
+  'Salvando...': 'Saving...',
+  'Salvar item': 'Save item',
+  '(cópia)': '(copy)',
+  'Não foi possível carregar o gerenciamento de cardápio.': 'Could not load menu management.',
+  'Não foi possível carregar os detalhes do item.': 'Could not load item details.',
+  'Preencha categoria, nome e preço válido antes de salvar.':
+    'Fill category, name and a valid price before saving.',
+  'Item atualizado com sucesso.': 'Item updated successfully.',
+  'Item criado com sucesso.': 'Item created successfully.',
+  'Não foi possível salvar o item.': 'Could not save the item.',
+  'Ja existe item com esta ordem nesta categoria':
+    'An item with this display order already exists in this category',
+  'Item marcado como indisponível.': 'Item marked as unavailable.',
+  'Item marcado como disponível.': 'Item marked as available.',
+  'Não foi possível atualizar a disponibilidade do item.': 'Could not update item availability.',
+  'Deseja desativar este item?': 'Do you want to deactivate this item?',
+  'Item desativado com sucesso.': 'Item deactivated successfully.',
+  'Não foi possível desativar o item.': 'Could not deactivate the item.',
+  'Gerenciar categorias': 'Manage categories',
+  'Crie e organize categorias que estruturam o cardápio administrativo e do kiosk.':
+    'Create and organize categories that structure the admin and kiosk menus.',
+  'Nova categoria': 'New category',
+  'Carregando categorias administrativas...': 'Loading admin categories...',
+  'Editar categoria': 'Edit category',
+  'Alternar categoria': 'Toggle category',
+  'Remover categoria': 'Remove category',
+  'Deseja remover esta categoria permanentemente?':
+    'Do you want to permanently remove this category?',
+  'Categoria removida com sucesso.': 'Category removed successfully.',
+  'Não foi possível remover a categoria.': 'Could not remove the category.',
+  'Nenhuma categoria cadastrada ainda.': 'No categories registered yet.',
+  'Defina nome, descrição e ordem para organizar a navegação de produtos.':
+    'Set name, description and order to organize product navigation.',
+  'Categoria ativa': 'Active category',
+  'Salvar categoria': 'Save category',
+  'Preencha o nome da categoria antes de salvar.': 'Fill in the category name before saving.',
+  'Categoria atualizada com sucesso.': 'Category updated successfully.',
+  'Categoria criada com sucesso.': 'Category created successfully.',
+  'Não foi possível salvar a categoria.': 'Could not save the category.',
+  'Categoria desativada com sucesso.': 'Category deactivated successfully.',
+  'Categoria ativada com sucesso.': 'Category activated successfully.',
+  'Não foi possível atualizar o status da categoria.': 'Could not update category status.',
+  'Dados inválidos para categoria. Revise os campos e tente novamente.':
+    'Invalid category data. Review the fields and try again.',
+  'O nome da categoria é obrigatório.': 'Category name is required.',
+  Ingredientes: 'Ingredients',
+  'Gerenciar ingredientes': 'Manage ingredients',
+  'Cadastre extras, substituições e remoções para montagem flexível de hambúrgueres e combos.':
+    'Create extras, substitutions and removals for flexible burger and combo customization.',
+  'Novo ingrediente': 'New ingredient',
+  Ingrediente: 'Ingredient',
+  Tipo: 'Type',
+  Estação: 'Station',
+  Conjunto: 'Scope',
+  Prioridade: 'Priority',
+  'Conjuntos por produto': 'Product scopes',
+  'Fluxo sugerido de produção': 'Suggested production flow',
+  'Siga a sequência por estação para reduzir erros de montagem no pico.':
+    'Follow station sequence to reduce assembly errors during rush hours.',
+  '{count} tipos': '{count} types',
+  'Todos os conjuntos': 'All scopes',
+  'Conjunto hambúrguer': 'Burger scope',
+  'Conjunto bebida': 'Drink scope',
+  'Conjunto acompanhamento': 'Side scope',
+  'Conjunto combo': 'Combo scope',
+  'Conjunto geral': 'General scope',
+  Rápido: 'Fast',
+  Médio: 'Medium',
+  Crítico: 'Critical',
+  'Todas as estações': 'All stations',
+  'Organização por estação': 'Station organization',
+  'Sugestões rápidas da cozinha': 'Quick kitchen suggestions',
+  'Estação proteínas': 'Proteins station',
+  'Estação queijos': 'Cheese station',
+  'Estação vegetais': 'Vegetables station',
+  'Estação molhos': 'Sauces station',
+  'Estação bebidas': 'Drinks station',
+  'Estação acompanhamentos': 'Sides station',
+  'Estação finalização': 'Finishing station',
+  'Estação geral': 'General station',
+  'Buscar ingrediente...': 'Search ingredient...',
+  'Todos os tipos': 'All types',
+  'Todos os status': 'All statuses',
+  'Somente ativos': 'Active only',
+  'Somente inativos': 'Inactive only',
+  'Exibindo {shown} de {total} ingredientes.': 'Showing {shown} of {total} ingredients.',
+  'Carregando ingredientes administrativos...': 'Loading admin ingredients...',
+  'Editar ingrediente': 'Edit ingredient',
+  'Alternar ingrediente': 'Toggle ingredient',
+  'Remover ingrediente': 'Remove ingredient',
+  'Nenhum ingrediente cadastrado ainda.': 'No ingredients registered yet.',
+  'Nenhum ingrediente encontrado para o filtro atual.':
+    'No ingredients found for the current filter.',
+  'Defina tipo, preço e disponibilidade para controlar a personalização dos pedidos.':
+    'Define type, price and availability to control order customization.',
+  Extra: 'Extra',
+  Substituição: 'Substitution',
+  Remoção: 'Removal',
+  'Ajuste de montagem': 'Assembly adjustment',
+  'Variação de tamanho': 'Size change',
+  'Alterar tamanho': 'Change size',
+  'Ingrediente ativo': 'Active ingredient',
+  'Salvar ingrediente': 'Save ingredient',
+  'Não foi possível carregar os ingredientes administrativos.': 'Could not load admin ingredients.',
+  'Preencha nome e preço válido antes de salvar o ingrediente.':
+    'Fill in name and a valid price before saving the ingredient.',
+  'Ingrediente atualizado com sucesso.': 'Ingredient updated successfully.',
+  'Ingrediente criado com sucesso.': 'Ingredient created successfully.',
+  'Não foi possível salvar o ingrediente.': 'Could not save the ingredient.',
+  'Ingrediente desativado com sucesso.': 'Ingredient deactivated successfully.',
+  'Ingrediente ativado com sucesso.': 'Ingredient activated successfully.',
+  'Não foi possível atualizar o status do ingrediente.': 'Could not update ingredient status.',
+  'Ingrediente removido com sucesso.': 'Ingredient removed successfully.',
+  'Não foi possível remover o ingrediente.': 'Could not remove the ingredient.',
+  'Deseja remover este ingrediente permanentemente?':
+    'Do you want to permanently remove this ingredient?',
+  'Mostrar somente compatíveis': 'Show compatible only',
+  'Mostrar todos': 'Show all',
+  'Há adicionais fora do conjunto deste item. Revise para evitar mistura no preparo.':
+    'There are extras outside this item scope. Review to avoid prep mix-up.',
+  'Um ou mais adicionais selecionados não existem mais. Atualize a tela e tente novamente.':
+    'One or more selected addons no longer exist. Refresh the screen and try again.',
+  'A categoria deste item não foi encontrada. Atualize os dados antes de salvar.':
+    'This item category was not found. Refresh data before saving.',
+  'Este item não foi encontrado. Atualize a lista e tente novamente.':
+    'This item was not found. Refresh the list and try again.',
+  'No fluxo de criação de hambúrguer, adicionais do tipo Extra ficam bloqueados por regra de operação.':
+    'In burger build flow, Extra addons are blocked by operation rule.',
+  'No fluxo de criação de hambúrguer, adicionais do tipo Variação de tamanho ficam bloqueados por regra de operação.':
+    'In burger build flow, Size change addons are blocked by operation rule.',
+  'No conjunto criação hambúrguer, o tipo Extra não é permitido para ingrediente.':
+    'In burger build scope, Extra type is not allowed for ingredient.',
+  'Variação de tamanho só pode ser usada em bebida, acompanhamento ou combo.':
+    'Size change can only be used for drink, side or combo.',
+  'Dados inválidos para ingrediente. Revise os campos e tente novamente.':
+    'Invalid ingredient data. Review the fields and try again.',
+  'O nome do ingrediente é obrigatório.': 'Ingredient name is required.',
+  'O preço do ingrediente deve ser maior ou igual a zero.':
+    'Ingredient price must be greater than or equal to zero.',
+  'Informe ao menos um campo para atualizar o ingrediente.':
+    'Provide at least one field to update the ingredient.',
+  'Dados inválidos para combo. Revise os campos e tente novamente.':
+    'Invalid combo data. Review the fields and try again.',
+  'O nome do combo é obrigatório.': 'Combo name is required.',
+  'Adicione ao menos um item válido no combo.': 'Add at least one valid item to the combo.',
+  'Selecione um item válido em todas as linhas do combo.':
+    'Select a valid item in every combo row.',
+  'Este combo não foi encontrado. Atualize a lista e tente novamente.':
+    'This combo was not found. Refresh the list and try again.',
+  'Extra aumenta o preço final do item.': 'Extra increases the final item price.',
+  'Substituição pode manter preço zero ou ajustar valor.':
+    'Substitution can keep zero price or apply a value adjustment.',
+  'Remoção sempre deve ficar com valor zero.': 'Removal should always keep zero value.',
+  'Para remoção, mantenha R$ 0,00.': 'For removal, keep BRL 0.00.',
+  'Ajuste de montagem deve manter valor zero.': 'Assembly adjustment should keep zero value.',
+  'Para ajuste de montagem, mantenha R$ 0,00.': 'For assembly adjustment, keep BRL 0.00.',
+  'Variação de tamanho permite aumento ou diminuição para bebidas e acompanhamentos.':
+    'Size change supports increase or decrease for drinks and sides.',
+  Combo: 'Combo',
+  'Gerenciar combos': 'Manage combos',
+  'Monte combos com itens inclusos e ajuste a disponibilidade quando a operação pedir.':
+    'Build combos with included items and adjust availability as operations require.',
+  'Novo combo': 'New combo',
+  'Carregando combos administrativos...': 'Loading admin combos...',
+  Ativo: 'Active',
+  Inativo: 'Inactive',
+  'Editar combo': 'Edit combo',
+  Desativar: 'Deactivate',
+  Reativar: 'Reactivate',
+  'Item removido': 'Removed item',
+  'Nenhum combo cadastrado ainda.': 'No combos registered yet.',
+  'Defina preço, descrição e itens inclusos para o combo aparecer corretamente no kiosk.':
+    'Define price, description and included items so the combo appears correctly in the kiosk.',
+  'Itens inclusos': 'Included items',
+  'Adicionar linha': 'Add row',
+  'Salvar combo': 'Save combo',
+  'Não foi possível carregar os combos administrativos.': 'Could not load admin combos.',
+  'Preencha nome, preço e ao menos um item incluso.':
+    'Fill in name, price and at least one included item.',
+  'Combo atualizado com sucesso.': 'Combo updated successfully.',
+  'Combo criado com sucesso.': 'Combo created successfully.',
+  'Não foi possível salvar o combo.': 'Could not save the combo.',
+  'Combo marcado como inativo.': 'Combo marked as inactive.',
+  'Combo reativado com sucesso.': 'Combo reactivated successfully.',
+  'Não foi possível atualizar o status do combo.': 'Could not update combo status.',
+  'Deseja remover este combo permanentemente?': 'Do you want to permanently remove this combo?',
+  'Combo removido com sucesso.': 'Combo removed successfully.',
+  'Não foi possível remover o combo.': 'Could not remove the combo.',
+  'Remover combo': 'Remove combo',
+  'Não repita o mesmo item dentro do combo. Ajuste as quantidades na mesma linha.':
+    'Do not repeat the same item inside the combo. Adjust quantities on the same row.',
+  'Remover item da linha': 'Remove row item',
+  'Gerenciar equipe': 'Manage team',
+  'Crie acessos internos, ajuste perfis e mantenha a operação segura.':
+    'Create internal access, adjust roles and keep operations secure.',
+  'Novo usuário': 'New user',
+  Usuário: 'User',
+  Perfil: 'Role',
+  'Último acesso': 'Last access',
+  'Carregando usuários...': 'Loading users...',
+  'Sem nome cadastrado': 'No registered name',
+  'Nunca acessou': 'Never signed in',
+  'Editar usuário': 'Edit user',
+  'Nenhum usuário interno cadastrado ainda.': 'No internal users registered yet.',
+  'Defina perfil, status e credenciais para acesso interno ao sistema.':
+    'Define role, status and credentials for internal system access.',
+  'Preencha apenas se quiser alterar': 'Fill only if you want to change it',
+  'Usuário ativo': 'Active user',
+  'Salvar usuário': 'Save user',
+  'Não foi possível carregar os usuários internos.': 'Could not load internal users.',
+  'Informe email válido e senha com pelo menos 6 caracteres para novos usuários.':
+    'Provide a valid email and a password with at least 6 characters for new users.',
+  'Usuário atualizado com sucesso.': 'User updated successfully.',
+  'Usuário criado com sucesso.': 'User created successfully.',
+  'Não foi possível salvar o usuário.': 'Could not save the user.',
+  'Usuário desativado com sucesso.': 'User deactivated successfully.',
+  'Usuário reativado com sucesso.': 'User reactivated successfully.',
+  'Não foi possível atualizar o status do usuário.': 'Could not update user status.',
+  'Dados inválidos para usuário. Revise os campos e tente novamente.':
+    'Invalid user data. Review the fields and try again.',
+  'O email informado é inválido.': 'The provided email is invalid.',
+  'A senha deve ter ao menos 6 caracteres.': 'Password must be at least 6 characters long.',
+  'Informe ao menos um campo para atualizar o usuário.':
+    'Provide at least one field to update the user.',
+  'Não é permitido remover a própria conta.': 'You are not allowed to remove your own account.',
+  'Deseja remover esta conta permanentemente?': 'Do you want to permanently remove this account?',
+  'Conta removida com sucesso.': 'Account removed successfully.',
+  'Não foi possível remover a conta.': 'Could not remove the account.',
+  'Remover conta': 'Remove account',
+  'Nao e permitido remover a propria conta': 'You cannot remove your own account',
+  'Pedidos em produção': 'Orders in production',
+  'Acompanhe as etapas de aguardo, preparo e pronto com atualização rápida de status.':
+    'Track waiting, preparing and ready stages with quick status updates.',
+  'Carregando pedidos do quadro...': 'Loading board orders...',
+  'Não foi possível carregar os pedidos para o quadro de produção.':
+    'Could not load orders for the production board.',
+  'Não foi possível atualizar o status do pedido.': 'Could not update order status.',
+  'Confirmar e iniciar preparo': 'Confirm and start preparing',
+  'Iniciar preparo': 'Start preparing',
+  'Marcar como pronto': 'Mark as ready',
+  'Concluir pedido': 'Complete order',
+  'Nenhum pedido nesta etapa no momento.': 'No orders in this stage right now.',
+  Delivery: 'Delivery',
+  'Esta aba já está preparada para o fluxo de delivery com filas, roteirização e acompanhamento de entrega.':
+    'This tab is ready for delivery flow with queues, routing and delivery tracking.',
+  'Fila de entregas': 'Delivery queue',
+  'Estrutura pronta para agrupar pedidos por prioridade e horário prometido.':
+    'Structure ready to group orders by priority and promised time.',
+  Roteirização: 'Routing',
+  'Área reservada para planejamento de rotas e zonas de cobertura.':
+    'Reserved area for route planning and coverage zones.',
+  'Status em tempo real': 'Real-time status',
+  'Preparado para mostrar despacho, em rota e entregue por entregador.':
+    'Prepared to show dispatched, en route and delivered by courier.',
+  Equipe: 'Team',
+  Relatórios: 'Reports',
+  'Compare períodos, analise categorias e exporte um snapshot operacional do negócio.':
+    'Compare periods, analyze categories and export an operational business snapshot.',
+  'Exportar JSON': 'Export JSON',
+  Vendas: 'Sales',
+  'Evolução diária': 'Daily evolution',
+  'Totais acumulados por dia no período filtrado.':
+    'Accumulated totals per day in the filtered period.',
+  Categorias: 'Categories',
+  'Contribuição de receita por categoria.': 'Revenue contribution by category.',
+  'Produtos com maior volume no período selecionado.':
+    'Products with the highest volume in the selected period.',
+  'Resumo do relatório': 'Report summary',
+  'Faixa consultada e momento da exportação atual.': 'Queried range and current export timestamp.',
+  Período: 'Period',
+  'Gerado em': 'Generated at',
+  'Status monitorados': 'Tracked statuses',
+  'Carregando relatório...': 'Loading report...',
+  'Não foi possível carregar o relatório.': 'Could not load the report.',
   'Começar pedido': 'Start order',
   'Escolha o idioma para continuar': 'Choose language to continue',
   item: 'item',
@@ -344,10 +689,8 @@ export const translations: Record<string, string> = {
   'Modo touch sem rolagem': 'No-scroll touch mode',
   'Pedido atual': 'Current order',
   'Total do pedido': 'Order total',
-  'Total do Pedido': 'Order total',
   'Resumo do pedido': 'Order summary',
   'Nome do cliente': 'Customer name',
-  'Nome do Cliente': 'Customer name',
   'Observações do pedido': 'Order notes',
   'Observação do pedido': 'Order note',
   'Mais vendidos': 'Best sellers',
@@ -415,6 +758,8 @@ export const translations: Record<string, string> = {
   Anterior: 'Previous',
   Bebida: 'Drink',
   Cancelar: 'Cancel',
+  'Confirmar remoção': 'Confirm removal',
+  'Processando...': 'Processing...',
   'Carregando combos...': 'Loading combos...',
   'Carregando itens...': 'Loading items...',
   'Confirmado no balcão': 'Confirmed at counter',
@@ -453,6 +798,33 @@ export const translations: Record<string, string> = {
   Item: 'Item',
 };
 
+function normalizeTranslationKey(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+const normalizedTranslations = Object.entries(translations).reduce<Record<string, string>>(
+  (acc, [key, value]) => {
+    const normalizedKey = normalizeTranslationKey(key);
+    if (!(normalizedKey in acc)) {
+      acc[normalizedKey] = value;
+    }
+    return acc;
+  },
+  {},
+);
+
+export function resolveTranslation(text: string): string {
+  const exact = translations[text];
+  if (exact) return exact;
+
+  return normalizedTranslations[normalizeTranslationKey(text)] ?? text;
+}
+
 export type I18nContextValue = {
   language: Language;
   setLanguage: (language: Language) => void;
@@ -476,6 +848,6 @@ export function interpolate(text: string, vars?: Record<string, string | number>
 
 export function translateStatic(text: string, vars?: Record<string, string | number>): string {
   const language = localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'pt';
-  const base = language === 'en' ? (translations[text] ?? text) : text;
+  const base = language === 'en' ? resolveTranslation(text) : text;
   return interpolate(base, vars);
 }

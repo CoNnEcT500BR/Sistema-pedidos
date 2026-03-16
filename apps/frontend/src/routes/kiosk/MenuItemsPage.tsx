@@ -62,7 +62,7 @@ export function MenuItemsPage() {
       window.removeEventListener('pointerdown', reset);
       window.removeEventListener('keydown', reset);
     };
-  }, [navigate]);
+  }, [navigate, categoryId, isComboCategory]);
 
   function handleAddItem(item: MenuItem) {
     trackKioskEvent('item_modal_opened', { itemId: item.id, itemName: item.name });

@@ -1,7 +1,17 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import { AdminPage } from '@/routes/admin/AdminPage';
+import { AdminLayout } from '@/routes/admin/AdminLayout';
+import { CategoriesPage as AdminCategoriesPage } from '@/routes/admin/CategoriesPage';
+import { CombosPage } from '@/routes/admin/CombosPage';
+import { DashboardPage } from '@/routes/admin/DashboardPage';
+import { DeliveryPage } from '@/routes/admin/DeliveryPage';
+import { LoginPage as AdminLoginPage } from '@/routes/admin/LoginPage';
+import { MenuManagementPage } from '@/routes/admin/MenuManagementPage';
+import { IngredientsPage } from '@/routes/admin/IngredientsPage';
+import { OrdersBoardPage } from '@/routes/admin/OrdersBoardPage';
+import { ReportsPage } from '@/routes/admin/ReportsPage';
+import { UsersPage } from '@/routes/admin/UsersPage';
 import { CartPage } from '@/routes/kiosk/CartPage';
 import { CategoriesPage } from '@/routes/kiosk/CategoriesPage';
 import { CheckoutPage } from '@/routes/kiosk/CheckoutPage';
@@ -42,6 +52,29 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  { path: '/admin', element: <AdminPage /> },
+  { path: '/admin/login', element: <AdminLoginPage /> },
+  {
+    element: (
+      <ProtectedRoute requiredRoles={['ADMIN']} redirectTo="/admin/login" forbiddenRedirectTo="/staff/classic" />
+    ),
+    children: [
+      {
+        path: '/admin',
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+          { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'menu', element: <MenuManagementPage /> },
+          { path: 'categories', element: <AdminCategoriesPage /> },
+          { path: 'ingredients', element: <IngredientsPage /> },
+          { path: 'combos', element: <CombosPage /> },
+          { path: 'orders', element: <OrdersBoardPage /> },
+          { path: 'delivery', element: <DeliveryPage /> },
+          { path: 'users', element: <UsersPage /> },
+          { path: 'reports', element: <ReportsPage /> },
+        ],
+      },
+    ],
+  },
 ]);
 
