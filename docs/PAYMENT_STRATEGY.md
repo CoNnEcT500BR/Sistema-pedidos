@@ -1,10 +1,13 @@
 # Estratégia de Pagamento Futuro - Sistema de Pedidos
 
+Observacao de contexto (16/03/2026): o projeto segue sem integracao de gateway no runtime atual. Este documento permanece como referencia de evolucao.
+
 ## 1. Visão Geral
 
 O sistema atual (MVP) **não implementará integração de pagamento**, mas deve ser **arquitetado para facilitar integração futura** sem refatoração massiva.
 
 ### Princípios de Design
+
 1. **Separação de responsabilidades**: Lógica de pagamento isolada em módulo próprio
 2. **Interfaces abstratas**: Usar contratos (interfaces) que podem ser implementados por múltiplos gateways
 3. **Estado de pedido independente**: Pedido existe independente do pagamento
@@ -116,6 +119,7 @@ enum PaymentStatus {
 ### 3.2 Relacionamento com Order
 
 **Atualizar Order:**
+
 ```prisma
 model Order {
   // ... campos existentes
@@ -216,7 +220,7 @@ export class ManualPaymentProvider implements IPaymentProvider {
       success: true,
       transactionId: `MANUAL_${Date.now()}`,
       status: PaymentStatus.APPROVED,
-      message: 'Pagamento manual registrado com sucesso'
+      message: 'Pagamento manual registrado com sucesso',
     };
   }
 
@@ -230,7 +234,7 @@ export class ManualPaymentProvider implements IPaymentProvider {
     return {
       success: true,
       refundId: `REFUND_${Date.now()}`,
-      message: 'Estorno manual registrado'
+      message: 'Estorno manual registrado',
     };
   }
 }
@@ -257,8 +261,8 @@ export class PIXPaymentProvider implements IPaymentProvider {
         transaction_amount: request.amount,
         description: `Pedido #${request.orderId}`,
         payer: {
-          email: request.customer?.email
-        }
+          email: request.customer?.email,
+        },
       });
 
       return {
@@ -268,15 +272,15 @@ export class PIXPaymentProvider implements IPaymentProvider {
         pixData: {
           qrCode: pixResponse.qr_code,
           qrCodeBase64: pixResponse.qr_code_base64,
-          copyPaste: pixResponse.qr_code
-        }
+          copyPaste: pixResponse.qr_code,
+        },
       };
     } catch (error) {
       return {
         success: false,
         status: PaymentStatus.FAILED,
         message: error.message,
-        errorCode: error.code
+        errorCode: error.code,
       };
     }
   }
@@ -311,11 +315,11 @@ export class PIXPaymentProvider implements IPaymentProvider {
 
   private mapGatewayStatus(gatewayStatus: string): PaymentStatus {
     const statusMap: Record<string, PaymentStatus> = {
-      'pending': PaymentStatus.PENDING,
-      'approved': PaymentStatus.APPROVED,
-      'rejected': PaymentStatus.FAILED,
-      'refunded': PaymentStatus.REFUNDED,
-      'cancelled': PaymentStatus.CANCELLED
+      pending: PaymentStatus.PENDING,
+      approved: PaymentStatus.APPROVED,
+      rejected: PaymentStatus.FAILED,
+      refunded: PaymentStatus.REFUNDED,
+      cancelled: PaymentStatus.CANCELLED,
     };
     return statusMap[gatewayStatus] || PaymentStatus.PENDING;
   }
@@ -332,9 +336,7 @@ export class PIXPaymentProvider implements IPaymentProvider {
 export class PaymentService {
   private providers: Map<string, IPaymentProvider> = new Map();
 
-  constructor(
-    private prisma: PrismaClient
-  ) {
+  constructor(private prisma: PrismaClient) {
     // Registrar providers disponíveis
     this.registerProvider('manual', new ManualPaymentProvider());
 
@@ -350,11 +352,11 @@ export class PaymentService {
   async processPayment(
     orderId: number,
     method: PaymentMethod,
-    providerName: string = 'manual'
+    providerName: string = 'manual',
   ): Promise<PaymentResponse> {
     // Buscar pedido
     const order = await this.prisma.order.findUnique({
-      where: { id: orderId }
+      where: { id: orderId },
     });
 
     if (!order) {
@@ -377,8 +379,8 @@ export class PaymentService {
       amount: Number(order.totalAmount),
       method,
       customer: {
-        name: order.customerName || undefined
-      }
+        name: order.customerName || undefined,
+      },
     });
 
     // Salvar Payment
@@ -394,8 +396,8 @@ export class PaymentService {
         pixQrCode: result.pixData?.qrCode,
         pixQrCodeBase64: result.pixData?.qrCodeBase64,
         pixCopyPaste: result.pixData?.copyPaste,
-        paidAt: result.status === PaymentStatus.APPROVED ? new Date() : null
-      }
+        paidAt: result.status === PaymentStatus.APPROVED ? new Date() : null,
+      },
     });
 
     // Se aprovado imediatamente, marcar pedido como pago
@@ -412,8 +414,8 @@ export class PaymentService {
       data: {
         isPaid: true,
         paidAt: new Date(),
-        status: OrderStatus.CONFIRMED // avança para próximo status
-      }
+        status: OrderStatus.CONFIRMED, // avança para próximo status
+      },
     });
 
     // Registrar histórico de status
@@ -421,14 +423,14 @@ export class PaymentService {
       data: {
         orderId,
         status: OrderStatus.CONFIRMED,
-        notes: 'Pagamento confirmado'
-      }
+        notes: 'Pagamento confirmado',
+      },
     });
   }
 
   async checkPaymentStatus(paymentId: number): Promise<PaymentStatus> {
     const payment = await this.prisma.payment.findUnique({
-      where: { id: paymentId }
+      where: { id: paymentId },
     });
 
     if (!payment || !payment.gatewayTxId) {
@@ -449,8 +451,8 @@ export class PaymentService {
         where: { id: paymentId },
         data: {
           status: newStatus,
-          paidAt: newStatus === PaymentStatus.APPROVED ? new Date() : payment.paidAt
-        }
+          paidAt: newStatus === PaymentStatus.APPROVED ? new Date() : payment.paidAt,
+        },
       });
 
       if (newStatus === PaymentStatus.APPROVED) {
@@ -516,10 +518,7 @@ interface PaymentStatusResponse {
 // Exemplo: Mercado Pago notifica que PIX foi pago
 // POST /api/webhooks/payment/mercadopago
 
-async function handlePaymentWebhook(
-  provider: string,
-  payload: any
-) {
+async function handlePaymentWebhook(provider: string, payload: any) {
   const paymentProvider = paymentService.getProvider(provider);
 
   if (!paymentProvider || !paymentProvider.handleWebhook) {
@@ -539,6 +538,7 @@ async function handlePaymentWebhook(
 ### 7.1 MVP: Pagamento Manual (Informacional)
 
 **Tela de Checkout (Kiosk):**
+
 ```tsx
 function CheckoutScreen() {
   const { cart, total } = useCartStore();
@@ -549,7 +549,7 @@ function CheckoutScreen() {
     const order = await createOrder({
       items: cart,
       totalAmount: total,
-      paymentMethodInfo: paymentMethod // apenas informacional
+      paymentMethodInfo: paymentMethod, // apenas informacional
     });
 
     // Exibe número do pedido
@@ -566,9 +566,7 @@ function CheckoutScreen() {
         <Radio value="CARD">💳 Cartão</Radio>
       </RadioGroup>
 
-      <Button onClick={handleConfirmOrder}>
-        Confirmar Pedido - R$ {total.toFixed(2)}
-      </Button>
+      <Button onClick={handleConfirmOrder}>Confirmar Pedido - R$ {total.toFixed(2)}</Button>
     </div>
   );
 }
@@ -579,6 +577,7 @@ function CheckoutScreen() {
 ### 7.2 Futuro: Pagamento PIX
 
 **Tela com QR Code:**
+
 ```tsx
 function PixPaymentScreen({ orderId }: { orderId: number }) {
   const [payment, setPayment] = useState<Payment | null>(null);
@@ -610,8 +609,8 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
       method: 'POST',
       body: JSON.stringify({
         method: 'PIX',
-        provider: 'mercadopago'
-      })
+        provider: 'mercadopago',
+      }),
     });
 
     const data = await result.json();
@@ -628,9 +627,7 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
           <img src={payment.pixData.qrCodeBase64} alt="QR Code PIX" />
           <p>Ou copie o código:</p>
           <code>{payment.pixData.copyPaste}</code>
-          <Button onClick={() => copyToClipboard(payment.pixData.copyPaste)}>
-            Copiar Código
-          </Button>
+          <Button onClick={() => copyToClipboard(payment.pixData.copyPaste)}>Copiar Código</Button>
         </>
       )}
 
@@ -646,11 +643,13 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
 ## 8. Estratégia de Migração (MVP → Produção com Pagamento)
 
 ### Fase 1: MVP (Atual)
+
 - ✅ Pedidos funcionam sem pagamento integrado
 - ✅ Campo `paymentMethodInfo` apenas informacional
 - ✅ Funcionário confirma recebimento manualmente
 
 ### Fase 2: Preparação da Infraestrutura
+
 - 📋 Adicionar model `Payment` ao Prisma
 - 📋 Criar migrations
 - 📋 Implementar `IPaymentProvider` interface
@@ -658,6 +657,7 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
 - 📋 Criar rotas API básicas
 
 ### Fase 3: Integração PIX (Primeira Integração Real)
+
 - 📋 Contratar gateway (Mercado Pago, PagSeguro, etc.)
 - 📋 Implementar `PIXPaymentProvider`
 - 📋 Adicionar fluxo de QR Code no frontend
@@ -666,11 +666,13 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
 - 📋 Deploy em produção
 
 ### Fase 4: Integração Cartão
+
 - 📋 Implementar `CardPaymentProvider`
 - 📋 Adicionar formulário de cartão (ou terminal físico)
 - 📋 Integrar com POS (se necessário)
 
 ### Fase 5: Múltiplas Formas de Pagamento
+
 - 📋 Permitir pagamento parcial (ex: metade dinheiro, metade cartão)
 - 📋 Vouchers/vale-refeição
 - 📋 Wallet (PicPay, Ame, etc.)
@@ -681,15 +683,16 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
 
 ### Comparativo
 
-| Gateway | PIX | Cartão | Boleto | Taxa Aprox. | Suporte | Webhook |
-|---------|-----|--------|--------|-------------|---------|---------|
-| **Mercado Pago** | ✅ | ✅ | ✅ | 3,99% - 4,99% | Bom | ✅ |
-| **PagSeguro** | ✅ | ✅ | ✅ | 3,99% - 5,49% | Médio | ✅ |
-| **Asaas** | ✅ | ✅ | ✅ | 1,99% - 3,99% | Excelente | ✅ |
-| **Stripe** | ❌ | ✅ | ❌ | 3,99% + R$ 0,39 | Excelente | ✅ |
-| **Pagar.me** | ✅ | ✅ | ✅ | 3,99% - 4,99% | Bom | ✅ |
+| Gateway          | PIX | Cartão | Boleto | Taxa Aprox.     | Suporte   | Webhook |
+| ---------------- | --- | ------ | ------ | --------------- | --------- | ------- |
+| **Mercado Pago** | ✅  | ✅     | ✅     | 3,99% - 4,99%   | Bom       | ✅      |
+| **PagSeguro**    | ✅  | ✅     | ✅     | 3,99% - 5,49%   | Médio     | ✅      |
+| **Asaas**        | ✅  | ✅     | ✅     | 1,99% - 3,99%   | Excelente | ✅      |
+| **Stripe**       | ❌  | ✅     | ❌     | 3,99% + R$ 0,39 | Excelente | ✅      |
+| **Pagar.me**     | ✅  | ✅     | ✅     | 3,99% - 4,99%   | Bom       | ✅      |
 
 **Recomendação:**
+
 - **MVP sem internet**: Nenhum gateway (manual apenas)
 - **Fase internet local + PIX**: **Asaas** (menor taxa, ótima API) ou **Mercado Pago** (mais conhecido)
 - **Fase cartão**: Depende se terá terminal físico (Stone, Cielo) ou web-based
@@ -699,18 +702,22 @@ function PixPaymentScreen({ orderId }: { orderId: number }) {
 ## 10. Segurança e Compliance
 
 ### 10.1 PCI-DSS (Cartões)
+
 Se implementar pagamento com cartão via web:
+
 - **NUNCA** armazenar dados de cartão completo
 - Usar tokenização do gateway
 - SSL/TLS obrigatório (HTTPS)
 - Recomendado: iframe do gateway (hosted payment page)
 
 ### 10.2 LGPD
+
 - Armazenar apenas dados necessários
 - Anonimizar/mascarar dados sensíveis em logs
 - Política de retenção de dados (ex: apagar pagamentos após 5 anos)
 
 ### 10.3 Auditoria
+
 - Logar todas as transações (sucesso e falha)
 - Rastrear usuário que processou pagamento (staff)
 - Alertas para transações suspeitas (valor muito alto, múltiplas tentativas)
@@ -720,6 +727,7 @@ Se implementar pagamento com cartão via web:
 ## 11. Testes (Preparação)
 
 ### 11.1 Testes Unitários
+
 ```typescript
 describe('PaymentService', () => {
   it('should process manual payment successfully', async () => {
@@ -740,6 +748,7 @@ describe('PaymentService', () => {
 ```
 
 ### 11.2 Testes de Integração
+
 ```typescript
 describe('PIX Payment Flow', () => {
   it('should generate QR code and wait for payment', async () => {
@@ -766,6 +775,7 @@ describe('PIX Payment Flow', () => {
 ## 12. Checklist de Preparação
 
 **Backend:**
+
 - [ ] Criar interface `IPaymentProvider`
 - [ ] Implementar `ManualPaymentProvider`
 - [ ] Criar `PaymentService` com orquestração
@@ -774,18 +784,21 @@ describe('PIX Payment Flow', () => {
 - [ ] Documentar fluxo de webhook
 
 **Frontend:**
+
 - [ ] Criar componentes base (PaymentMethodSelector, PaymentSummary)
 - [ ] Preparar estado de pagamento no store
 - [ ] Tela de QR Code PIX (hidden/feature flag)
 - [ ] Polling service para status
 
 **Infraestrutura:**
+
 - [ ] Documentar requisitos de gateway
 - [ ] Planejar custos de transação
 - [ ] Definir fluxo de testes (sandbox)
 - [ ] Preparar domínio para webhook (ex: https://pedidos.restaurante.com.br/webhooks/payment)
 
 **Segurança:**
+
 - [ ] SSL/TLS configurado
 - [ ] Secrets management (API keys)
 - [ ] Rate limiting em rotas de pagamento
@@ -798,6 +811,7 @@ describe('PIX Payment Flow', () => {
 Esta estratégia garante que o MVP seja **simples e funcional** (sem pagamento integrado), mas o código está **pronto para evoluir** sem reescrita quando chegar a hora de integrar gateways reais.
 
 **Vantagens da Abordagem:**
+
 - ✅ MVP mais rápido de desenvolver
 - ✅ Validação do negócio sem custo de gateway
 - ✅ Arquitetura extensível e testável
@@ -805,6 +819,7 @@ Esta estratégia garante que o MVP seja **simples e funcional** (sem pagamento i
 - ✅ Reduz débito técnico
 
 **Próximos Passos Pós-MVP:**
+
 1. Operar manualmente por 2-4 semanas
 2. Coletar feedback sobre fluxo de pagamento ideal
 3. Decidir qual método integrar primeiro (PIX recomendado)

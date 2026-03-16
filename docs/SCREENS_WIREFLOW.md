@@ -1,8 +1,11 @@
 # Mapa de Telas (Wireflow) - Sistema de Pedidos
 
+Observacao de contexto (16/03/2026): este documento descreve wireframes de referencia. Parte relevante dessas telas ja esta implementada nas rotas de Kiosk, Staff e Admin.
+
 ## 1. Visão Geral das Interfaces
 
 ### Três Perfis Principais
+
 ```
 ┌────────────────────────────────────────────────────────┐
 │                   SISTEMA DE PEDIDOS                   │
@@ -24,6 +27,7 @@
 ## 2. KIOSK - Interface do Cliente (Totem Touch)
 
 ### 2.1 Fluxo Principal
+
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   Splash    │────►│  Categorias │────►│   Itens     │────►│  Detalhes   │
@@ -69,6 +73,7 @@
 ### 2.2 Tela 1: Splash Screen (Bem-vindo)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │                                                  │
@@ -93,6 +98,7 @@
 ```
 
 **Comportamento:**
+
 - Timeout de 30s sem interação → volta para splash
 - Botão grande e evidente
 - Opção de idioma (futuro)
@@ -102,6 +108,7 @@
 ### 2.3 Tela 2: Categorias do Menu
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │ [< Início]           CARDÁPIO         [🛒 0]     │ ← Header fixo
@@ -130,6 +137,7 @@
 ```
 
 **Elementos:**
+
 - Cards grandes (200x200px mínimo)
 - Ícone + Nome + Quantidade de itens
 - Busca sempre visível
@@ -140,6 +148,7 @@
 ### 2.4 Tela 3: Itens da Categoria
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ [< Voltar]       HAMBÚRGUERES        [🛒 2]     │
@@ -173,6 +182,7 @@
 ```
 
 **Elementos:**
+
 - Destaque para combos (borda colorida)
 - Cards de itens com imagem, nome, descrição curta, preço
 - Botão [+] grande para adicionar
@@ -183,6 +193,7 @@
 ### 2.5 Tela 4: Detalhes e Personalização (Item Individual)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │ [✕ Fechar]    HAMBÚRGUER CLÁSSICO               │
@@ -224,6 +235,7 @@
 ```
 
 **Comportamento:**
+
 - Checkbox + stepper de quantidade para cada extra
 - Preço atualizado em tempo real
 - Botão destaque no final
@@ -233,6 +245,7 @@
 ### 2.6 Tela 5: Personalização de Combo
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │ [✕ Fechar]       COMBO CLÁSSICO                  │
@@ -277,6 +290,7 @@
 ```
 
 **Comportamento:**
+
 - Radio buttons para escolhas únicas
 - Indicação clara de valores extras
 - Total atualizado dinamicamente
@@ -286,6 +300,7 @@
 ### 2.7 Tela 6: Carrinho (Revisão do Pedido)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │ [< Continuar]      MEU PEDIDO      [🗑️ Limpar]  │
@@ -328,6 +343,7 @@
 ```
 
 **Elementos:**
+
 - Lista expansível de itens
 - Controle de quantidade inline
 - Botão remover por item
@@ -338,6 +354,7 @@
 ### 2.8 Tela 7: Confirmação e Número do Pedido
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │                                                  │
@@ -371,6 +388,7 @@
 ```
 
 **Comportamento:**
+
 - Exibir número grande e claro
 - Timeout para voltar ao início
 - Opção de imprimir (se houver impressora)
@@ -380,6 +398,7 @@
 ## 3. STAFF - Interface do Funcionário (Balcão)
 
 ### 3.1 Fluxo Principal
+
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   Login     │────►│    Home     │────►│ Novo Pedido │
@@ -420,6 +439,7 @@
 ### 3.2 Tela 1: Login
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │                                                  │
@@ -458,6 +478,7 @@
 ### 3.3 Tela 2: Dashboard (Home Staff)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ [☰] Menu  |  PAINEL BALCÃO  |  João Silva [Sair]            │
@@ -496,6 +517,7 @@
 ```
 
 **Elementos:**
+
 - Cards com métricas do dia
 - Listas de pedidos com ações rápidas
 - Destaque para botão "Novo Pedido"
@@ -505,6 +527,7 @@
 ### 3.4 Tela 3: Novo Pedido (Seleção Rápida)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ [< Voltar]  NOVO PEDIDO - BALCÃO          [🛒 Carrinho: 3]   │
@@ -545,6 +568,7 @@
 ```
 
 **Características:**
+
 - Busca rápida por nome ou código de barras
 - Atalhos para itens mais vendidos
 - Carrinho lateral sempre visível
@@ -555,6 +579,7 @@
 ### 3.5 Tela 4: Finalizar Pedido (Checkout)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ [< Voltar]           FINALIZAR PEDIDO                        │
@@ -605,6 +630,7 @@
 ### 3.6 Tela 5: Lista de Pedidos (Monitoramento)
 
 **Layout:**
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ [☰]  PEDIDOS EM ANDAMENTO        [Atualizar] [Hoje ▾]       │
@@ -643,6 +669,7 @@
 ```
 
 **Características:**
+
 - Atualização em tempo real (WebSocket)
 - Cores/badges por status
 - Filtros rápidos
@@ -653,6 +680,7 @@
 ## 4. ADMIN - Interface do Gerente
 
 ### 4.1 Fluxo Principal
+
 ```
 ┌─────────────┐     ┌──────────────┐     ┌──────────────┐
 │   Login     │────►│  Dashboard   │────►│  Relatórios  │
@@ -681,6 +709,7 @@
 ### 4.2 Tela 1: Dashboard Admin
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ [☰] Menu  |  PAINEL ADMINISTRATIVO  |  Admin [Sair]           │
@@ -724,6 +753,7 @@
 ### 4.3 Tela 2: Gerenciar Cardápio
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ [☰]  GERENCIAR CARDÁPIO               [+ Novo Item]           │
@@ -762,6 +792,7 @@
 ### 4.4 Tela 3: Editar Item do Cardápio
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ [< Voltar]  EDITAR ITEM: HAMBÚRGUER CLÁSSICO                  │
@@ -806,6 +837,7 @@
 ### 4.5 Tela 4: Gerenciar Combos
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ [< Voltar]  EDITAR COMBO: COMBO CLÁSSICO                      │
@@ -856,6 +888,7 @@
 ### 4.6 Tela 5: Relatórios
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ [☰]  RELATÓRIOS                                                │
@@ -900,18 +933,21 @@
 ### 5.1 Design Responsivo
 
 **Kiosk (Totem 21" Touch):**
+
 - Resolução: 1920x1080 (Full HD)
 - Orientação: Portrait ou Landscape
 - Touch targets: mínimo 80x80px (ideal: 100x100px)
 - Font size: 18px+ (24px para títulos)
 
 **Staff (Tablet 10"):**
+
 - Resolução: 1280x800 ou similar
 - Orientação: Landscape
 - Touch targets: mínimo 60x60px
 - Font size: 16px+
 
 **Admin (Desktop):**
+
 - Resolução: 1366x768 ou superior
 - Mouse + teclado
 - Tabelas densas permitidas
@@ -947,6 +983,7 @@
 - **Info**: azul (#3b82f6) + ℹ️
 
 **Toast Notifications:**
+
 - Posição: top-right (desktop) ou top-center (mobile)
 - Duração: 3-5 segundos
 - Dismiss manual disponível
@@ -999,6 +1036,7 @@
 ## 7. Protótipos de Alta Fidelidade (Próximo Passo)
 
 Após validação deste wireflow, criar protótipos no Figma com:
+
 - Paleta de cores definida
 - Tipografia escolhida
 - Componentes shadcn/ui aplicados

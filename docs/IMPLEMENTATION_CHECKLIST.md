@@ -1,857 +1,93 @@
-# Checklist de Implementação - Sistema de Pedidos
+﻿# Checklist de Implementacao - Estado Atual
 
-Este checklist guia a implementação prática do MVP, fase por fase.
+Atualizado em 16/03/2026.
 
----
+## 1. Fases Entregues
 
-## ✅ FASE 1: Setup e Estrutura Base (5-7 dias)
+- [x] Fase 1 - Setup de monorepo, toolchain e base de dados
+- [x] Fase 2 - Backend principal (Auth/Menu/Combos/Orders/Addons)
+- [x] Fase 3 - Frontend Kiosk funcional
+- [x] Fase 4 - Frontend Staff de balcao funcional
+- [x] Fase 5 - Frontend Admin operacional
 
-Status atual: concluida, com excecao de itens desta lista que foram originalmente planejados mas nao existem mais exatamente nesse formato no repositorio.
+## 2. Backend
 
-### Backend Setup
+- [x] Auth com JWT e controle por role
+- [x] Menu com CRUD, disponibilidade e regras de compatibilidade
+- [x] Combos com CRUD e disponibilidade
+- [x] Addons com catalogo publico e admin
+- [x] Orders com calculo e transicoes de status
+- [x] Telemetry para eventos operacionais
+- [x] Reports para dashboard e vendas
+- [x] Users para gestao de usuarios internos
 
-- [x] **1.1 Inicializar projeto Node.js**
+## 3. Frontend
 
-  ```bash
-  mkdir sistema-pedidos
-  cd sistema-pedidos
-  npm init -y
-  mkdir apps packages docs
-  ```
+Kiosk:
 
-- [x] **1.2 Configurar workspaces no root**
-  - [x] Editar `package.json` com `"workspaces": ["apps/*", "packages/*"]`
-  - [x] Adicionar scripts: `dev`, `build`, `test`, `lint`
+- [x] fluxo completo de compra
+- [x] carrinho e checkout
+- [x] confirmacao
 
-- [x] **1.3 Inicializar backend**
+Staff:
 
-  ```bash
-  cd apps
-  mkdir server
-  cd server
-  npm init -y
-  npm install fastify @fastify/cors @fastify/jwt
-  npm install -D typescript @types/node tsx prisma
-  ```
+- [x] login
+- [x] criacao de pedido em balcao
 
-- [x] **1.4 Configurar TypeScript (backend)**
-  - [x] Criar `tsconfig.json`
-  - [x] Configurar `paths` com aliases (`@/*`)
+Admin:
 
-- [x] **1.5 Estrutura de pastas backend**
-  - [x] Criar: `src/`, `src/modules/`, `src/shared/`, `src/config/`, `src/types/`
-  - [x] Criar: `prisma/`, `prisma/migrations/`
+- [x] login por role
+- [x] dashboard
+- [x] menu (CRUD)
+- [x] categorias (CRUD)
+- [x] ingredientes/addons (CRUD)
+- [x] combos (CRUD)
+- [x] pedidos por status (board)
+- [x] usuarios (CRUD)
+- [x] relatorios com exportacao
+- [x] delivery (estrutura inicial)
 
-- [x] **1.6 Configurar Prisma**
+## 4. Regra SIZE_CHANGE (entregue)
 
-  ```bash
-  npx prisma init --datasource-provider sqlite
-  ```
+- [x] Tipo adicionado nos contratos compartilhados
+- [x] Suporte backend/frontend completo
+- [x] Validacao de compatibilidade por escopo
+- [x] Backfill de dados para upgrades de bebida/batata
+- [x] Seed consistente para novos ambientes
+- [x] Script E2E dedicado (test:e2e:size-change)
 
-  - [x] Editar `schema.prisma` com todas as entidades (copiar de DATA_MODEL.md)
-  - [x] Gerar migrations: `npx prisma migrate dev --name init`
-  - [x] Gerar Prisma Client: `npx prisma generate`
+## 5. Testes e Validacao
 
-- [x] **1.7 Criar seed script**
-  - [x] Criar `prisma/seed.ts`
-  - [x] Adicionar categorias padrão (Hambúrgueres, Bebidas, etc.)
-  - [x] Adicionar itens de exemplo (5-10 por categoria)
-  - [x] Adicionar combos exemplo (2-3)
-  - [x] Adicionar usuários: admin e staff padrão
-  - [x] Adicionar roles (admin, staff)
-  - [x] Executar: `npx prisma db seed`
+- [x] type-check backend
+- [x] type-check frontend
+- [x] scripts manuais por fase
+- [x] e2e kiosk
+- [x] e2e admin orders board
+- [x] e2e size change
 
-- [x] **1.8 Setup inicial do Fastify**
-  - [x] Criar `src/app.ts` (configuração do Fastify)
-  - [x] Criar `src/server.ts` (entry point)
-  - [x] Configurar CORS
-  - [x] Configurar logger (Pino)
-  - [x] Testar: `npm run dev` → servidor rodando
+## 6. Pendencias Prioritarias
 
----
+Confiabilidade e qualidade:
 
-### Frontend Setup
+- [ ] Integrar todos os E2E no CI com gate de merge
+- [ ] Adicionar testes de contrato para endpoints criticos (Auth, Orders, Reports, Users)
+- [ ] Ampliar cobertura de cenarios negativos para addons e transicoes de status de pedido
+- [ ] Criar smoke test pos-deploy para rotas principais
 
-- [x] **1.9 Inicializar frontend**
+Operacao Admin e Staff:
 
-  ```bash
-  cd ../
-  npm create vite@latest frontend -- --template react-ts
-  cd frontend
-  npm install
-  ```
+- [ ] Evoluir fluxo de delivery para uso real (fila, roteirizacao, status de entrega)
+- [ ] Melhorar board de pedidos com filtros por SLA, tempo em etapa e ordenacao por prioridade
+- [ ] Adicionar exportacao CSV em relatorios (alem de JSON)
 
-- [x] **1.10 Instalar dependências frontend**
+Observabilidade e seguranca:
 
-  ```bash
-  npm install react-router-dom zustand axios
-  npm install -D tailwindcss postcss autoprefixer
-  npx tailwindcss init -p
-  ```
+- [ ] Consolidar observabilidade operacional (metricas, logs estruturados e alertas)
+- [ ] Incluir trilha de auditoria para acoes administrativas sensiveis (menu, preco, usuarios)
+- [ ] Aplicar hardening de autenticacao (rate limit de login e bloqueio progressivo)
 
-- [x] **1.11 Configurar Tailwind CSS**
-  - [x] Editar `tailwind.config.js` (adicionar paths: `./src/**/*.{js,ts,jsx,tsx}`)
-  - [x] Criar `src/styles/globals.css` com directives do Tailwind
+Plataforma e dados:
 
-- [x] **1.12 Instalar shadcn/ui**
-
-  ```bash
-  npx shadcn-ui@latest init
-  npx shadcn-ui@latest add button card input dialog toast
-  ```
-
-- [x] **1.13 Estrutura de pastas frontend**
-  - [x] Criar: `src/app/`, `src/routes/`, `src/features/`, `src/components/`
-  - [x] Criar: `src/services/`, `src/stores/`, `src/utils/`, `src/types/`
-  - [x] Criar subpastas em `routes/`: `kiosk/`, `staff/`, `admin/`
-
-- [x] **1.14 Configurar TypeScript (frontend)**
-  - [x] Editar `tsconfig.json` com paths aliases
-  - [x] Adicionar: `"@/*": ["./src/*"]`
-
-- [x] **1.15 Configurar React Router**
-  - [x] Criar `src/app/router.tsx`
-  - [x] Definir rotas: `/kiosk`, `/staff`, `/admin`
-  - [x] Integrar no `App.tsx`
-
-- [x] **1.16 Setup de API client**
-  - [x] Criar `src/services/api.service.ts`
-  - [x] Configurar Axios base URL
-  - [x] Adicionar interceptors (JWT, error handling)
-
----
-
-### Package Shared (Opcional mas Recomendado)
-
-- [x] **1.17 Criar package shared**
-
-  ```bash
-  cd ../../packages
-  mkdir shared
-  cd shared
-  npm init -y
-  npm install -D typescript
-  ```
-
-- [x] **1.18 Definir tipos compartilhados**
-  - [x] Criar `src/types/menu.types.ts`
-  - [x] Criar `src/types/order.types.ts`
-  - [x] Criar `src/types/user.types.ts`
-
----
-
-### DevOps e Scripts
-
-- [x] **1.19 Configurar ESLint + Prettier**
-  - [x] Criar `.eslintrc.json` no root
-  - [x] Criar `.prettierrc` no root
-  - [x] Adicionar scripts: `lint`, `format`
-
-- [x] **1.20 Consolidar scripts auxiliares do repositorio**
-  - [x] Scripts de dev/build/type-check por workspace
-  - [x] Scripts manuais de validacao da Fase 2 em `scripts/`
-  - [ ] Script unico de setup automatizado multiplataforma
-
-- [x] **1.21 Documentação básica**
-  - [x] Criar README.md no root (copiar de docs/)
-  - [x] Criar .env.example (backend e frontend)
-
-- [x] **1.22 Testar setup completo**
-  - [x] Backend rodando: `npm run dev -w server`
-  - [x] Frontend rodando: `npm run dev -w frontend`
-  - [x] Sem erros de build
-  - [x] Banco de dados seed executado
-
----
-
-## ✅ FASE 2: Backend API (7-10 dias)
-
-### Module: Auth
-
-- [x] **2.1 Criar estrutura do módulo**
-  - [x] `src/modules/auth/auth.routes.ts`
-  - [x] `src/modules/auth/auth.service.ts`
-  - [x] `src/modules/auth/auth.middleware.ts`
-  - [x] `src/modules/auth/auth.types.ts`
-
-- [x] **2.2 Implementar login**
-  - [x] POST `/api/auth/login`
-  - [x] Validar email + password (bcrypt ou fallback legado)
-  - [x] Gerar JWT token
-  - [x] Retornar user + token
-  - [x] GET `/api/auth/me`
-
-- [x] **2.3 Implementar middleware JWT**
-  - [x] Verificar token no header `Authorization: Bearer <token>`
-  - [x] Decodificar e validar token
-  - [x] Adicionar `user` ao request
-
-- [x] **2.4 Implementar middleware de role**
-  - [x] `checkRole(['ADMIN', 'STAFF'])`
-  - [x] Verificar se user.role está na lista permitida
-
-- [x] **2.5 Testar com Postman/Insomnia**
-  - [x] Login com credenciais corretas → 200 + token
-  - [x] Login com credenciais erradas → 401
-  - [x] Rota protegida sem token → 401
-  - [x] Rota protegida com token válido → 200
-
----
-
-### Module: Menu
-
-- [x] **2.6 Criar estrutura do módulo**
-  - [x] `menu.routes.ts`, `menu.service.ts`, `menu.repository.ts`, `menu.types.ts`
-
-- [x] **2.7 Implementar endpoints públicos**
-  - [x] GET `/api/categories` (listar categorias ativas)
-  - [x] GET `/api/menu` (listar todos os itens disponíveis)
-  - [x] GET `/api/menu?category=:id` (filtrar por categoria)
-  - [x] GET `/api/menu/:id` (detalhes de um item)
-
-- [x] **2.8 Implementar endpoints admin**
-  - [x] POST `/api/menu` (criar item - admin only)
-  - [x] PUT `/api/menu/:id` (editar item - admin only)
-  - [x] PATCH `/api/menu/:id/availability` (marcar disponível/indisponível)
-  - [x] DELETE `/api/menu/:id` (desativar item - soft delete)
-
-- [x] **2.9 Implementar validações (Zod)**
-  - [x] Schema para CreateMenuItemDto
-  - [x] Schema para UpdateMenuItemDto
-  - [x] Validar antes de salvar no banco
-
-- [x] **2.10 Testar CRUD completo**
-  - [x] Criar item → 201
-  - [x] Listar itens → 200 + array
-  - [x] Editar item → 200
-  - [x] Marcar indisponível → item.isAvailable = false
-  - [x] Soft delete → item removido da listagem publica
-
----
-
-### Module: Combos (Simplificado)
-
-- [x] **2.11 Criar estrutura do módulo**
-  - [x] `combos.routes.ts`, `combos.service.ts`, `combos.repository.ts`
-
-- [x] **2.12 Implementar endpoints públicos**
-  - [x] GET `/api/combos` (listar combos ativos)
-  - [x] GET `/api/combos/:id` (detalhes do combo + itens inclusos)
-
-- [x] **2.13 Implementar endpoints admin**
-  - [x] POST `/api/combos` (criar combo simples)
-  - [x] PUT `/api/combos/:id` (editar combo)
-  - [x] PATCH `/api/combos/:id/availability`
-
-- [x] **2.14 Testar combos**
-  - [x] Criar combo com 3 itens inclusos
-  - [x] Listar combos → retorna corretamente
-  - [x] Editar preço → reflete imediatamente
-
----
-
-### Module: Orders
-
-- [x] **2.15 Criar estrutura do módulo**
-  - [x] `orders.routes.ts`, `orders.service.ts`, `orders.repository.ts`
-  - [x] `orders.calculator.ts` (lógica de precificação)
-
-- [x] **2.16 Implementar cálculo de preços**
-  - [x] Função: `calculateOrderTotal(items)`
-  - [x] Iterar por cada item
-  - [x] Se MenuItem: preço base + adicionais
-  - [x] Se Combo: preço fixo + adicionais extras
-  - [x] Retornar: `{ items: [...], totalAmount: 123.45 }`
-
-- [x] **2.17 Implementar criação de pedido**
-  - [x] POST `/api/orders`
-  - [x] Validar payload (items, quantities)
-  - [x] Calcular total automaticamente
-  - [x] Salvar Order + OrderItems + OrderItemAddons
-  - [x] Gerar orderNumber sequencial inteiro
-  - [x] Registrar OrderStatusHistory (PENDING)
-  - [x] Retornar pedido completo + número
-
-- [x] **2.18 Implementar listagem de pedidos**
-  - [x] GET `/api/orders` (com filtros: status, date)
-  - [x] GET `/api/orders/:id` (detalhes completos com items)
-
-- [x] **2.19 Implementar atualização de status**
-  - [x] PATCH `/api/orders/:id/status`
-  - [x] Validar transições (PENDING → CONFIRMED → PREPARING → READY → COMPLETED)
-  - [x] Registrar histórico (OrderStatusHistory)
-
-- [x] **2.20 Testar fluxo completo de pedido**
-  - [x] Criar pedido com 2 itens + adicionais → 201
-  - [x] Cálculo de total está correto
-  - [x] Listar pedidos → inclui o novo
-  - [x] Atualizar status → histórico registrado
-  - [x] Buscar detalhes → itens completos
-
----
-
-### Module: Addons
-
-- [x] **2.21 Implementar endpoints**
-  - [x] GET `/api/addons` (listar todos os adicionais ativos)
-  - [x] GET `/api/menu/:menuItemId/addons` (adicionais permitidos para um item)
-
-- [x] **2.22 Testar**
-  - [x] Listar adicionais → array correto
-  - [x] Filtrar por item → apenas addons permitidos
-
----
-
-### Documentação da API
-
-- [x] **2.23 Documentar rotas (opcional: Swagger)**
-  - [x] Instalar `@fastify/swagger`
-  - [x] Adicionar schemas nas rotas de Auth, Menu, Combos, Orders e Addons
-  - [x] Acessar `/docs` → documentação interativa
-  - [x] Acessar `/docs/json` → OpenAPI JSON
-
-- [x] **2.24 Criar collection Postman/Insomnia**
-  - [x] Cobrir endpoints públicos e administrativos da fase 2
-  - [x] Incluir no repositório (`/docs/api-collection.json`)
-
----
-
-## ✅ FASE 3: Frontend Kiosk (concluida)
-
-Status: implementacao completa em 10/03/2026.
-
-### Setup Base
-
-- [x] **3.1 Criar estrutura de rotas Kiosk**
-  - [x] `routes/kiosk/SplashScreen.tsx`
-  - [x] `routes/kiosk/CategoriesPage.tsx`
-  - [x] `routes/kiosk/MenuItemsPage.tsx`
-  - [x] `routes/kiosk/CartPage.tsx`
-  - [x] `routes/kiosk/CheckoutPage.tsx`
-  - [x] `routes/kiosk/ConfirmationPage.tsx`
-
-- [x] **3.2 Configurar rotas no React Router**
-  - [x] `/kiosk` → SplashScreen
-  - [x] `/kiosk/menu` → CategoriesPage
-  - [x] `/kiosk/menu/:categoryId` → MenuItemsPage
-  - [x] `/kiosk/cart` → CartPage
-  - [x] `/kiosk/checkout` → CheckoutPage
-  - [x] `/kiosk/confirmation/:orderNumber` → ConfirmationPage
-
----
-
-### Feature: Menu
-
-- [x] **3.3 Criar serviço de menu (frontend)**
-  - [x] `features/menu/services/menu.service.ts`
-  - [x] Função: `getCategories()`
-  - [x] Função: `getMenuItems(categoryId?)`
-  - [x] Função: `getMenuItem(id)`
-  - [x] Função: `getAddons(menuItemId)`
-
-- [x] **3.4 Criar hook useMenu**
-  - [x] `features/menu/hooks/useMenu.ts`
-  - [x] Hooks: useCategories, useMenuItems, useAddons, useCombos
-
-- [x] **3.5 Criar componentes de Menu**
-  - [x] `features/menu/components/CategoryCard.tsx`
-  - [x] `features/menu/components/MenuItemCard.tsx`
-  - [x] `features/menu/components/MenuItemModal.tsx`
-  - [x] `features/menu/components/AddonsSelector.tsx`
-
-- [x] **3.6 Implementar tela de categorias**
-  - [x] Fetch categorias via API
-  - [x] Renderizar grid de CategoryCards
-  - [x] Click → navegar para `/kiosk/menu/:categoryId`
-
-- [x] **3.7 Implementar tela de itens**
-  - [x] Fetch itens por categoria
-  - [x] Renderizar lista de MenuItemCards
-  - [x] Click em [+] → abrir MenuItemModal
-
-- [x] **3.8 Implementar modal de personalização**
-  - [x] Exibir detalhes do item (imagem, descrição, preço)
-  - [x] Listar adicionais permitidos (checkbox + stepper)
-  - [x] Campo de observações (textarea)
-  - [x] Calcular preço em tempo real
-  - [x] Botão "Adicionar ao Carrinho"
-
----
-
-### Feature: Cart
-
-- [x] **3.9 Criar CartStore (Zustand)**
-  - [x] `features/cart/store/cart.store.ts`
-  - [x] State: `items: CartItem[]`
-  - [x] Actions: `addMenuItem`, `addCombo`, `removeItem`, `updateQuantity`, `clear`
-  - [x] Computed: `getTotalItems()`, `getTotalPrice()`
-
-- [x] **3.10 Criar componentes de Cart**
-  - [x] `features/cart/components/CartSummary.tsx` (barra flutuante com total)
-  - [x] `features/cart/components/CartItem.tsx` (item individual no carrinho)
-
-- [x] **3.11 Implementar tela de carrinho**
-  - [x] Listar todos os itens do carrinho
-  - [x] Controle de quantidade (+/-)
-  - [x] Botão remover item
-  - [x] Exibir subtotal de cada item
-  - [x] Exibir total geral
-  - [x] Botão "Finalizar Pedido" → navegar para `/kiosk/checkout`
-
----
-
-### Feature: Orders (Kiosk)
-
-- [x] **3.12 Criar serviço de orders (frontend)**
-  - [x] `features/orders/services/orders.service.ts`
-  - [x] Função: `createOrder(items, customerName?, notes?)`
-
-- [x] **3.13 Implementar tela de checkout**
-  - [x] Resumo do pedido (lista de itens + total)
-  - [x] Campo nome do cliente (opcional)
-  - [x] Informação de pagamento (apenas informacional no MVP)
-  - [x] Botão "Confirmar Pedido" → POST `/api/orders`
-
-- [x] **3.14 Implementar tela de confirmação**
-  - [x] Exibir número do pedido (grande e destacado)
-  - [x] Mensagem: "Aguarde a chamada do seu número"
-  - [x] Botão "Fazer Novo Pedido" → limpar carrinho e voltar para splash
-  - [x] Timeout automático (30s) → voltar para splash
-
----
-
-### Polimento Kiosk
-
-- [x] **3.15 Design touch-friendly**
-  - [x] Botões com tamanho mínimo de 44×44px (muitos com 80px+)
-  - [x] Font size 18px+ nas principais ações
-  - [x] Espaçamento adequado em todos os componentes
-
-- [x] **3.16 Feedback visual**
-  - [x] Loading spinners ao fazer requests
-  - [x] Toast notifications (item adicionado, erro, etc.)
-  - [x] Animações suaves (transitions, active:scale)
-
-- [x] **3.17 Tratamento de erros**
-  - [x] Erro de rede → mensagem amigável
-  - [x] Item indisponível → badge "Esgotado" + botão desativado
-  - [x] Timeout de inatividade → retorno para splash
-
-- [x] **3.18 Testar fluxo completo Kiosk**
-  - [x] Splash → Categorias → Itens → Personalizar → Carrinho → Checkout → Confirmação
-  - [x] Adicionar múltiplos itens (2 hambúrgueres + 1 combo)
-  - [x] Adicionar adicionais ("Bacon Extra" no item)
-  - [x] Total calculado corretamente (R$ 76,70 verificado)
-  - [x] Script de validação: `scripts/manual-test-kiosk-phase3.js` (8/8 testes ✓)
-
-- [x] **3.19 Telemetria básica da jornada**
-  - [x] Serviço frontend para rastrear eventos de tela e funil no kiosk
-  - [x] Persistência local dos últimos eventos no navegador
-  - [x] Endpoint backend `POST /api/telemetry/events` para ingestão
-  - [x] Endpoint backend `GET /api/telemetry/events` para inspeção rápida
-
-- [x] **3.20 Teste E2E do fluxo crítico**
-  - [x] Script `scripts/e2e-kiosk-critical-flow.js` cobrindo categorias, itens, addons, combo e criação de pedido
-  - [x] Validação de telemetria no mesmo fluxo E2E
-  - [x] Script npm root: `npm run test:e2e:kiosk`
-
----
-
-## ✅ FASE 4: Frontend Staff (concluida em 12/03/2026)
-
-Status atual: fluxo Staff reduzido ao essencial do balcão. A área ativa cobre login, registro de pedido e confirmação de pagamento na mesma tela. Dashboard e páginas de pedidos foram desabilitados por enquanto e ficam reservados para evoluções futuras na área administrativa.
-
-### Setup e Autenticação
-
-- [x] **4.1 Criar estrutura de rotas Staff**
-  - [x] `routes/staff/LoginPage.tsx`
-  - [x] `routes/staff/StaffLayout.tsx`
-  - [x] `routes/staff/NewOrderPage.tsx`
-  - [x] Fluxo ativo mantido apenas em `/staff/login` e `/staff`
-  - [x] `routes/staff/DashboardPage.tsx`, `routes/staff/OrdersListPage.tsx` e `routes/staff/OrderDetailsPage.tsx` preservadas fora do roteamento ativo
-
-- [x] **4.2 Criar AuthStore (Zustand)**
-  - [x] `features/auth/store/auth.store.ts`
-  - [x] State: `user`, `token`, `isAuthenticated`
-  - [x] Actions: `login`, `logout`, `checkAuth`
-
-- [x] **4.3 Criar serviço de autenticação**
-  - [x] `features/auth/services/auth.service.ts`
-  - [x] Função: `login(email, password)` → salva token em localStorage
-  - [x] Função: `logout()` → remove token
-  - [x] Função: `me()` → GET /api/auth/me
-
-- [x] **4.4 Implementar LoginPage**
-  - [x] Formulário: email + password
-  - [x] Validação básica (campos obrigatórios)
-  - [x] Submit → POST `/api/auth/login`
-  - [x] Salvar token no localStorage
-  - [x] Redirecionar para `/staff` (balcão)
-  - [x] Mensagem de erro inline para credenciais inválidas
-
-- [x] **4.5 Criar ProtectedRoute**
-  - [x] `features/auth/components/ProtectedRoute.tsx`
-  - [x] Verificar se `isAuthenticated`
-  - [x] Se não autenticado → redirecionar para `/staff/login`
-
-- [x] **4.6 Criar StaffCartStore separado**
-  - [x] `features/cart/store/staff-cart.store.ts`
-  - [x] Persist key `staff-cart-v1` (isolado do kiosk)
-
----
-
-### StaffLayout
-
-- [x] **4.7 Implementar StaffLayout simplificado**
-  - [x] Navegação focada apenas em "Registrar Pedido"
-  - [x] Header com nome do usuário e role
-  - [x] Botão "Sair" com logout + redirect
-  - [x] Dashboard e páginas de pedidos removidos do fluxo ativo do Staff
-
----
-
-### Novo Pedido (Staff)
-
-- [x] **4.8 Implementar NewOrderPage focado em balcão**
-  - [x] Layout: seleção de itens ampliada + painel lateral de resumo/pagamento
-  - [x] Cabeçalho forte de atendimento e busca maior
-  - [x] Tabs de categorias destacadas
-  - [x] Cards de lanches maiores e mais intuitivos para toque/clique rápido
-  - [x] Carrinho lateral (CartItemRow reutilizado)
-  - [x] Campos: nome do cliente + observações gerais
-  - [x] Seção de pagamento na mesma tela
-  - [x] Formas: Dinheiro, Cartão e Pix
-  - [x] Cálculo de troco em tempo real para dinheiro
-  - [x] Bloqueio de finalização quando o valor em dinheiro é insuficiente
-  - [x] Botão "Registrar pedido e confirmar pagamento"
-  - [x] POST `/api/orders` mantido sem alterações de backend
-  - [x] Informações de pagamento adicionadas às observações enviadas ao pedido
-  - [x] Tratamento de erros de validação por item
-
----
-
-### Testes
-
-- [x] **4.9 Validação técnica**
-  - [x] Fluxo Staff ativo reduzido para login + registrar pedido
-  - [x] Dashboard, lista de pedidos e detalhes removidos do roteamento ativo
-  - [x] Type-check do frontend sem erros
-
----
-
-## 🚧 FASE 5: Frontend Admin (5-7 dias)
-
-Status atual: apenas a pagina base `routes/admin/AdminPage.tsx` existe; os itens abaixo continuam pendentes.
-
-### Dashboard Admin
-
-- [ ] **5.1 Criar estrutura de rotas Admin**
-  - [ ] `routes/admin/LoginPage.tsx`
-  - [ ] `routes/admin/DashboardPage.tsx`
-  - [ ] `routes/admin/MenuManagementPage.tsx`
-  - [ ] `routes/admin/MenuItemFormPage.tsx`
-  - [ ] `routes/admin/CombosPage.tsx`
-  - [ ] `routes/admin/ComboFormPage.tsx`
-  - [ ] `routes/admin/UsersPage.tsx`
-  - [ ] `routes/admin/ReportsPage.tsx`
-
-- [ ] **5.2 Implementar LoginPage (Admin)**
-  - [ ] Reutilizar LoginForm (com role check: admin)
-  - [ ] Redirecionar para `/admin`
-
-- [ ] **5.3 Implementar DashboardPage**
-  - [ ] Cards com métricas (faturamento, pedidos, ticket médio)
-  - [ ] Gráfico simples (opcional no MVP: usar recharts ou chart.js)
-  - [ ] Lista de itens mais vendidos
-  - [ ] Ações rápidas (botões para gerenciar cardápio, relatórios)
-
----
-
-### Gerenciar Cardápio
-
-- [ ] **5.4 Implementar MenuManagementPage**
-  - [ ] Listar categorias (accordion ou tabs)
-  - [ ] Listar itens por categoria
-  - [ ] Botão [+ Novo Item]
-  - [ ] Ações por item: [Editar] [Duplicar] [Desativar] [Marcar Indisponível]
-
-- [ ] **5.5 Implementar MenuItemFormPage**
-  - [ ] Formulário completo (nome, categoria, preço, descrição, imagem URL)
-  - [ ] Validação (campos obrigatórios, preço > 0)
-  - [ ] Checkboxes: `isActive`, `isAvailable`
-  - [ ] Multiselect: adicionais permitidos
-  - [ ] Submit → POST ou PUT `/api/menu` ou `/api/menu/:id`
-
-- [ ] **5.6 Testar CRUD de cardápio**
-  - [ ] Criar novo item → aparece na lista
-  - [ ] Editar item → mudanças salvas
-  - [ ] Desativar item → não aparece no Kiosk
-  - [ ] Marcar indisponível → badge "Esgotado" no Kiosk
-
----
-
-### Gerenciar Combos
-
-- [ ] **5.7 Implementar CombosPage**
-  - [ ] Listar combos (cards ou tabela)
-  - [ ] Botão [+ Novo Combo]
-  - [ ] Ações: [Editar] [Ver Regras] [Desativar]
-
-- [ ] **5.8 Implementar ComboFormPage**
-  - [ ] Formulário: nome, preço, descrição, imagem
-  - [ ] Seção: "Itens Inclusos" (multiselect de MenuItems com quantidade)
-  - [ ] (MVP simplificado: sem ComboRules, apenas preço fixo)
-  - [ ] Submit → POST ou PUT `/api/combos` ou `/api/combos/:id`
-
-- [ ] **5.9 Testar CRUD de combos**
-  - [ ] Criar combo com 3 itens → aparece no Kiosk
-  - [ ] Editar preço → reflete imediatamente
-
----
-
-### Relatórios
-
-- [ ] **5.10 Implementar ReportsPage**
-  - [ ] Filtro de período (date range picker)
-  - [ ] Métricas resumidas (vendas, pedidos, ticket médio)
-  - [ ] Vendas por categoria (tabela ou gráfico)
-  - [ ] Top 10 itens mais vendidos (tabela)
-  - [ ] Botão [Exportar] (opcional: gerar JSON ou CSV para download)
-
-- [ ] **5.11 Criar endpoint de relatórios (backend)**
-  - [ ] GET `/api/reports/sales?start=YYYY-MM-DD&end=YYYY-MM-DD`
-  - [ ] Calcular: total de vendas, pedidos, ticket médio
-  - [ ] Agrupar por categoria
-  - [ ] Retornar JSON estruturado
-
----
-
-### Gerenciar Usuários (Básico)
-
-- [ ] **5.12 Implementar UsersPage (opcional MVP)**
-  - [ ] Listar usuários (staff + admin)
-  - [ ] Botão [+ Novo Usuário]
-  - [ ] Ações: [Editar] [Desativar]
-
-- [ ] **5.13 Formulário de usuário (opcional MVP)**
-  - [ ] Campos: username, fullName, email, role
-  - [ ] Senha: hash automático no backend
-
----
-
-### Polimento Admin
-
-- [ ] **5.14 Layout desktop-first**
-  - [ ] Sidebar fixa ou colapsável
-  - [ ] Header com nome do admin + botão Sair
-
-- [ ] **5.15 Validação e feedback**
-  - [ ] Validação inline em formulários
-  - [ ] Mensagens de sucesso/erro (toasts)
-
-- [ ] **5.16 Testar fluxo completo Admin**
-  - [ ] Login → Dashboard → Gerenciar Cardápio → Criar Item → Visualizar no Kiosk
-  - [ ] Editar combo → Salvar → Visualizar no Kiosk
-  - [ ] Gerar relatório de vendas
-
----
-
-## 🚧 FASE 6: Polimento e Deploy (3-5 dias)
-
-Status atual: pendente apos implementacao real das jornadas de frontend.
-
-### Polimento Geral
-
-- [ ] **6.1 Ajustes de UX**
-  - [ ] Garantir botões grandes no Kiosk (80x80px)
-  - [ ] Contraste adequado (WCAG AA)
-  - [ ] Feedback visual em todos os actions
-
-- [ ] **6.2 Loading states**
-  - [ ] Skeleton screens ou spinners em todas as fetches
-  - [ ] Desabilitar botões durante submit (evitar duplo clique)
-
-- [ ] **6.3 Error handling**
-  - [ ] Tratamento de erro de rede (toast + retry)
-  - [ ] Mensagens de erro amigáveis
-  - [ ] Fallback UI para erros críticos
-
-- [ ] **6.4 Responsividade**
-  - [ ] Testar em diferentes resoluções (1920x1080, 1280x800, 1366x768)
-  - [ ] Ajustar breakpoints do Tailwind se necessário
-
----
-
-### Testes Manuais
-
-- [ ] **6.5 Testar fluxo Kiosk (end-to-end)**
-  - [ ] Cliente faz pedido completo sozinho
-  - [ ] Testar com múltiplos itens, adicionais, combos
-  - [ ] Verificar cálculo correto do total
-
-- [ ] **6.6 Testar fluxo Staff**
-  - [ ] Funcionário cria pedido no balcão
-  - [ ] Atualiza status de pedidos
-  - [ ] Monitora lista em tempo real (refresh manual no MVP)
-
-- [ ] **6.7 Testar fluxo Admin**
-  - [ ] Gerente edita cardápio → mudanças refletem no Kiosk
-  - [ ] Marca item indisponível → some do Kiosk
-  - [ ] Visualiza relatórios corretos
-
-- [ ] **6.8 Testar concorrência**
-  - [ ] Abrir Kiosk em 2 dispositivos simultaneamente
-  - [ ] Fazer pedidos ao mesmo tempo
-  - [ ] Ver pedidos aparecerem no Staff
-  - [ ] Sem conflitos ou erros
-
----
-
-### Deploy em Produção
-
-- [ ] **6.9 Preparar PC Central (Windows)**
-  - [ ] Instalar Node.js 20+ LTS
-  - [ ] Instalar Git (se necessário)
-  - [ ] Configurar IP estático
-  - [ ] Desabilitar hibernação/sleep
-
-- [ ] **6.10 Clonar projeto no PC Central**
-
-  ```bash
-  git clone <repo-url> C:\sistema-pedidos
-  cd C:\sistema-pedidos
-  npm install
-  ```
-
-- [ ] **6.11 Configurar .env (produção)**
-  - [ ] Backend: `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET`
-  - [ ] Frontend: `VITE_API_URL=http://192.168.1.100:3000`
-
-- [ ] **6.12 Build do projeto**
-
-  ```bash
-  npm run build
-  ```
-
-- [ ] **6.13 Executar migrations**
-
-  ```bash
-  cd apps/server
-  npx prisma migrate deploy
-  npx prisma db seed
-  ```
-
-- [ ] **6.14 Iniciar servidor como serviço (pm2)**
-
-  ```bash
-  npm install -g pm2
-  pm2 start apps/server/dist/server.js --name sistema-pedidos
-  pm2 startup
-  pm2 save
-  ```
-
-- [ ] **6.15 Configurar firewall do Windows**
-  - [ ] Abrir porta 3000 (TCP)
-  - [ ] Testar acesso de outro dispositivo na rede
-
-- [ ] **6.16 Configurar roteador**
-  - [ ] Garantir que PC Central e dispositivos estão na mesma rede
-  - [ ] Testar ping entre dispositivos
-
----
-
-### Acesso pelos Dispositivos
-
-- [ ] **6.17 Configurar totems/tablets**
-  - [ ] Acessar `http://<IP_PC_CENTRAL>:3000/kiosk`
-  - [ ] Adicionar bookmark ou atalho na tela inicial
-  - [ ] Instalar PWA (se configurado)
-
-- [ ] **6.18 Testar acesso**
-  - [ ] Totem 1: http://192.168.1.100:3000/kiosk → OK
-  - [ ] Tablet Staff: http://192.168.1.100:3000/staff → OK
-  - [ ] PC Admin: http://192.168.1.100:3000/admin → OK
-
----
-
-### Treinamento e Documentação
-
-- [ ] **6.19 Criar manual do usuário**
-  - [ ] Como usar o Kiosk (para clientes, se necessário)
-  - [ ] Como usar o Staff (para funcionários)
-  - [ ] Como usar o Admin (para gerência)
-
-- [ ] **6.20 Treinamento da equipe**
-  - [ ] Sessão hands-on com staff (30min)
-  - [ ] Sessão hands-on com gerente (1h)
-  - [ ] Responder dúvidas
-
-- [ ] **6.21 Criar documentação técnica de manutenção**
-  - [ ] Como fazer backup do banco de dados
-  - [ ] Como reiniciar o servidor
-  - [ ] Como atualizar o sistema (deploy)
-
----
-
-### Monitoramento e Backup
-
-- [ ] **6.22 Configurar backup automático**
-  - [ ] Script para copiar `database.db` diariamente
-  - [ ] Agendar via Task Scheduler (Windows)
-
-- [ ] **6.23 Configurar logs**
-  - [ ] Logs do Pino salvos em arquivo
-  - [ ] Rotação de logs (evitar arquivos muito grandes)
-
-- [ ] **6.24 Monitoramento básico**
-  - [ ] pm2 monit ou pm2 logs
-  - [ ] Alertas se servidor cair (pm2 restart automático já faz isso)
-
----
-
-### Go-Live
-
-- [ ] **6.25 Soft Launch**
-  - [ ] Operar em horário de menor movimento (ex: tarde)
-  - [ ] Equipe técnica de prontidão
-  - [ ] Coletar feedback em tempo real
-
-- [ ] **6.26 Ajustes pós-launch**
-  - [ ] Corrigir pequenos bugs encontrados
-  - [ ] Ajustar UX conforme feedback
-
-- [ ] **6.27 Hard Launch**
-  - [ ] Operar em horário de pico
-  - [ ] Sem sistema antigo como fallback
-  - [ ] Comunicar aos clientes sobre novo sistema
-
----
-
-### Pós-MVP
-
-- [ ] **6.28 Retrospectiva**
-  - [ ] Reunião com equipe (devs + stakeholders)
-  - [ ] O que funcionou bem?
-  - [ ] O que pode melhorar?
-  - [ ] Documentar lições aprendidas
-
-- [ ] **6.29 Coletar métricas**
-  - [ ] Tempo médio de criação de pedido
-  - [ ] Erros reportados
-  - [ ] Feedback de usuários (funcionários e clientes)
-
-- [ ] **6.30 Priorizar backlog v2.0**
-  - [ ] Revisar MVP_ROADMAP.md
-  - [ ] Decidir próximas features (WebSocket? Pagamento? Impressão?)
-  - [ ] Agendar próxima sprint
-
----
-
-## 📞 Suporte
-
-Em caso de dúvidas durante a implementação, consultar:
-
-- [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DATA_MODEL.md](./DATA_MODEL.md)
-- [PRICING_RULES.md](./PRICING_RULES.md)
-- [MVP_ROADMAP.md](./MVP_ROADMAP.md)
+- [ ] Definir rotina automatizada de backup e restore validado do banco local
+- [ ] Planejar migracao monetaria de Float para Decimal com testes de regressao
+- [ ] Estruturar feature flags para entregas graduais em Admin e Kiosk

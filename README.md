@@ -1,6 +1,6 @@
 # Sistema de Pedidos Off-Grid para Restaurante
 
-Sistema de pedidos para operacao local em rede LAN/Wi-Fi, com backend em Fastify + Prisma e frontend React. O repositorio ja entrega a base completa do monorepo, banco SQLite com seed, autenticacao JWT e a API principal da Fase 3.
+Sistema de pedidos para operacao local em rede LAN/Wi-Fi, com backend em Fastify + Prisma e frontend React. O repositorio ja entrega a base completa do monorepo, banco SQLite com seed, autenticacao JWT, jornada Kiosk operacional, Staff focado em balcao e a entrega inicial da area Admin.
 
 ## Visao Geral
 
@@ -10,16 +10,16 @@ O projeto esta organizado em tres frentes de uso:
 - Staff: rota base para operacao de balcao
 - Admin: rota base para operacao e manutencao do cardapio
 
-No estado atual, o backend esta funcional com modulos de negocio ativos, enquanto o frontend ainda esta em fase de shell/interface base.
+No estado atual, backend e frontend cobrem as jornadas centrais do MVP e a administracao operacional basica do restaurante.
 
 ## Status Atual
 
 - Fase 1 concluida: monorepo, TypeScript, Prisma 7, SQLite, Fastify, React e Tailwind configurados
-- Fase 3 backend implementada para auth, menu, combos, addons, orders e telemetry
+- Backend implementado para auth, menu, combos, addons, orders, telemetry, reports e users
 - Seed inicial pronto com categorias, itens, combos, addons e usuarios padrao
 - Swagger UI disponivel para exploracao da API
-- Frontend com roteamento pronto para kiosk, staff e admin, ainda com paginas placeholder
-- Build, lint e type-check funcionando no monorepo
+- Frontend com fluxo Kiosk completo, Staff de balcao e Admin operacional
+- Build e type-check funcionando no monorepo
 
 Entregas de backend disponiveis hoje:
 
@@ -29,6 +29,14 @@ Entregas de backend disponiveis hoje:
 - Addons: listagem global e listagem de addons permitidos por item
 - Orders: criacao publica, listagem autenticada, detalhe e atualizacao de status
 - Telemetry: ingestao e consulta de eventos recentes de jornada
+- Reports: dashboard administrativo e relatorio de vendas por periodo
+- Users: listagem, criacao, edicao e ativacao/desativacao de usuarios internos
+
+Entregas de frontend disponiveis hoje:
+
+- Kiosk: fluxo completo de autoatendimento com telemetria
+- Staff: login e registro de pedido no balcao em modos classic e touch
+- Admin: login por role, dashboard, cardapio, combos, usuarios internos e relatorios
 
 ---
 
@@ -158,6 +166,13 @@ Menu:
 - PUT /api/menu/:id
 - PATCH /api/menu/:id/availability
 - DELETE /api/menu/:id
+- GET /api/admin/categories
+- POST /api/admin/categories
+- PUT /api/admin/categories/:id
+- PATCH /api/admin/categories/:id/status
+- DELETE /api/admin/categories/:id
+- GET /api/admin/menu
+- DELETE /api/admin/menu/:id
 
 Combos:
 
@@ -166,11 +181,18 @@ Combos:
 - POST /api/combos
 - PUT /api/combos/:id
 - PATCH /api/combos/:id/availability
+- DELETE /api/combos/:id
+- GET /api/admin/combos
 
 Addons:
 
 - GET /api/addons
 - GET /api/menu/:menuItemId/addons
+- GET /api/admin/addons
+- POST /api/admin/addons
+- PUT /api/admin/addons/:id
+- PATCH /api/admin/addons/:id/status
+- DELETE /api/admin/addons/:id
 
 Orders:
 
@@ -183,6 +205,19 @@ Telemetry:
 
 - POST /api/telemetry/events
 - GET /api/telemetry/events
+
+Reports:
+
+- GET /api/reports/dashboard
+- GET /api/reports/sales
+
+Users:
+
+- GET /api/users
+- POST /api/users
+- PUT /api/users/:id
+- PATCH /api/users/:id/status
+- DELETE /api/users/:id
 
 ---
 
@@ -199,6 +234,11 @@ npm run test
 npm run type-check
 npm run format
 npm run test:phase1
+npm run test:staff:phase4
+npm run test:admin:phase5
+npm run test:e2e:kiosk
+npm run test:e2e:admin:orders
+npm run test:e2e:size-change
 ```
 
 Backend:
@@ -222,7 +262,7 @@ npm run -w apps/frontend type-check
 npm run -w apps/frontend lint
 ```
 
-Scripts manuais adicionais estao na pasta scripts para validacoes por modulo das fases 2 e 3.
+Scripts manuais e E2E adicionais estao na pasta scripts para validacoes por modulo das fases 1 a 5.
 
 ---
 
@@ -261,10 +301,10 @@ npm run build
 
 Os proximos passos mais evidentes no codigo atual sao:
 
-- Evoluir as paginas de kiosk, staff e admin alem dos placeholders
-- Conectar o frontend aos endpoints ja publicados
-- Completar telas operacionais de pedido, autenticacao e gestao
-- Expandir cobertura de testes manuais/automatizados das fases 2 e 3
+- Integrar os scripts E2E novos no pipeline de CI (kiosk, admin orders e size change)
+- Expandir testes negativos para regras de compatibilidade de addons por escopo
+- Evoluir a aba Delivery do Admin para fluxo operacional real
+- Consolidar cobertura de testes automatizados para regressao de menu/combos/orders
 
 ---
 
