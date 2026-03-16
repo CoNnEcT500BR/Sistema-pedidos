@@ -51,6 +51,13 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
 
       try {
         const order = await createOrder(parsed.data);
+        app.realtime.broadcastOrderChanged({
+          type: 'ORDER_CREATED',
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          timestamp: new Date().toISOString(),
+        });
         return reply.code(201).send({ data: order });
       } catch (error) {
         if (error instanceof OrderValidationError) {
@@ -163,6 +170,13 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
 
       try {
         const order = await updateOrderStatus(params.id, parsed.data);
+        app.realtime.broadcastOrderChanged({
+          type: 'ORDER_STATUS_UPDATED',
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          timestamp: new Date().toISOString(),
+        });
         return reply.code(200).send({ data: order });
       } catch (error) {
         if (isOrderServiceError(error)) {

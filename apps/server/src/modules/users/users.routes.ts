@@ -54,6 +54,18 @@ const updateUserStatusBodySchema = {
 } as const;
 
 export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
+  const emitUserChanged = (
+    action: 'CREATED' | 'UPDATED' | 'DELETED' | 'STATUS_CHANGED',
+    userId: string,
+  ) => {
+    app.realtime.broadcastUserChanged({
+      type: 'USER_CHANGED',
+      action,
+      userId,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
   app.get(
     '/users',
     {
@@ -96,6 +108,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const data = await usersService.createUser(parsed.data);
+      emitUserChanged('CREATED', data.id);
       return reply.code(201).send({ data });
     },
   );
@@ -127,6 +140,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const data = await usersService.updateUser(params.id, parsed.data);
+      emitUserChanged('UPDATED', data.id);
       return { data };
     },
   );
@@ -158,6 +172,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const data = await usersService.updateStatus(params.id, parsed.data.isActive);
+      emitUserChanged('STATUS_CHANGED', data.id);
       return { data };
     },
   );
@@ -183,6 +198,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
 
       try {
         const data = await usersService.deleteUser(params.id, request.user.sub);
+        emitUserChanged('DELETED', data.id);
         return { data };
       } catch (error) {
         if (error instanceof Error) {

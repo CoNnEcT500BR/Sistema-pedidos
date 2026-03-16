@@ -29,6 +29,20 @@ import {
 import { isMenuServiceError, menuService } from './menu.service';
 
 export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
+  const emitCatalogChanged = (
+    entity: 'CATEGORY' | 'MENU_ITEM',
+    action: 'CREATED' | 'UPDATED' | 'DELETED' | 'STATUS_CHANGED' | 'AVAILABILITY_CHANGED',
+    entityId: string,
+  ) => {
+    app.realtime.broadcastCatalogChanged({
+      type: 'CATALOG_CHANGED',
+      entity,
+      action,
+      entityId,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
   app.get(
     '/admin/categories',
     {
@@ -86,6 +100,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const category = await menuService.createCategory(parsed.data);
+      emitCatalogChanged('CATEGORY', 'CREATED', category.id);
       return reply.code(201).send({ data: category });
     },
   );
@@ -129,6 +144,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
 
       try {
         const category = await menuService.updateCategory(params.id, parsed.data);
+        emitCatalogChanged('CATEGORY', 'UPDATED', category.id);
         return reply.code(200).send({ data: category });
       } catch (error) {
         if (isMenuServiceError(error)) {
@@ -174,6 +190,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const category = await menuService.updateCategoryStatus(params.id, parsed.data.isActive);
+      emitCatalogChanged('CATEGORY', 'STATUS_CHANGED', category.id);
       return reply.code(200).send({ data: category });
     },
   );
@@ -197,6 +214,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const params = request.params as { id: string };
       const category = await menuService.deleteCategory(params.id);
+      emitCatalogChanged('CATEGORY', 'DELETED', category.id);
       return reply.code(200).send({ data: category });
     },
   );
@@ -316,6 +334,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
 
       try {
         const item = await menuService.createMenuItem(parsed.data);
+        emitCatalogChanged('MENU_ITEM', 'CREATED', item.id);
         return reply.code(201).send({ data: item });
       } catch (error) {
         if (isMenuServiceError(error)) {
@@ -356,6 +375,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
 
       try {
         const item = await menuService.updateMenuItem(params.id, parsed.data);
+        emitCatalogChanged('MENU_ITEM', 'UPDATED', item.id);
         return reply.code(200).send({ data: item });
       } catch (error) {
         if (isMenuServiceError(error)) {
@@ -395,6 +415,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const item = await menuService.updateAvailability(params.id, parsed.data.isAvailable);
+      emitCatalogChanged('MENU_ITEM', 'AVAILABILITY_CHANGED', item.id);
       return reply.code(200).send({ data: item });
     },
   );
@@ -418,6 +439,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const params = request.params as { id: string };
       const item = await menuService.deleteMenuItem(params.id);
+      emitCatalogChanged('MENU_ITEM', 'DELETED', item.id);
       return reply.code(200).send({ data: item });
     },
   );
@@ -441,6 +463,7 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const params = request.params as { id: string };
       const item = await menuService.deactivateMenuItem(params.id);
+      emitCatalogChanged('MENU_ITEM', 'AVAILABILITY_CHANGED', item.id);
       return reply.code(200).send({ data: item });
     },
   );

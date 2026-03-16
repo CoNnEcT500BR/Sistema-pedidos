@@ -22,6 +22,19 @@ import {
 } from './addons.service';
 
 export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> {
+  const emitCatalogChanged = (
+    action: 'CREATED' | 'UPDATED' | 'DELETED' | 'STATUS_CHANGED' | 'AVAILABILITY_CHANGED',
+    entityId: string,
+  ) => {
+    app.realtime.broadcastCatalogChanged({
+      type: 'CATALOG_CHANGED',
+      entity: 'ADDON',
+      action,
+      entityId,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
   app.get(
     '/admin/addons',
     {
@@ -80,6 +93,7 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const addon = await addonsService.createAddon(parsed.data);
+      emitCatalogChanged('CREATED', addon.id);
       return reply.code(201).send({ data: addon });
     },
   );
@@ -124,6 +138,7 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const addon = await addonsService.updateAddon(params.id, parsed.data);
+      emitCatalogChanged('UPDATED', addon.id);
       return reply.code(200).send({ data: addon });
     },
   );
@@ -161,6 +176,7 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const addon = await addonsService.updateAddonStatus(params.id, parsed.data.isActive);
+      emitCatalogChanged('STATUS_CHANGED', addon.id);
       return reply.code(200).send({ data: addon });
     },
   );
@@ -183,6 +199,7 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
     async (request, reply) => {
       const params = request.params as { id: string };
       const addon = await addonsService.deleteAddon(params.id);
+      emitCatalogChanged('DELETED', addon.id);
       return reply.code(200).send({ data: addon });
     },
   );

@@ -23,6 +23,19 @@ import {
 } from './combos.types';
 
 export async function registerCombosRoutes(app: FastifyInstance): Promise<void> {
+  const emitCatalogChanged = (
+    action: 'CREATED' | 'UPDATED' | 'DELETED' | 'STATUS_CHANGED' | 'AVAILABILITY_CHANGED',
+    entityId: string,
+  ) => {
+    app.realtime.broadcastCatalogChanged({
+      type: 'CATALOG_CHANGED',
+      entity: 'COMBO',
+      action,
+      entityId,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
   app.get(
     '/admin/combos',
     {
@@ -115,6 +128,7 @@ export async function registerCombosRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const combo = await combosService.createCombo(parsed.data);
+      emitCatalogChanged('CREATED', combo.id);
       return reply.code(201).send({ data: combo });
     },
   );
@@ -148,6 +162,7 @@ export async function registerCombosRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const combo = await combosService.updateCombo(params.id, parsed.data);
+      emitCatalogChanged('UPDATED', combo.id);
       return reply.code(200).send({ data: combo });
     },
   );
@@ -181,6 +196,7 @@ export async function registerCombosRoutes(app: FastifyInstance): Promise<void> 
       }
 
       const combo = await combosService.updateAvailability(params.id, parsed.data.isAvailable);
+      emitCatalogChanged('AVAILABILITY_CHANGED', combo.id);
       return reply.code(200).send({ data: combo });
     },
   );
@@ -204,6 +220,7 @@ export async function registerCombosRoutes(app: FastifyInstance): Promise<void> 
     async (request, reply) => {
       const params = request.params as { id: string };
       const combo = await combosService.deleteCombo(params.id);
+      emitCatalogChanged('DELETED', combo.id);
       return reply.code(200).send({ data: combo });
     },
   );

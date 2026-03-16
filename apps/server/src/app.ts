@@ -5,6 +5,7 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 
 import { registerRoutes } from './routes';
+import { registerRealtime } from '@/shared/realtime/realtime';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const usePrettyLogs = !isProduction && process.env.LOG_PRETTY !== 'false';
@@ -88,6 +89,8 @@ export async function buildApp(): Promise<FastifyInstance> {
     version: '1.0.0',
     database: 'connected',
   }));
+
+  await registerRealtime(app);
 
   await registerRoutes(app);
 
