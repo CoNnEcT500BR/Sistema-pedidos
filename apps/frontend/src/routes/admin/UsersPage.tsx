@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pencil, Plus, RefreshCcw, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 
 import {
   Dialog,
@@ -15,6 +15,7 @@ import { adminService } from '@/features/admin/services/admin.service';
 import type { AdminUser } from '@/features/admin/types/admin.types';
 import { userErrorRules } from '@/features/admin/utils/api-error-rules';
 import { resolveApiErrorMessage } from '@/features/admin/utils/api-error';
+import { useUsersRealtimeRefresh } from '@/hooks/useUsersRealtimeRefresh';
 import { useI18n } from '@/i18n';
 
 interface UserFormState {
@@ -65,8 +66,12 @@ export function UsersPage() {
   }, [t]);
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, [loadUsers]);
+
+  useUsersRealtimeRefresh(() => {
+    void loadUsers();
+  });
 
   function openCreate() {
     setForm(emptyForm);
@@ -174,10 +179,6 @@ export function UsersPage() {
         </div>
 
         <div className="flex gap-3">
-          <button type="button" onClick={loadUsers} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100">
-            <RefreshCcw size={16} />
-            {t('Atualizar')}
-          </button>
           <button type="button" onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-800">
             <Plus size={16} />
             {t('Novo usuário')}

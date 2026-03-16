@@ -1,12 +1,11 @@
 import { isAxiosError } from 'axios';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { OrderCard } from '@/features/orders/components/OrderCard';
 import { ordersService } from '@/features/orders/services/orders.service';
 import type { Order, OrderStatus } from '@/features/orders/types/order.types';
+import { useOrdersRealtimeRefresh } from '@/hooks/useOrdersRealtimeRefresh';
 import { useI18n } from '@/i18n';
-
-const POLL_INTERVAL = 15_000;
 
 type FilterTab = 'ALL' | OrderStatus;
 
@@ -17,7 +16,6 @@ export function OrdersListPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<FilterTab>('ALL');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchOrders = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -38,12 +36,12 @@ export function OrdersListPage() {
   }, [t]);
 
   useEffect(() => {
-    fetchOrders();
-    intervalRef.current = setInterval(() => fetchOrders(true), POLL_INTERVAL);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    void fetchOrders();
   }, [fetchOrders]);
+
+  useOrdersRealtimeRefresh(() => {
+    void fetchOrders(true);
+  });
 
   async function handleStatusChange(orderId: string, status: OrderStatus) {
     setUpdatingId(orderId);
@@ -51,7 +49,7 @@ export function OrdersListPage() {
       await ordersService.updateOrderStatus(orderId, status);
       await fetchOrders(true);
     } catch {
-      // silently fail; next poll will re-sync
+      // silently fail; realtime update will re-sync
     } finally {
       setUpdatingId(null);
     }
@@ -74,7 +72,9 @@ export function OrdersListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">{t('Pedidos')}</h1>
         <button
-          onClick={() => fetchOrders()}
+          onClick={() => {
+            void fetchOrders();
+          }}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-600
             text-sm font-medium hover:bg-gray-50 transition-colors"
         >

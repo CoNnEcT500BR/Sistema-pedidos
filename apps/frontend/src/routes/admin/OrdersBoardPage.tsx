@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshCcw } from 'lucide-react';
 
 import { StatusBadge } from '@/features/orders/components/StatusBadge';
 import { ordersService } from '@/features/orders/services/orders.service';
 import type { Order, OrderStatus } from '@/features/orders/types/order.types';
+import { useOrdersRealtimeRefresh } from '@/hooks/useOrdersRealtimeRefresh';
 import { useI18n } from '@/i18n';
 
 const boardStatuses: Array<{ key: 'PENDING' | 'PREPARING' | 'READY'; label: string }> = [
@@ -29,8 +29,10 @@ export function OrdersBoardPage() {
     [language],
   );
 
-  const loadOrders = useCallback(async () => {
-    setLoading(true);
+  const loadOrders = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     setError('');
     try {
       const data = await ordersService.getOrders();
@@ -38,15 +40,19 @@ export function OrdersBoardPage() {
     } catch {
       setError(t('Não foi possível carregar os pedidos para o quadro de produção.'));
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [t]);
 
   useEffect(() => {
-    loadOrders();
-    const intervalId = setInterval(loadOrders, 15000);
-    return () => clearInterval(intervalId);
+    void loadOrders();
   }, [loadOrders]);
+
+  useOrdersRealtimeRefresh(() => {
+    void loadOrders(true);
+  });
 
   const groupedOrders = useMemo(() => {
     return {
@@ -62,7 +68,7 @@ export function OrdersBoardPage() {
       for (const step of steps) {
         await ordersService.updateOrderStatus(order.id, step);
       }
-      await loadOrders();
+      await loadOrders(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : t('Não foi possível atualizar o status do pedido.');
       setError(message);
@@ -131,14 +137,6 @@ export function OrdersBoardPage() {
           <p className="mt-2 text-sm text-stone-600">{t('Acompanhe as etapas de aguardo, preparo e pronto com atualização rápida de status.')}</p>
         </div>
 
-        <button
-          type="button"
-          onClick={loadOrders}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
-        >
-          <RefreshCcw size={16} />
-          {t('Atualizar')}
-        </button>
       </div>
 
       {error ? <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}

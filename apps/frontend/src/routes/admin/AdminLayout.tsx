@@ -14,6 +14,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { useRealtimeConnectionStatus } from '@/hooks/useRealtimeConnectionStatus';
 import { useI18n } from '@/i18n';
 
 const navigation = [
@@ -32,6 +33,26 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { user, logout } = useAuthStore();
+  const realtimeStatus = useRealtimeConnectionStatus();
+
+  const realtimeBadge =
+    realtimeStatus === 'connected'
+      ? {
+          dotClass: 'bg-emerald-500',
+          label: t('Tempo real conectado'),
+          wrapperClass: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+        }
+      : realtimeStatus === 'reconnecting'
+        ? {
+            dotClass: 'bg-amber-500 animate-pulse',
+            label: t('Reconectando tempo real'),
+            wrapperClass: 'border-amber-200 bg-amber-50 text-amber-700',
+          }
+        : {
+            dotClass: 'bg-stone-400',
+            label: t('Tempo real desconectado'),
+            wrapperClass: 'border-stone-200 bg-white text-stone-600',
+          };
 
   function handleLogout() {
     logout();
@@ -79,6 +100,13 @@ export function AdminLayout() {
         <div className="mx-4 mb-5 rounded-3xl border border-stone-200 bg-stone-50 p-4">
           <p className="text-sm font-semibold text-stone-900">{user?.name ?? user?.email ?? t('Administrador')}</p>
           <p className="mt-1 text-xs uppercase tracking-[0.18em] text-stone-500">{t('Sessão ativa')}</p>
+          <div
+            className={`mt-4 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${realtimeBadge.wrapperClass}`}
+            title={t('Status da conexão em tempo real do painel administrativo')}
+          >
+            <span className={`h-2 w-2 rounded-full ${realtimeBadge.dotClass}`} />
+            {realtimeBadge.label}
+          </div>
           <button
             type="button"
             onClick={handleLogout}

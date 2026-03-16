@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Copy, Pencil, Plus, Power, RefreshCcw, Trash2 } from 'lucide-react';
+import { Copy, Pencil, Plus, Power, Trash2 } from 'lucide-react';
 
 import {
   Dialog,
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { adminService } from '@/features/admin/services/admin.service';
 import { menuErrorRules } from '@/features/admin/utils/api-error-rules';
 import { resolveApiErrorMessage } from '@/features/admin/utils/api-error';
+import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
 import type { AdminMenuItemDetail } from '@/features/admin/types/admin.types';
 import type { Addon, Category, MenuItem } from '@/features/menu/types/menu.types';
 import { resolveIngredientMeta, type ProductScope } from '@/features/menu/utils/ingredient-meta';
@@ -206,6 +207,10 @@ export function MenuManagementPage() {
     loadBaseData(selectedCategory);
   }, [selectedCategory, loadBaseData]);
 
+  useCatalogRealtimeRefresh(() => {
+    void loadBaseData(selectedCategory);
+  });
+
   function resetMessages() {
     setError('');
     setSuccess('');
@@ -390,15 +395,6 @@ export function MenuManagementPage() {
               </option>
             ))}
           </select>
-
-          <button
-            type="button"
-            onClick={() => loadBaseData(selectedCategory)}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
-          >
-            <RefreshCcw size={16} />
-            {t('Atualizar')}
-          </button>
 
           <button
             type="button"

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, RefreshCcw } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { adminService } from '@/features/admin/services/admin.service';
 import type { DashboardData } from '@/features/admin/types/admin.types';
+import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
+import { useOrdersRealtimeRefresh } from '@/hooks/useOrdersRealtimeRefresh';
 import { useI18n } from '@/i18n';
 
 function formatOrderStatus(status: string, t: (value: string) => string) {
@@ -49,8 +51,16 @@ export function DashboardPage() {
   }, [t]);
 
   useEffect(() => {
-    loadDashboard();
+    void loadDashboard();
   }, [loadDashboard]);
+
+  useOrdersRealtimeRefresh(() => {
+    void loadDashboard();
+  });
+
+  useCatalogRealtimeRefresh(() => {
+    void loadDashboard();
+  });
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-6 lg:px-8 lg:py-8">
@@ -62,14 +72,6 @@ export function DashboardPage() {
             {data ? t('Resumo de {period}', { period: data.period.label }) : t('Acompanhe vendas, pedidos e sinais da operação em tempo real.')}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={loadDashboard}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
-        >
-          <RefreshCcw size={16} />
-          {t('Atualizar')}
-        </button>
       </div>
 
       {error ? <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}

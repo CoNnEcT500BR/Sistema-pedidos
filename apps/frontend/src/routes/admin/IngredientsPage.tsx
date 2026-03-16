@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, Power, RefreshCcw, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Power, Trash2 } from 'lucide-react';
 
 import {
   Dialog,
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { adminService } from '@/features/admin/services/admin.service';
 import { ingredientErrorRules } from '@/features/admin/utils/api-error-rules';
 import { resolveApiErrorMessage } from '@/features/admin/utils/api-error';
+import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
 import type { Addon } from '@/features/menu/types/menu.types';
 import {
   buildIngredientDescription,
@@ -344,8 +345,12 @@ export function IngredientsPage() {
   }, [t]);
 
   useEffect(() => {
-    loadAddons();
+    void loadAddons();
   }, [loadAddons]);
+
+  useCatalogRealtimeRefresh(() => {
+    void loadAddons();
+  });
 
   function resetMessages() {
     setError('');
@@ -541,14 +546,6 @@ export function IngredientsPage() {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => loadAddons()}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
-          >
-            <RefreshCcw size={16} />
-            {t('Atualizar')}
-          </button>
           <button
             type="button"
             onClick={openCreate}

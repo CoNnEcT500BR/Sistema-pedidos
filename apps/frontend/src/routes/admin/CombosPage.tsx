@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, RefreshCcw, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 
 import {
   Dialog,
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { adminService } from '@/features/admin/services/admin.service';
 import { comboErrorRules } from '@/features/admin/utils/api-error-rules';
 import { resolveApiErrorMessage } from '@/features/admin/utils/api-error';
+import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
 import type { Combo, MenuItem } from '@/features/menu/types/menu.types';
 import { useI18n } from '@/i18n';
 
@@ -85,8 +86,12 @@ export function CombosPage() {
   }, [t]);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
+
+  useCatalogRealtimeRefresh(() => {
+    void loadData();
+  });
 
   function openCreate() {
     setForm({
@@ -237,10 +242,6 @@ export function CombosPage() {
         </div>
 
         <div className="flex gap-3">
-          <button type="button" onClick={loadData} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100">
-            <RefreshCcw size={16} />
-            {t('Atualizar')}
-          </button>
           <button type="button" onClick={openCreate} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-800">
             <Plus size={16} />
             {t('Novo combo')}

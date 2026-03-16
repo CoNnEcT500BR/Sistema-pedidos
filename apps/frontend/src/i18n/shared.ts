@@ -76,6 +76,11 @@ export const translations: Record<string, string> = {
     'No-scroll screen with item and payment steps',
   'Balcão e confirmação de pagamento': 'Counter and payment confirmation',
   'Sessão ativa': 'Active session',
+  'Tempo real conectado': 'Realtime connected',
+  'Reconectando tempo real': 'Reconnecting realtime',
+  'Tempo real desconectado': 'Realtime disconnected',
+  'Status da conexão em tempo real do painel administrativo':
+    'Realtime connection status for the admin panel',
   'Sair da conta': 'Sign out',
   Atendente: 'Attendant',
   'Ver Carrinho': 'View Cart',

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Download, RefreshCcw } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { adminService } from '@/features/admin/services/admin.service';
 import type { SalesReportData } from '@/features/admin/types/admin.types';
+import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
+import { useOrdersRealtimeRefresh } from '@/hooks/useOrdersRealtimeRefresh';
 import { useI18n } from '@/i18n';
 
 function getDateOffset(offset: number) {
@@ -42,8 +44,16 @@ export function ReportsPage() {
   }, [endDate, startDate, t]);
 
   useEffect(() => {
-    loadReport();
+    void loadReport();
   }, [loadReport]);
+
+  useOrdersRealtimeRefresh(() => {
+    void loadReport();
+  });
+
+  useCatalogRealtimeRefresh(() => {
+    void loadReport();
+  });
 
   function exportJson() {
     if (!report) return;
@@ -69,10 +79,6 @@ export function ReportsPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[180px_180px_auto_auto]">
             <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="rounded-2xl border border-stone-300 px-4 py-3 text-sm text-stone-700 outline-none focus:ring-2 focus:ring-stone-300" />
             <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="rounded-2xl border border-stone-300 px-4 py-3 text-sm text-stone-700 outline-none focus:ring-2 focus:ring-stone-300" />
-            <button type="button" onClick={loadReport} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100">
-              <RefreshCcw size={16} />
-              {t('Atualizar')}
-            </button>
             <button type="button" onClick={exportJson} disabled={!report} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60">
               <Download size={16} />
               {t('Exportar JSON')}
