@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Copy, Pencil, Plus, Power, Trash2 } from 'lucide-react';
+import { Copy, GripVertical, Pencil, Plus, Power, Trash2 } from 'lucide-react';
 
 import {
   Dialog,
@@ -32,7 +32,8 @@ interface MenuFormState {
   imageUrl: string;
   displayOrder: string;
   isAvailable: boolean;
-  addonIds: string[];
+  assemblyAddonIds: string[];
+  extraAddonIds: string[];
 }
 
 const emptyForm: MenuFormState = {
@@ -44,7 +45,8 @@ const emptyForm: MenuFormState = {
   imageUrl: '',
   displayOrder: '0',
   isAvailable: true,
-  addonIds: [],
+  assemblyAddonIds: [],
+  extraAddonIds: [],
 };
 
 const productScopeLabels: Record<ProductScope, string> = {
@@ -75,9 +77,34 @@ function inferMenuItemScope(categoryName?: string, itemName?: string): ProductSc
   return 'GENERAL';
 }
 
+function isNamedAsExtra(value: string): boolean {
+  const normalized = normalizeScopeSource(value);
+  return /\bextra\b|\bextras\b|\badicional\b|\badicionais\b/.test(normalized);
+}
+
+function isAddonTypeAllowedForScope(addonType: Addon['addonType'], scope: ProductScope): boolean {
+  if (scope === 'BURGER_BUILD') {
+    return addonType === 'SUBSTITUTION' || addonType === 'REMOVAL';
+  }
+
+  if (addonType === 'SIZE_CHANGE') {
+    return scope === 'DRINK' || scope === 'SIDE' || scope === 'COMBO';
+  }
+
+  return true;
+}
+
 function isAddonCompatibleWithScope(addon: Addon, scope: ProductScope): boolean {
   const addonScope = resolveIngredientMeta(addon).scope;
-  if (scope === 'BURGER_BUILD' && (addon.addonType === 'EXTRA' || addon.addonType === 'SIZE_CHANGE')) return false;
+
+  if (!isAddonTypeAllowedForScope(addon.addonType, scope)) {
+    return false;
+  }
+
+  if (scope === 'BURGER_BUILD') {
+    if (isNamedAsExtra(addon.name)) return false;
+  }
+
   if (addonScope === 'GENERAL' || scope === 'GENERAL') return true;
   if (scope === 'BURGER_BUILD') return addonScope === 'BURGER_BUILD' || addonScope === 'BURGER';
   return addonScope === scope;
@@ -94,8 +121,11 @@ export function MenuManagementPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeAddonTab, setActiveAddonTab] = useState<'ASSEMBLY' | 'EXTRA'>('ASSEMBLY');
   const [showAllAddons, setShowAllAddons] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<MenuItem | null>(null);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [form, setForm] = useState<MenuFormState>(emptyForm);
 
@@ -154,22 +184,102 @@ export function MenuManagementPage() {
     [form.name, selectedCategoryName],
   );
 
-  const filteredAddonsForItem = useMemo(() => {
-    if (showAllAddons) return addons;
+  const selectedAddonIds = useMemo(
+    () => [...form.assemblyAddonIds, ...form.extraAddonIds],
+    [form.assemblyAddonIds, form.extraAddonIds],
+  );
 
-    return addons.filter((addon) => {
-      const compatible = isAddonCompatibleWithScope(addon, currentItemScope);
-      if (compatible) return true;
-      return form.addonIds.includes(addon.id);
+  const selectedAddonIdSet = useMemo(() => new Set(selectedAddonIds), [selectedAddonIds]);
+
+  const addonById = useMemo(() => {
+    const map = new Map<string, Addon>();
+    addons.forEach((addon) => {
+      map.set(addon.id, addon);
     });
-  }, [addons, currentItemScope, form.addonIds, showAllAddons]);
+    return map;
+  }, [addons]);
+
+  const addonCompatibilityById = useMemo(() => {
+    const map = new Map<string, { compatible: boolean; scope: ProductScope }>();
+
+    addons.forEach((addon) => {
+      map.set(addon.id, {
+        compatible: isAddonCompatibleWithScope(addon, currentItemScope),
+        scope: resolveIngredientMeta(addon).scope,
+      });
+    });
+
+    return map;
+  }, [addons, currentItemScope]);
+
+  const filteredAssemblyAddons = useMemo(() => {
+    const assemblySource = addons.filter((addon) => addon.addonType !== 'EXTRA');
+    if (showAllAddons) return assemblySource;
+
+    return assemblySource.filter(
+      (addon) =>
+        (addonCompatibilityById.get(addon.id)?.compatible ?? false) ||
+        form.assemblyAddonIds.includes(addon.id),
+    );
+  }, [addonCompatibilityById, addons, form.assemblyAddonIds, showAllAddons]);
+
+  const filteredExtraAddons = useMemo(() => {
+    const extraSource = addons.filter((addon) => addon.addonType === 'EXTRA');
+    if (currentItemScope === 'BURGER_BUILD') {
+      return [];
+    }
+
+    if (showAllAddons) return extraSource;
+
+    return extraSource.filter(
+      (addon) =>
+        (addonCompatibilityById.get(addon.id)?.compatible ?? false) ||
+        form.extraAddonIds.includes(addon.id),
+    );
+  }, [addonCompatibilityById, addons, currentItemScope, form.extraAddonIds, showAllAddons]);
+
+  const selectedCategoryItems = useMemo(
+    () =>
+      items.filter((item) => item.categoryId === form.categoryId && (!form.id || item.id !== form.id)),
+    [form.categoryId, form.id, items],
+  );
+
+  const availableDisplayOrders = useMemo(() => {
+    const usedOrders = new Set(
+      selectedCategoryItems
+        .map((item) => item.displayOrder)
+        .filter((order): order is number => typeof order === 'number'),
+    );
+    const highestTaken = selectedCategoryItems.reduce(
+      (max, item) => Math.max(max, item.displayOrder ?? -1),
+      -1,
+    );
+
+    const available: number[] = [];
+    for (let order = 0; order <= highestTaken + 1; order += 1) {
+      if (!usedOrders.has(order)) {
+        available.push(order);
+      }
+    }
+
+    const currentOrder = Number(form.displayOrder || 0);
+    if (
+      Number.isInteger(currentOrder) &&
+      currentOrder >= 0 &&
+      !usedOrders.has(currentOrder) &&
+      !available.includes(currentOrder)
+    ) {
+      available.push(currentOrder);
+    }
+
+    return available.sort((a, b) => a - b);
+  }, [form.displayOrder, selectedCategoryItems]);
 
   const incompatibleSelectedAddons = useMemo(() => {
     return addons.filter(
-      (addon) =>
-        form.addonIds.includes(addon.id) && !isAddonCompatibleWithScope(addon, currentItemScope),
+      (addon) => selectedAddonIdSet.has(addon.id) && !(addonCompatibilityById.get(addon.id)?.compatible ?? false),
     );
-  }, [addons, currentItemScope, form.addonIds]);
+  }, [addonCompatibilityById, addons, selectedAddonIdSet]);
 
   const loadBaseData = useCallback(async (categoryId = selectedCategory) => {
     setLoading(true);
@@ -194,6 +304,15 @@ export function MenuManagementPage() {
     }
   }, [selectedCategory, t]);
 
+  const loadMenuItemsOnly = useCallback(async (categoryId = selectedCategory) => {
+    try {
+      const nextItems = await adminService.getAdminMenuItems(categoryId || undefined);
+      setItems(nextItems);
+    } catch {
+      setError(t('Nao foi possivel atualizar a lista de itens do cardapio.'));
+    }
+  }, [selectedCategory, t]);
+
   useEffect(() => {
     loadBaseData('');
   }, [loadBaseData]);
@@ -208,8 +327,21 @@ export function MenuManagementPage() {
   }, [selectedCategory, loadBaseData]);
 
   useCatalogRealtimeRefresh(() => {
-    void loadBaseData(selectedCategory);
+    void loadMenuItemsOnly(selectedCategory);
   });
+
+  useEffect(() => {
+    if (!dialogOpen || !availableDisplayOrders.length) {
+      return;
+    }
+
+    const currentOrder = Number(form.displayOrder || 0);
+    if (availableDisplayOrders.includes(currentOrder)) {
+      return;
+    }
+
+    setForm((current) => ({ ...current, displayOrder: String(availableDisplayOrders[0]) }));
+  }, [availableDisplayOrders, dialogOpen, form.displayOrder]);
 
   function resetMessages() {
     setError('');
@@ -219,6 +351,7 @@ export function MenuManagementPage() {
   function openCreate() {
     resetMessages();
     setShowAllAddons(false);
+    setActiveAddonTab('ASSEMBLY');
     setForm({
       ...emptyForm,
       categoryId: categories[0]?.id ?? '',
@@ -228,6 +361,19 @@ export function MenuManagementPage() {
 
   function applyDetailToForm(detail: AdminMenuItemDetail, duplicate = false) {
     setShowAllAddons(false);
+    setActiveAddonTab('ASSEMBLY');
+    const assemblyAddonIds = detail.addons
+      .filter((addon) => addon.assignmentType === 'ASSEMBLY')
+      .map((addon) => addon.addonId);
+    const extraAddonIds = detail.addons
+      .filter((addon) => addon.assignmentType === 'EXTRA')
+      .map((addon) => addon.addonId);
+
+    // Compatibilidade com registros antigos sem assignmentType consistente.
+    const fallbackExtraIds = detail.addons
+      .filter((addon) => addon.addon.addonType === 'EXTRA')
+      .map((addon) => addon.addonId);
+
     setForm({
       id: duplicate ? undefined : detail.id,
       categoryId: detail.categoryId,
@@ -238,7 +384,8 @@ export function MenuManagementPage() {
       imageUrl: detail.imageUrl ?? '',
       displayOrder: String(detail.displayOrder ?? 0),
       isAvailable: duplicate ? true : detail.isAvailable,
-      addonIds: detail.addons.map((addon) => addon.addonId),
+      assemblyAddonIds,
+      extraAddonIds: extraAddonIds.length ? extraAddonIds : fallbackExtraIds,
     });
     setDialogOpen(true);
   }
@@ -257,19 +404,28 @@ export function MenuManagementPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function toggleAddon(addonId: string) {
-    const addon = addons.find((entry) => entry.id === addonId);
+  function toggleAddon(addonId: string, target: 'ASSEMBLY' | 'EXTRA') {
+    const addon = addonById.get(addonId);
     if (!addon) return;
 
-    const isCompatible = isAddonCompatibleWithScope(addon, currentItemScope);
+    const isCompatible = addonCompatibilityById.get(addonId)?.compatible ?? false;
 
     setForm((current) => {
-      const isSelected = current.addonIds.includes(addonId);
+      const currentTargetIds = target === 'ASSEMBLY' ? current.assemblyAddonIds : current.extraAddonIds;
+      const oppositeTargetIds = target === 'ASSEMBLY' ? current.extraAddonIds : current.assemblyAddonIds;
+      const isSelected = currentTargetIds.includes(addonId);
 
       if (isSelected) {
         return {
           ...current,
-          addonIds: current.addonIds.filter((id) => id !== addonId),
+          assemblyAddonIds:
+            target === 'ASSEMBLY'
+              ? current.assemblyAddonIds.filter((id) => id !== addonId)
+              : current.assemblyAddonIds,
+          extraAddonIds:
+            target === 'EXTRA'
+              ? current.extraAddonIds.filter((id) => id !== addonId)
+              : current.extraAddonIds,
         };
       }
 
@@ -280,9 +436,59 @@ export function MenuManagementPage() {
 
       return {
         ...current,
-        addonIds: [...current.addonIds, addonId],
+        assemblyAddonIds:
+          target === 'ASSEMBLY'
+            ? [...current.assemblyAddonIds, addonId]
+            : current.assemblyAddonIds.filter((id) => id !== addonId),
+        extraAddonIds:
+          target === 'EXTRA'
+            ? [...current.extraAddonIds, addonId]
+            : oppositeTargetIds.filter((id) => id !== addonId),
       };
     });
+  }
+
+  async function handleDropReorder(targetItemId: string) {
+    if (!selectedCategory || !draggedItemId || draggedItemId === targetItemId || reordering) {
+      return;
+    }
+
+    const currentItems = items.filter((item) => item.categoryId === selectedCategory);
+    const fromIndex = currentItems.findIndex((item) => item.id === draggedItemId);
+    const toIndex = currentItems.findIndex((item) => item.id === targetItemId);
+
+    if (fromIndex < 0 || toIndex < 0) {
+      setDraggedItemId(null);
+      return;
+    }
+
+    const reordered = [...currentItems];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    const reorderedWithDisplayOrder = reordered.map((item, index) => ({
+      ...item,
+      displayOrder: index,
+    }));
+
+    setItems(reorderedWithDisplayOrder);
+    setDraggedItemId(null);
+    setReordering(true);
+    setError('');
+
+    try {
+      await adminService.reorderAdminMenuItems(
+        selectedCategory,
+        reorderedWithDisplayOrder.map((item) => item.id),
+      );
+      setSuccess(t('Ordem dos itens atualizada com sucesso.'));
+    } catch (err) {
+      const message = resolveMenuApiErrorMessage(err, 'Não foi possível reordenar os itens.');
+      setError(message);
+      await loadBaseData(selectedCategory);
+    } finally {
+      setReordering(false);
+    }
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -294,14 +500,28 @@ export function MenuManagementPage() {
       return;
     }
 
+    if (currentItemScope === 'BURGER_BUILD' && form.extraAddonIds.length > 0) {
+      setError(t('No fluxo de criação de hambúrguer, extras não podem ser vinculados ao item.'));
+      return;
+    }
+
     setSaving(true);
     try {
-      const validatedAddonIds = form.addonIds.filter((addonId) => {
-        const addon = addons.find((entry) => entry.id === addonId);
-        return addon ? isAddonCompatibleWithScope(addon, currentItemScope) : false;
+      const validatedAssemblyAddonIds = form.assemblyAddonIds.filter((addonId) => {
+        return addonCompatibilityById.get(addonId)?.compatible ?? false;
       });
 
-      if (validatedAddonIds.length !== form.addonIds.length) {
+      const validatedExtraAddonIds = form.extraAddonIds.filter((addonId) => {
+        const addon = addonById.get(addonId);
+        if (!addon) return false;
+        if (addon.addonType !== 'EXTRA') return false;
+        return addonCompatibilityById.get(addonId)?.compatible ?? false;
+      });
+
+      if (
+        validatedAssemblyAddonIds.length !== form.assemblyAddonIds.length ||
+        validatedExtraAddonIds.length !== form.extraAddonIds.length
+      ) {
         setError(t('Alguns adicionais incompatíveis foram removidos antes de salvar.'));
       }
 
@@ -314,7 +534,8 @@ export function MenuManagementPage() {
         imageUrl: form.imageUrl.trim() || undefined,
         displayOrder: Number(form.displayOrder || 0),
         isAvailable: form.isAvailable,
-        addonIds: validatedAddonIds,
+        assemblyAddonIds: validatedAssemblyAddonIds,
+        extraAddonIds: currentItemScope === 'BURGER_BUILD' ? [] : validatedExtraAddonIds,
       };
 
       if (form.id) {
@@ -326,7 +547,7 @@ export function MenuManagementPage() {
       }
 
       setDialogOpen(false);
-      await loadBaseData(selectedCategory);
+      await loadMenuItemsOnly(selectedCategory);
     } catch (err) {
       const message = resolveMenuApiErrorMessage(err, 'Não foi possível salvar o item.');
       setError(message);
@@ -342,7 +563,7 @@ export function MenuManagementPage() {
       setSuccess(
         item.isAvailable ? t('Item marcado como indisponível.') : t('Item marcado como disponível.'),
       );
-      await loadBaseData(selectedCategory);
+      await loadMenuItemsOnly(selectedCategory);
     } catch (err) {
       const message = resolveMenuApiErrorMessage(
         err,
@@ -364,7 +585,7 @@ export function MenuManagementPage() {
       await adminService.deleteMenuItem(removeTarget.id);
       setSuccess(t('Item removido com sucesso.'));
       setRemoveTarget(null);
-      await loadBaseData(selectedCategory);
+      await loadMenuItemsOnly(selectedCategory);
     } catch (err) {
       const message = resolveMenuApiErrorMessage(err, 'Não foi possível remover o item.');
       setError(message);
@@ -447,6 +668,7 @@ export function MenuManagementPage() {
           <table className="min-w-full divide-y divide-stone-200 text-sm">
             <thead className="bg-stone-50 text-left text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
               <tr>
+                <th className="px-5 py-4">{t('Ordem')}</th>
                 <th className="px-5 py-4">{t('Item')}</th>
                 <th className="px-5 py-4">{t('Categoria')}</th>
                 <th className="px-5 py-4">{t('Preço')}</th>
@@ -457,13 +679,33 @@ export function MenuManagementPage() {
             <tbody className="divide-y divide-stone-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-stone-500">
+                  <td colSpan={6} className="px-5 py-10 text-center text-stone-500">
                     {t('Carregando cardápio administrativo...')}
                   </td>
                 </tr>
               ) : items.length ? (
                 items.map((item) => (
-                  <tr key={item.id} className="align-top">
+                  <tr
+                    key={item.id}
+                    className={`align-top ${draggedItemId === item.id ? 'bg-stone-50' : ''}`}
+                    draggable={Boolean(selectedCategory) && !reordering}
+                    onDragStart={() => setDraggedItemId(item.id)}
+                    onDragOver={(event) => {
+                      if (!selectedCategory || reordering) return;
+                      event.preventDefault();
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      void handleDropReorder(item.id);
+                    }}
+                    onDragEnd={() => setDraggedItemId(null)}
+                  >
+                    <td className="px-5 py-4">
+                      <div className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-2.5 py-1.5 text-xs font-semibold text-stone-700">
+                        {selectedCategory ? <GripVertical size={14} className="text-stone-500" /> : null}
+                        <span>{(item.displayOrder ?? 0) + 1}</span>
+                      </div>
+                    </td>
                     <td className="px-5 py-4">
                       <div className="flex items-start gap-3">
                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-stone-100 text-lg">
@@ -502,13 +744,20 @@ export function MenuManagementPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-stone-500">
+                  <td colSpan={6} className="px-5 py-10 text-center text-stone-500">
                     {t('Nenhum item encontrado para o filtro atual.')}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+        <div className="border-t border-stone-200 bg-stone-50 px-5 py-3 text-xs text-stone-600">
+          {selectedCategory
+            ? reordering
+              ? t('Atualizando ordem do cardápio...')
+              : t('Arraste as linhas para reordenar os itens desta categoria.')
+            : t('Selecione uma categoria para habilitar reordenação por arraste.')}
         </div>
       </div>
 
@@ -547,7 +796,20 @@ export function MenuManagementPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-stone-700">{t('Ordem de exibição')}</label>
-                    <Input type="number" min="0" step="1" value={form.displayOrder} onChange={(event) => updateField('displayOrder', event.target.value)} />
+                    <select
+                      value={form.displayOrder}
+                      onChange={(event) => updateField('displayOrder', event.target.value)}
+                      className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      {availableDisplayOrders.map((order) => (
+                        <option key={order} value={String(order)}>
+                          {t('Posição {order}', { order: order + 1 })}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-stone-500">
+                      {t('A lista mostra apenas posições livres para evitar repetição na categoria.')}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -602,31 +864,61 @@ export function MenuManagementPage() {
                     </div>
                   ) : null}
 
-                  <div className="grid max-h-[260px] gap-2 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50 p-3">
-                    {filteredAddonsForItem.map((addon) => {
-                      const isChecked = form.addonIds.includes(addon.id);
-                      const isCompatible = isAddonCompatibleWithScope(addon, currentItemScope);
-                      const addonScope = resolveIngredientMeta(addon).scope;
+                  <div className="mb-3 inline-flex rounded-xl border border-stone-200 bg-stone-100 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setActiveAddonTab('ASSEMBLY')}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeAddonTab === 'ASSEMBLY' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600'}`}
+                    >
+                      {t('Montagem')} ({form.assemblyAddonIds.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveAddonTab('EXTRA')}
+                      disabled={currentItemScope === 'BURGER_BUILD'}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeAddonTab === 'EXTRA' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600'} disabled:cursor-not-allowed disabled:opacity-50`}
+                    >
+                      {t('Extras permitidos')} ({form.extraAddonIds.length})
+                    </button>
+                  </div>
 
-                      return (
-                        <label
-                          key={addon.id}
-                          className={`flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm ${isCompatible || isChecked ? 'text-stone-700' : 'text-stone-400'}`}
-                        >
-                          <span className="flex min-w-0 flex-col">
-                            <span className="truncate">{addon.name}</span>
-                            <span className="text-xs text-stone-500">{t(productScopeLabels[addonScope])}</span>
-                          </span>
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggleAddon(addon.id)}
-                            disabled={!isCompatible && !isChecked}
-                            className="h-4 w-4 rounded border-stone-300"
-                          />
-                        </label>
-                      );
-                    })}
+                  <div className="grid max-h-[260px] gap-2 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50 p-3">
+                    {(activeAddonTab === 'ASSEMBLY' ? filteredAssemblyAddons : filteredExtraAddons).map(
+                      (addon) => {
+                        const isChecked =
+                          activeAddonTab === 'ASSEMBLY'
+                            ? form.assemblyAddonIds.includes(addon.id)
+                            : form.extraAddonIds.includes(addon.id);
+                        const compatibility = addonCompatibilityById.get(addon.id);
+                        const isCompatible = compatibility?.compatible ?? false;
+                        const addonScope = compatibility?.scope ?? resolveIngredientMeta(addon).scope;
+
+                        return (
+                          <label
+                            key={addon.id}
+                            className={`flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm ${isCompatible || isChecked ? 'text-stone-700' : 'text-stone-400'}`}
+                          >
+                            <span className="flex min-w-0 flex-col">
+                              <span className="truncate">{addon.name}</span>
+                              <span className="text-xs text-stone-500">{t(productScopeLabels[addonScope])}</span>
+                            </span>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleAddon(addon.id, activeAddonTab)}
+                              disabled={!isCompatible && !isChecked}
+                              className="h-4 w-4 rounded border-stone-300"
+                            />
+                          </label>
+                        );
+                      },
+                    )}
+
+                    {activeAddonTab === 'EXTRA' && currentItemScope === 'BURGER_BUILD' ? (
+                      <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                        {t('Extras ficam desabilitados para itens de criação de hambúrguer.')}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

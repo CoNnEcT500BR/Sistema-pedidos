@@ -1,5 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +28,19 @@ function isFlavorAddon(name: string): boolean {
   return name.toLowerCase().startsWith('sabor ');
 }
 
+function normalizeScopeSource(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isBurgerBuildItem(item?: MenuItem | null): boolean {
+  if (!item) return false;
+  const value = normalizeScopeSource(`${item.category?.name ?? ''} ${item.name}`);
+  return /(criacao|criar|monte|personaliz|custom)/.test(value) && /(hamburg|burger|lanche|sanduiche)/.test(value);
+}
+
 interface MenuItemModalProps {
   item: MenuItem | null;
   open: boolean;
@@ -41,8 +54,13 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
   const [selectedIngredients, setSelectedIngredients] = useState<SelectedIngredient[]>([]);
   const increaseButtonRef = useRef<HTMLButtonElement | null>(null);
   const { addons, loading: addonsLoading } = useAddons(open && item ? item.id : null);
+  const availableAddons = useMemo(() => {
+    if (!isBurgerBuildItem(item)) return addons;
+
+    return addons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
+  }, [addons, item]);
   const isDrinkItem = item ? isDrinkName(item.name) : false;
-  const hasFlavorOptions = addons.some((addon) => isFlavorAddon(addon.name));
+  const hasFlavorOptions = availableAddons.some((addon) => isFlavorAddon(addon.name));
   const hasSelectedFlavor = selectedIngredients.some(
     (ingredient) => isFlavorAddon(ingredient.name) && ingredient.quantityToAdd > 0,
   );
@@ -147,9 +165,9 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
               <span className="text-sm">{t('Carregando ingredientes...')}</span>
             </div>
           ) : (
-            addons.length > 0 && (
+            availableAddons.length > 0 && (
               <IngredientsEditor
-                addons={addons}
+                addons={availableAddons}
                 selected={selectedIngredients}
                 onChange={setSelectedIngredients}
               />

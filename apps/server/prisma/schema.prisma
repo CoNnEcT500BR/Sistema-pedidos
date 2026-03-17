@@ -49,6 +49,7 @@ model MenuItem {
 
     @@unique([categoryId, name])
     @@index([categoryId])
+    @@index([categoryId, displayOrder])
     @@index([isAvailable])
 }
 
@@ -80,12 +81,14 @@ model MenuItemAddon {
     addonId String
     addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
 
-    isRequired   Boolean @default(false)
-    displayOrder Int     @default(0)
+    isRequired     Boolean @default(false)
+    assignmentType String  @default("ASSEMBLY") // ASSEMBLY, EXTRA
+    displayOrder   Int     @default(0)
 
     @@unique([menuItemId, addonId])
     @@index([menuItemId])
     @@index([addonId])
+    @@index([assignmentType])
 }
 
 // ============ COMBOS/PROMOÇÕES ============

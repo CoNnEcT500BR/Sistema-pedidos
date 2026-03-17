@@ -92,9 +92,17 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const addon = await addonsService.createAddon(parsed.data);
-      emitCatalogChanged('CREATED', addon.id);
-      return reply.code(201).send({ data: addon });
+      try {
+        const addon = await addonsService.createAddon(parsed.data);
+        emitCatalogChanged('CREATED', addon.id);
+        return reply.code(201).send({ data: addon });
+      } catch (error) {
+        if (isAddonsServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -137,9 +145,17 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const addon = await addonsService.updateAddon(params.id, parsed.data);
-      emitCatalogChanged('UPDATED', addon.id);
-      return reply.code(200).send({ data: addon });
+      try {
+        const addon = await addonsService.updateAddon(params.id, parsed.data);
+        emitCatalogChanged('UPDATED', addon.id);
+        return reply.code(200).send({ data: addon });
+      } catch (error) {
+        if (isAddonsServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -175,9 +191,17 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const addon = await addonsService.updateAddonStatus(params.id, parsed.data.isActive);
-      emitCatalogChanged('STATUS_CHANGED', addon.id);
-      return reply.code(200).send({ data: addon });
+      try {
+        const addon = await addonsService.updateAddonStatus(params.id, parsed.data.isActive);
+        emitCatalogChanged('STATUS_CHANGED', addon.id);
+        return reply.code(200).send({ data: addon });
+      } catch (error) {
+        if (isAddonsServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -198,9 +222,17 @@ export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> 
     },
     async (request, reply) => {
       const params = request.params as { id: string };
-      const addon = await addonsService.deleteAddon(params.id);
-      emitCatalogChanged('DELETED', addon.id);
-      return reply.code(200).send({ data: addon });
+      try {
+        const addon = await addonsService.deleteAddon(params.id);
+        emitCatalogChanged('DELETED', addon.id);
+        return reply.code(200).send({ data: addon });
+      } catch (error) {
+        if (isAddonsServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 

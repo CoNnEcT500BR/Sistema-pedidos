@@ -50,6 +50,19 @@ function isBurgerName(name: string): boolean {
   return name.toLowerCase().includes('burger');
 }
 
+function normalizeScopeSource(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isBurgerBuildItemName(name?: string): boolean {
+  if (!name) return false;
+  const value = normalizeScopeSource(name);
+  return /(criacao|criar|monte|personaliz|custom)/.test(value) && /(hamburg|burger|lanche|sanduiche)/.test(value);
+}
+
 function isFlavorAddon(name: string): boolean {
   return name.toLowerCase().startsWith('sabor ');
 }
@@ -305,6 +318,12 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
   const { addons: burgerAddons } = useAddons(open && burgerItem ? burgerItem.id : null);
   const { addons: drinkAddons } = useAddons(open && drinkItem ? drinkItem.id : null);
 
+  const availableBurgerAddons = useMemo(() => {
+    if (!isBurgerBuildItemName(burgerItem?.name)) return burgerAddons;
+
+    return burgerAddons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
+  }, [burgerAddons, burgerItem?.name]);
+
   const upgradeOptions = useMemo(() => {
     if (!combo?.comboItems) return [];
 
@@ -519,7 +538,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               {step === 'burger' && (
                 <TouchCustomizationPanel
                   title={burgerItem ? t('Lanche: {name}', { name: t(burgerItem.name) }) : t('Lanche')}
-                  addons={burgerAddons}
+                  addons={availableBurgerAddons}
                   selected={selectedBurgerIngredients}
                   onChange={setSelectedBurgerIngredients}
                 />

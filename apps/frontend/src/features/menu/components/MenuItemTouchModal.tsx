@@ -44,6 +44,19 @@ function isFlavorAddon(name: string): boolean {
   return name.toLowerCase().startsWith('sabor ');
 }
 
+function normalizeScopeSource(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isBurgerBuildItem(item?: MenuItem | null): boolean {
+  if (!item) return false;
+  const value = normalizeScopeSource(`${item.category?.name ?? ''} ${item.name}`);
+  return /(criacao|criar|monte|personaliz|custom)/.test(value) && /(hamburg|burger|lanche|sanduiche)/.test(value);
+}
+
 function formatCurrency(value: number): string {
   return value.toFixed(2).replace('.', ',');
 }
@@ -127,12 +140,17 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
   const [ingredientsPageIndex, setIngredientsPageIndex] = useState(0);
   const increaseButtonRef = useRef<HTMLButtonElement | null>(null);
   const { addons, loading: addonsLoading } = useAddons(open && item ? item.id : null);
+  const availableAddons = useMemo(() => {
+    if (!isBurgerBuildItem(item)) return addons;
 
-  const removableIngredients = useMemo(() => addons.filter((addon) => addon.isRequired === true), [addons]);
-  const extraIngredients = useMemo(() => addons.filter((addon) => addon.isRequired === false), [addons]);
+    return addons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
+  }, [addons, item]);
+
+  const removableIngredients = useMemo(() => availableAddons.filter((addon) => addon.isRequired === true), [availableAddons]);
+  const extraIngredients = useMemo(() => availableAddons.filter((addon) => addon.isRequired === false), [availableAddons]);
 
   const isDrinkItem = item ? isDrinkName(item.name) : false;
-  const hasFlavorOptions = addons.some((addon) => isFlavorAddon(addon.name));
+  const hasFlavorOptions = availableAddons.some((addon) => isFlavorAddon(addon.name));
   const hasSelectedFlavor = selectedIngredients.some((ingredient) => isFlavorAddon(ingredient.name) && ingredient.quantityToAdd > 0);
   const mustSelectFlavor = isDrinkItem && hasFlavorOptions;
   const isFlavorSelectionValid = !mustSelectFlavor || hasSelectedFlavor;
@@ -218,7 +236,9 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
     const newQuantity = isFlavorOption ? (rawNext > 0 ? 1 : 0) : Math.max(0, rawNext);
 
     if (isFlavorOption && newQuantity > 0) {
-      const flavorIds = new Set(addons.filter((entry) => isFlavorAddon(entry.name)).map((entry) => entry.id));
+      const flavorIds = new Set(
+        availableAddons.filter((entry) => isFlavorAddon(entry.name)).map((entry) => entry.id),
+      );
       const cleaned = selectedIngredients.filter((entry) => !flavorIds.has(entry.addonId)).map((entry) => ({ ...entry }));
 
       if (existing) {

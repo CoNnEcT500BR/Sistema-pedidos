@@ -172,11 +172,12 @@ export const addonSchema = {
 
 export const menuItemAddonOptionSchema = {
   type: 'object',
-  required: ['id', 'name', 'addonType', 'price', 'description', 'isRequired'],
+  required: ['id', 'name', 'addonType', 'assignmentType', 'price', 'description', 'isRequired'],
   properties: {
     id: { type: 'string' },
     name: { type: 'string' },
     addonType: { type: 'string' },
+    assignmentType: { type: 'string', enum: ['ASSEMBLY', 'EXTRA'] },
     price: { type: 'number' },
     description: nullableString,
     isRequired: { type: 'boolean' },
@@ -229,12 +230,21 @@ export const menuItemWithCategorySchema = {
 
 export const menuItemAddonLinkSchema = {
   type: 'object',
-  required: ['id', 'menuItemId', 'addonId', 'isRequired', 'displayOrder', 'addon'],
+  required: [
+    'id',
+    'menuItemId',
+    'addonId',
+    'isRequired',
+    'assignmentType',
+    'displayOrder',
+    'addon',
+  ],
   properties: {
     id: { type: 'string' },
     menuItemId: { type: 'string' },
     addonId: { type: 'string' },
     isRequired: { type: 'boolean' },
+    assignmentType: { type: 'string', enum: ['ASSEMBLY', 'EXTRA'] },
     displayOrder: { type: 'integer' },
     addon: addonSchema,
   },
@@ -271,6 +281,14 @@ export const createMenuItemBodySchema = {
     displayOrder: { type: 'integer', minimum: 0 },
     isAvailable: { type: 'boolean' },
     addonIds: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    assemblyAddonIds: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    extraAddonIds: {
       type: 'array',
       items: { type: 'string' },
     },

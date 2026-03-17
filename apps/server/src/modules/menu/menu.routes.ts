@@ -21,6 +21,7 @@ import {
 import {
   createCategorySchema,
   createMenuItemSchema,
+  reorderMenuItemsSchema,
   updateAvailabilitySchema,
   updateCategorySchema,
   updateCategoryStatusSchema,
@@ -239,6 +240,55 @@ export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
       const query = request.query as { category?: string };
       const items = await menuService.listAdminMenuItems(query.category);
       return { data: items };
+    },
+  );
+
+  app.post(
+    '/admin/menu/reorder',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['menu', 'admin'],
+        summary: 'Reordenar itens do cardapio na area administrativa',
+        security: bearerAuthSecurity,
+        body: {
+          type: 'object',
+          required: ['categoryId', 'orderedItemIds'],
+          properties: {
+            categoryId: { type: 'string', minLength: 1 },
+            orderedItemIds: {
+              type: 'array',
+              minItems: 1,
+              items: { type: 'string', minLength: 1 },
+            },
+          },
+        },
+        response: {
+          200: dataResponse({ type: 'object', properties: { success: { type: 'boolean' } } }),
+          400: validationErrorSchema,
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const parsed = reorderMenuItemsSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply
+          .code(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
+      }
+
+      try {
+        await menuService.reorderMenuItems(parsed.data);
+        emitCatalogChanged('MENU_ITEM', 'UPDATED', parsed.data.categoryId);
+        return reply.code(200).send({ data: { success: true } });
+      } catch (error) {
+        if (isMenuServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 

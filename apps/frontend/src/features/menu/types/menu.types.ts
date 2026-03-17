@@ -24,6 +24,7 @@ export interface Addon {
   id: string;
   name: string;
   addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL' | 'SIZE_CHANGE';
+  assignmentType?: 'ASSEMBLY' | 'EXTRA';
   price: number;
   description?: string;
   isRequired?: boolean;

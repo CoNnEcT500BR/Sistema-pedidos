@@ -63,6 +63,13 @@ export const adminService = {
     return res.data.data;
   },
 
+  async reorderAdminMenuItems(categoryId: string, orderedItemIds: string[]): Promise<void> {
+    await apiClient.post<ApiResponse<{ success: boolean }>>('/api/admin/menu/reorder', {
+      categoryId,
+      orderedItemIds,
+    });
+  },
+
   async getMenuItemDetail(id: string): Promise<AdminMenuItemDetail> {
     const res = await apiClient.get<ApiResponse<AdminMenuItemDetail>>(`/api/menu/${id}`);
     return res.data.data;

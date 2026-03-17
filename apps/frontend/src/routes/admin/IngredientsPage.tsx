@@ -224,6 +224,7 @@ export function IngredientsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<Addon | null>(null);
   const [error, setError] = useState('');
+  const [modalError, setModalError] = useState('');
   const [success, setSuccess] = useState('');
   const [form, setForm] = useState<IngredientFormState>(emptyForm);
 
@@ -355,6 +356,7 @@ export function IngredientsPage() {
   function resetMessages() {
     setError('');
     setSuccess('');
+    setModalError('');
   }
 
   function updateField<Key extends keyof IngredientFormState>(
@@ -389,13 +391,15 @@ export function IngredientsPage() {
 
   function handleAddonTypeChange(value: Addon['addonType']) {
     if (!isAddonTypeAllowedForScope(value, form.scope)) {
-        setError(
-          value === 'SIZE_CHANGE'
-            ? t('Variação de tamanho só pode ser usada em bebida, acompanhamento ou combo.')
-            : t('No conjunto criação hambúrguer, o tipo Extra não é permitido para ingrediente.'),
-        );
+      setModalError(
+        value === 'SIZE_CHANGE'
+          ? t('Variação de tamanho só pode ser usada em bebida, acompanhamento ou combo.')
+          : t('No conjunto criação hambúrguer, o tipo Extra não é permitido para ingrediente.'),
+      );
       return;
     }
+
+    setModalError('');
 
     setForm((current) => ({
       ...current,
@@ -408,7 +412,7 @@ export function IngredientsPage() {
     setForm((current) => {
       if (!isAddonTypeAllowedForScope(current.addonType, scope)) {
         const nextAddonType: Addon['addonType'] = scope === 'BURGER_BUILD' ? 'SUBSTITUTION' : 'SIZE_CHANGE';
-        setError(
+        setModalError(
           current.addonType === 'EXTRA'
             ? t('No conjunto criação hambúrguer, o tipo Extra não é permitido para ingrediente.')
             : t('Variação de tamanho só pode ser usada em bebida, acompanhamento ou combo.'),
@@ -445,12 +449,12 @@ export function IngredientsPage() {
     resetMessages();
 
     if (!form.name.trim() || Number(form.price) < 0) {
-      setError(t('Preencha nome e preço válido antes de salvar o ingrediente.'));
+      setModalError(t('Preencha nome e preço válido antes de salvar o ingrediente.'));
       return;
     }
 
     if (!isAddonTypeAllowedForScope(form.addonType, form.scope)) {
-      setError(
+      setModalError(
         form.addonType === 'SIZE_CHANGE'
           ? t('Variação de tamanho só pode ser usada em bebida, acompanhamento ou combo.')
           : t('No conjunto criação hambúrguer, o tipo Extra não é permitido para ingrediente.'),
@@ -485,7 +489,7 @@ export function IngredientsPage() {
       await loadAddons();
     } catch (err) {
       const message = resolveIngredientApiErrorMessage(err, 'Não foi possível salvar o ingrediente.');
-      setError(message);
+      setModalError(message);
     } finally {
       setSaving(false);
     }
@@ -797,6 +801,12 @@ export function IngredientsPage() {
                 {t('Defina tipo, preço e disponibilidade para controlar a personalização dos pedidos.')}
               </DialogDescription>
             </DialogHeader>
+
+            {modalError ? (
+              <div className="mx-6 mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {modalError}
+              </div>
+            ) : null}
 
             {!form.id ? (
               <div className="mx-6 mt-5 rounded-2xl border border-stone-200 bg-stone-50 p-4">

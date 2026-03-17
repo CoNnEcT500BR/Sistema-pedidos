@@ -82,6 +82,13 @@ export const menuRepository = {
       },
     }),
 
+  listMenuItemIdsByCategory: (categoryId: string) =>
+    prisma.menuItem.findMany({
+      where: { categoryId },
+      select: { id: true },
+      orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+    }),
+
   findCategoryById: (id: string) =>
     prisma.category.findUnique({
       where: { id },
@@ -130,6 +137,19 @@ export const menuRepository = {
       select: { id: true },
     }),
 
+  reorderMenuItemsByCategory: async (_categoryId: string, orderedItemIds: string[]) => {
+    await prisma.$transaction(async (tx) => {
+      for (let index = 0; index < orderedItemIds.length; index += 1) {
+        await tx.menuItem.update({
+          where: { id: orderedItemIds[index] },
+          data: {
+            displayOrder: index,
+          },
+        });
+      }
+    });
+  },
+
   createMenuItem: async (data: {
     categoryId: string;
     name: string;
@@ -140,18 +160,43 @@ export const menuRepository = {
     displayOrder?: number;
     isAvailable?: boolean;
     addonIds?: string[];
+    assemblyAddonIds?: string[];
+    extraAddonIds?: string[];
   }) => {
-    const { addonIds = [], ...menuItemData } = data;
+    const { addonIds = [], assemblyAddonIds, extraAddonIds, ...menuItemData } = data;
+
+    const useSegmented = Array.isArray(assemblyAddonIds) || Array.isArray(extraAddonIds);
+    const segmentedAssembly = assemblyAddonIds ?? [];
+    const segmentedExtras = extraAddonIds ?? [];
+
+    const assignmentRows = useSegmented
+      ? [
+          ...segmentedAssembly.map((addonId, index) => ({
+            addonId,
+            assignmentType: 'ASSEMBLY' as const,
+            isRequired: false,
+            displayOrder: index,
+          })),
+          ...segmentedExtras.map((addonId, index) => ({
+            addonId,
+            assignmentType: 'EXTRA' as const,
+            isRequired: false,
+            displayOrder: index,
+          })),
+        ]
+      : addonIds.map((addonId, index) => ({
+          addonId,
+          assignmentType: 'ASSEMBLY' as const,
+          isRequired: false,
+          displayOrder: index,
+        }));
 
     return prisma.menuItem.create({
       data: {
         ...menuItemData,
-        addons: addonIds.length
+        addons: assignmentRows.length
           ? {
-              create: addonIds.map((addonId, index) => ({
-                addonId,
-                displayOrder: index,
-              })),
+              create: assignmentRows,
             }
           : undefined,
       },
@@ -168,11 +213,19 @@ export const menuRepository = {
   },
 
   updateMenuItem: async (id: string, data: Record<string, unknown>) => {
-    const { addonIds, ...menuItemData } = data as Record<string, unknown> & {
+    const { addonIds, assemblyAddonIds, extraAddonIds, ...menuItemData } = data as Record<
+      string,
+      unknown
+    > & {
       addonIds?: string[];
+      assemblyAddonIds?: string[];
+      extraAddonIds?: string[];
     };
 
-    if (!Array.isArray(addonIds)) {
+    const shouldRewriteAddons =
+      Array.isArray(addonIds) || Array.isArray(assemblyAddonIds) || Array.isArray(extraAddonIds);
+
+    if (!shouldRewriteAddons) {
       return prisma.menuItem.update({
         where: { id },
         data: menuItemData,
@@ -188,6 +241,33 @@ export const menuRepository = {
       });
     }
 
+    const useSegmented = Array.isArray(assemblyAddonIds) || Array.isArray(extraAddonIds);
+    const segmentedAssembly = assemblyAddonIds ?? [];
+    const segmentedExtras = extraAddonIds ?? [];
+    const legacyAddonIds = addonIds ?? [];
+
+    const assignmentRows = useSegmented
+      ? [
+          ...segmentedAssembly.map((addonId, index) => ({
+            addonId,
+            assignmentType: 'ASSEMBLY' as const,
+            isRequired: false,
+            displayOrder: index,
+          })),
+          ...segmentedExtras.map((addonId, index) => ({
+            addonId,
+            assignmentType: 'EXTRA' as const,
+            isRequired: false,
+            displayOrder: index,
+          })),
+        ]
+      : legacyAddonIds.map((addonId, index) => ({
+          addonId,
+          assignmentType: 'ASSEMBLY' as const,
+          isRequired: false,
+          displayOrder: index,
+        }));
+
     return prisma.$transaction(async (tx) => {
       await tx.menuItemAddon.deleteMany({ where: { menuItemId: id } });
 
@@ -195,12 +275,9 @@ export const menuRepository = {
         where: { id },
         data: {
           ...menuItemData,
-          addons: addonIds.length
+          addons: assignmentRows.length
             ? {
-                create: addonIds.map((addonId, index) => ({
-                  addonId,
-                  displayOrder: index,
-                })),
+                create: assignmentRows,
               }
             : undefined,
         },

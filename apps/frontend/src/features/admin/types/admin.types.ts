@@ -7,6 +7,7 @@ export interface AdminMenuItemDetail extends MenuItem {
     menuItemId: string;
     addonId: string;
     isRequired: boolean;
+    assignmentType: 'ASSEMBLY' | 'EXTRA';
     displayOrder: number;
     addon: Addon;
   }>;
@@ -76,6 +77,8 @@ export interface AdminMenuItemPayload {
   displayOrder?: number;
   isAvailable?: boolean;
   addonIds?: string[];
+  assemblyAddonIds?: string[];
+  extraAddonIds?: string[];
 }
 
 export interface AdminComboPayload {

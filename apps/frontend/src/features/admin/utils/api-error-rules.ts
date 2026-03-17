@@ -8,6 +8,11 @@ export const menuErrorRules: ApiErrorRule[] = [
     matchMode: 'all',
   },
   {
+    includes: ['regra de operacao', 'nao aceitam extras'],
+    message: 'No fluxo de criação de hambúrguer, a aba de extras fica desabilitada para este item.',
+    matchMode: 'all',
+  },
+  {
     includes: ['regra de operacao', 'nao aceitam adicionais do tipo size_change'],
     message:
       'No fluxo de criação de hambúrguer, adicionais do tipo Variação de tamanho ficam bloqueados por regra de operação.',
@@ -30,6 +35,11 @@ export const menuErrorRules: ApiErrorRule[] = [
     includes: ['item nao encontrado'],
     message: 'Este item não foi encontrado. Atualize a lista e tente novamente.',
   },
+  {
+    includes: ['ja existe item com esta ordem nesta categoria'],
+    message:
+      'A ordem de exibição escolhida já está em uso nesta categoria. Selecione outra posição.',
+  },
 ];
 
 export const ingredientErrorRules: ApiErrorRule[] = [
@@ -48,6 +58,15 @@ export const ingredientErrorRules: ApiErrorRule[] = [
   {
     includes: ['informe ao menos um campo para atualizar'],
     message: 'Informe ao menos um campo para atualizar o ingrediente.',
+  },
+  {
+    includes: ['ja existe ingrediente com este nome'],
+    message: 'Já existe um ingrediente com esse nome. Use um nome diferente.',
+  },
+  {
+    includes: ['unique constraint failed', 'addon.name'],
+    message: 'Já existe um ingrediente com esse nome. Use um nome diferente.',
+    matchMode: 'all',
   },
 ];
 

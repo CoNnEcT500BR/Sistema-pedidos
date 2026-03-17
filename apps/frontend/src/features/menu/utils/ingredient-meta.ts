@@ -29,6 +29,12 @@ const defaultMeta: IngredientMeta = {
   priority: 'FAST',
 };
 
+const ingredientMetaCache = new Map<string, IngredientMeta>();
+
+function getAddonMetaCacheKey(addon: Addon): string {
+  return `${addon.id}|${addon.name}|${addon.addonType}|${addon.description ?? ''}`;
+}
+
 function normalize(value: string): string {
   return value
     .normalize('NFD')
@@ -129,10 +135,20 @@ function inferMetaFallback(addon: Addon): IngredientMeta {
 }
 
 export function resolveIngredientMeta(addon: Addon): IngredientMeta {
+  const cacheKey = getAddonMetaCacheKey(addon);
+  const cached = ingredientMetaCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const description = addon.description ?? '';
   const tokenMatch = description.match(/\[meta\|([^\]]*)\]/);
 
-  if (!tokenMatch) return inferMetaFallback(addon);
+  if (!tokenMatch) {
+    const fallback = inferMetaFallback(addon);
+    ingredientMetaCache.set(cacheKey, fallback);
+    return fallback;
+  }
 
   const segments = tokenMatch[1]?.split('|') ?? [];
   const parsed = segments.reduce<Record<string, string>>((acc, segment) => {
@@ -145,7 +161,9 @@ export function resolveIngredientMeta(addon: Addon): IngredientMeta {
   const scope = asScope(parsed.scope) ?? inferMetaFallback(addon).scope;
   const priority = asPriority(parsed.priority) ?? inferMetaFallback(addon).priority;
 
-  return { station, scope, priority };
+  const meta = { station, scope, priority };
+  ingredientMetaCache.set(cacheKey, meta);
+  return meta;
 }
 
 export function defaultIngredientMeta(): IngredientMeta {

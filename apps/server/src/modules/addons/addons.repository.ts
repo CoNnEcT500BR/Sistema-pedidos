@@ -12,6 +12,14 @@ export const addonsRepository = {
       orderBy: [{ isActive: 'desc' }, { name: 'asc' }],
     }),
 
+  listAddonNameIndex: () =>
+    prisma.addon.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+
   createAddon: (data: {
     name: string;
     addonType: string;
@@ -46,5 +54,12 @@ export const addonsRepository = {
   findMenuItemById: (menuItemId: string) =>
     prisma.menuItem.findUnique({
       where: { id: menuItemId },
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+      },
     }),
 };

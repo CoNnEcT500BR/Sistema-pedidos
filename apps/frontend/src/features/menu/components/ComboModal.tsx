@@ -54,6 +54,19 @@ function isBurgerName(name: string): boolean {
   return name.toLowerCase().includes('burger');
 }
 
+function normalizeScopeSource(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isBurgerBuildItemName(name?: string): boolean {
+  if (!name) return false;
+  const value = normalizeScopeSource(name);
+  return /(criacao|criar|monte|personaliz|custom)/.test(value) && /(hamburg|burger|lanche|sanduiche)/.test(value);
+}
+
 function isFlavorAddon(name: string): boolean {
   return name.toLowerCase().startsWith('sabor ');
 }
@@ -78,6 +91,12 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
   const { addons: burgerAddons, loading: burgerAddonsLoading } = useAddons(
     open && burgerItem ? burgerItem.id : null,
   );
+
+  const availableBurgerAddons = useMemo(() => {
+    if (!isBurgerBuildItemName(burgerItem?.name)) return burgerAddons;
+
+    return burgerAddons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
+  }, [burgerAddons, burgerItem?.name]);
 
   const { addons: drinkAddons, loading: drinkAddonsLoading } = useAddons(
     open && drinkItem ? drinkItem.id : null,
@@ -310,11 +329,11 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
               </h4>
               {burgerAddonsLoading ? (
                 <span className="text-sm text-gray-400">{t('Carregando ingredientes do lanche...')}</span>
-              ) : burgerAddons.length === 0 ? (
+              ) : availableBurgerAddons.length === 0 ? (
                 <span className="text-sm text-gray-400">{t('Esse lanche nao possui personalizacao.')}</span>
               ) : (
                 <IngredientsEditor
-                  addons={burgerAddons}
+                  addons={availableBurgerAddons}
                   selected={selectedBurgerIngredients}
                   onChange={setSelectedBurgerIngredients}
                 />
