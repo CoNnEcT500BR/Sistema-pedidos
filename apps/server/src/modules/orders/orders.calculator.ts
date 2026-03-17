@@ -101,6 +101,30 @@ async function validateItemAddons(
     };
   }
 
+  // Validar SIZE_CHANGE: upgrade só é permitido para tamanho maior que o atual
+  const sizeChangeAddons = selectedAddons.filter((a) => a.addonType === 'SIZE_CHANGE');
+  if (sizeChangeAddons.length > 0) {
+    const sizeRank: Record<string, number> = { P: 0, M: 1, G: 2 };
+
+    const itemSizeMatch = menuItem.name.match(/\s([PMG])$/);
+    const itemSize = itemSizeMatch?.[1];
+
+    if (itemSize) {
+      for (const addon of sizeChangeAddons) {
+        const addonSizeMatch = addon.name.match(/\s([PMG])$/);
+        const targetSize = addonSizeMatch?.[1];
+
+        if (targetSize && sizeRank[targetSize] <= sizeRank[itemSize]) {
+          return {
+            itemIndex,
+            itemName,
+            message: `Upgrade "${addon.name}" inválido para "${menuItem.name}": tamanho alvo deve ser maior que o atual`,
+          };
+        }
+      }
+    }
+  }
+
   return null;
 }
 

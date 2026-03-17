@@ -38,6 +38,31 @@ export function isAddonsServiceError(error: unknown): error is AddonsServiceErro
   return error instanceof AddonsServiceError;
 }
 
+type SizeSuffix = 'P' | 'M' | 'G';
+
+const sizeRank: Record<SizeSuffix, number> = {
+  P: 0,
+  M: 1,
+  G: 2,
+};
+
+function getSizeSuffix(value: string | undefined): SizeSuffix | null {
+  if (!value) return null;
+  const match = value.match(/\s([PMG])$/);
+  return (match?.[1] as SizeSuffix | undefined) ?? null;
+}
+
+function isInvalidSizeChangeForItem(addonName: string, menuItemName: string): boolean {
+  const sourceSize = getSizeSuffix(menuItemName);
+  const targetSize = getSizeSuffix(addonName);
+
+  if (!sourceSize || !targetSize) {
+    return false;
+  }
+
+  return sizeRank[targetSize] <= sizeRank[sourceSize];
+}
+
 function normalizeName(value: string): string {
   return value
     .normalize('NFD')
@@ -136,6 +161,11 @@ export const addonsService = {
     return allowed
       .filter((entry) => entry.addon.isActive)
       .filter((entry) => isAddonCompatibleWithScope(entry.addon, targetScope))
+      .filter(
+        (entry) =>
+          entry.addon.addonType !== 'SIZE_CHANGE' ||
+          !isInvalidSizeChangeForItem(entry.addon.name, menuItem.name),
+      )
       .map((entry) => ({
         id: entry.addon.id,
         name: entry.addon.name,

@@ -48,6 +48,31 @@ interface MenuItemModalProps {
   onAddToCart: (item: MenuItem, quantity: number, addons: CartAddon[]) => void;
 }
 
+type SizeSuffix = 'P' | 'M' | 'G';
+
+const sizeRank: Record<SizeSuffix, number> = {
+  P: 0,
+  M: 1,
+  G: 2,
+};
+
+function getSizeSuffix(value: string | undefined): SizeSuffix | null {
+  if (!value) return null;
+  const match = value.match(/\s([PMG])$/);
+  return (match?.[1] as SizeSuffix | undefined) ?? null;
+}
+
+function isAllowedSizeChange(addonName: string, itemName: string): boolean {
+  const sourceSize = getSizeSuffix(itemName);
+  const targetSize = getSizeSuffix(addonName);
+
+  if (!sourceSize || !targetSize) {
+    return true;
+  }
+
+  return sizeRank[targetSize] > sizeRank[sourceSize];
+}
+
 export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModalProps) {
   const { t } = useI18n();
   const [quantity, setQuantity] = useState(1);
@@ -55,9 +80,19 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
   const increaseButtonRef = useRef<HTMLButtonElement | null>(null);
   const { addons, loading: addonsLoading } = useAddons(open && item ? item.id : null);
   const availableAddons = useMemo(() => {
-    if (!isBurgerBuildItem(item)) return addons;
+    let scopedAddons = addons;
 
-    return addons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
+    if (isBurgerBuildItem(item)) {
+      scopedAddons = addons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
+    }
+
+    if (!item) {
+      return scopedAddons;
+    }
+
+    return scopedAddons.filter(
+      (addon) => addon.addonType !== 'SIZE_CHANGE' || isAllowedSizeChange(addon.name, item.name),
+    );
   }, [addons, item]);
   const isDrinkItem = item ? isDrinkName(item.name) : false;
   const hasFlavorOptions = availableAddons.some((addon) => isFlavorAddon(addon.name));
