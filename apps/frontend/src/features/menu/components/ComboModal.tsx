@@ -11,6 +11,17 @@ import type { CartAddon } from '@/features/cart/store/cart.store';
 import { useAddons, useAllAddons } from '../hooks/useMenu';
 import type { Combo } from '../types/menu.types';
 import { IngredientsEditor, type SelectedIngredient } from './IngredientsEditor';
+import {
+  buildComboUpgradeOptions,
+  filterComboUpgradesFromExtras,
+  isDrinkComboUpgradeName,
+  isDrinkMenuItemName,
+  isPotatoComboUpgradeName,
+  UPGRADE_DRINK_G,
+  UPGRADE_DRINK_M,
+  UPGRADE_POTATO_G,
+  UPGRADE_POTATO_M,
+} from '../utils/combo-customization.utils';
 import { useI18n } from '@/i18n';
 
 interface ComboModalProps {
@@ -18,36 +29,6 @@ interface ComboModalProps {
   open: boolean;
   onClose: () => void;
   onAddToCart: (combo: Combo, quantity: number, addons: CartAddon[]) => void;
-}
-
-const UPGRADE_POTATO_M = 'Upgrade Batata para M';
-const UPGRADE_POTATO_G = 'Upgrade Batata para G';
-const UPGRADE_DRINK_M = 'Upgrade Bebida para M';
-const UPGRADE_DRINK_G = 'Upgrade Bebida para G';
-
-function isPotatoUpgrade(name: string) {
-  return name.startsWith('Upgrade Batata');
-}
-
-function isDrinkUpgrade(name: string) {
-  return name.startsWith('Upgrade Bebida');
-}
-
-function getSizeSuffix(name: string | undefined): 'P' | 'M' | 'G' | null {
-  if (!name) return null;
-  const m = name.match(/\s([PMG])$/);
-  return (m?.[1] as 'P' | 'M' | 'G' | undefined) ?? null;
-}
-
-function isDrinkName(name: string): boolean {
-  const lower = name.toLowerCase();
-  return (
-    lower.includes('refrigerante') ||
-    lower.includes('suco') ||
-    lower.includes('cha gelado') ||
-    lower.includes('agua mineral') ||
-    lower.includes('milkshake')
-  );
 }
 
 function isBurgerName(name: string): boolean {
@@ -85,7 +66,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
 
   const drinkItem = useMemo(() => {
     if (!combo?.comboItems) return null;
-    return combo.comboItems.find((ci) => isDrinkName(ci.menuItem.name))?.menuItem ?? null;
+    return combo.comboItems.find((ci) => isDrinkMenuItemName(ci.menuItem.name))?.menuItem ?? null;
   }, [combo]);
 
   const { addons: burgerAddons, loading: burgerAddonsLoading } = useAddons(
@@ -102,47 +83,22 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
     open && drinkItem ? drinkItem.id : null,
   );
 
+  const availableDrinkAddons = useMemo(
+    () => filterComboUpgradesFromExtras(drinkAddons),
+    [drinkAddons],
+  );
+
   const upgradeOptions = useMemo(() => {
-    if (!combo?.comboItems) return [];
-
-    const byName = new Map(allAddons.map((a) => [a.name, a]));
-    const options = [] as typeof allAddons;
-
-    const potatoItem = combo.comboItems.find((ci) => ci.menuItem.name.toLowerCase().includes('batata'))?.menuItem;
-    const drinkItem = combo.comboItems.find((ci) => isDrinkName(ci.menuItem.name))?.menuItem;
-
-    const potatoSize = getSizeSuffix(potatoItem?.name);
-    if (potatoSize === 'P') {
-      const m = byName.get(UPGRADE_POTATO_M);
-      const g = byName.get(UPGRADE_POTATO_G);
-      if (m) options.push(m);
-      if (g) options.push(g);
-    } else if (potatoSize === 'M') {
-      const g = byName.get(UPGRADE_POTATO_G);
-      if (g) options.push(g);
-    }
-
-    const drinkSize = getSizeSuffix(drinkItem?.name);
-    if (drinkSize === 'P') {
-      const m = byName.get(UPGRADE_DRINK_M);
-      const g = byName.get(UPGRADE_DRINK_G);
-      if (m) options.push(m);
-      if (g) options.push(g);
-    } else if (drinkSize === 'M') {
-      const g = byName.get(UPGRADE_DRINK_G);
-      if (g) options.push(g);
-    }
-
-    return options;
+    return buildComboUpgradeOptions(allAddons, combo);
   }, [allAddons, combo]);
 
   const potatoUpgrades = useMemo(
-    () => upgradeOptions.filter((opt) => isPotatoUpgrade(opt.name)),
+    () => upgradeOptions.filter((opt) => isPotatoComboUpgradeName(opt.name)),
     [upgradeOptions],
   );
 
   const drinkUpgrades = useMemo(
-    () => upgradeOptions.filter((opt) => isDrinkUpgrade(opt.name)),
+    () => upgradeOptions.filter((opt) => isDrinkComboUpgradeName(opt.name)),
     [upgradeOptions],
   );
 
@@ -175,8 +131,8 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
   );
 
   const drinkHasFlavorOptions = useMemo(
-    () => drinkAddons.some((addon) => isFlavorAddon(addon.name)),
-    [drinkAddons],
+    () => availableDrinkAddons.some((addon) => isFlavorAddon(addon.name)),
+    [availableDrinkAddons],
   );
 
   const drinkHasSelectedFlavor = useMemo(
@@ -357,11 +313,11 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
               </h4>
               {drinkAddonsLoading ? (
                 <span className="text-sm text-gray-400">{t('Carregando opcoes da bebida...')}</span>
-              ) : drinkAddons.length === 0 ? (
+              ) : availableDrinkAddons.length === 0 ? (
                 <span className="text-sm text-gray-400">{t('Essa bebida nao possui personalizacao.')}</span>
               ) : (
                 <IngredientsEditor
-                  addons={drinkAddons}
+                  addons={availableDrinkAddons}
                   selected={selectedDrinkIngredients}
                   onChange={setSelectedDrinkIngredients}
                 />
@@ -377,7 +333,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
 
           <div className="flex flex-col gap-2">
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-600">
-              {t('Upgrades do combo')}
+              {t('Upgrade do combo')}
             </h4>
 
             {allAddonsLoading ? (
@@ -478,7 +434,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
               <div className="mt-3 flex flex-col gap-3 text-sm text-gray-700">
                 {selectedUpgradeSummary.length > 0 && (
                   <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-600">{t('Upgrades')}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-600">{t('Upgrade do combo')}</p>
                     <div className="mt-1 flex flex-col gap-1">
                       {selectedUpgradeSummary.map(({ opt }) => (
                         <p key={opt.id} className="text-xs font-medium text-blue-700">

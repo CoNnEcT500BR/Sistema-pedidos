@@ -174,7 +174,7 @@ export const menuRepository = {
           ...segmentedAssembly.map((addonId, index) => ({
             addonId,
             assignmentType: 'ASSEMBLY' as const,
-            isRequired: false,
+            isRequired: true,
             displayOrder: index,
           })),
           ...segmentedExtras.map((addonId, index) => ({
@@ -187,7 +187,7 @@ export const menuRepository = {
       : addonIds.map((addonId, index) => ({
           addonId,
           assignmentType: 'ASSEMBLY' as const,
-          isRequired: false,
+          isRequired: true,
           displayOrder: index,
         }));
 
@@ -251,7 +251,7 @@ export const menuRepository = {
           ...segmentedAssembly.map((addonId, index) => ({
             addonId,
             assignmentType: 'ASSEMBLY' as const,
-            isRequired: false,
+            isRequired: true,
             displayOrder: index,
           })),
           ...segmentedExtras.map((addonId, index) => ({
@@ -264,7 +264,7 @@ export const menuRepository = {
       : legacyAddonIds.map((addonId, index) => ({
           addonId,
           assignmentType: 'ASSEMBLY' as const,
-          isRequired: false,
+          isRequired: true,
           displayOrder: index,
         }));
 

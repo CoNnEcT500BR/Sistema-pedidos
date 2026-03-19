@@ -10,6 +10,17 @@ import {
 import type { CartAddon } from '@/features/cart/store/cart.store';
 import { useAddons, useAllAddons } from '@/features/menu/hooks/useMenu';
 import type { Addon, Combo } from '@/features/menu/types/menu.types';
+import {
+  buildComboUpgradeOptions,
+  filterComboUpgradesFromExtras,
+  isDrinkComboUpgradeName,
+  isDrinkMenuItemName,
+  isPotatoComboUpgradeName,
+  UPGRADE_DRINK_G,
+  UPGRADE_DRINK_M,
+  UPGRADE_POTATO_G,
+  UPGRADE_POTATO_M,
+} from '@/features/menu/utils/combo-customization.utils';
 import { useI18n } from '@/i18n';
 
 interface SelectedIngredient {
@@ -23,27 +34,12 @@ interface SelectedIngredient {
 type ComboStep = 'overview' | 'burger' | 'drink' | 'upgrades';
 
 const ADDONS_PER_PAGE = 4;
-const UPGRADE_POTATO_M = 'Upgrade Batata para M';
-const UPGRADE_POTATO_G = 'Upgrade Batata para G';
-const UPGRADE_DRINK_M = 'Upgrade Bebida para M';
-const UPGRADE_DRINK_G = 'Upgrade Bebida para G';
 
 interface ComboTouchModalProps {
   combo: Combo | null;
   open: boolean;
   onClose: () => void;
   onAddToCart: (combo: Combo, quantity: number, addons: CartAddon[]) => void;
-}
-
-function isDrinkName(name: string): boolean {
-  const lower = name.toLowerCase();
-  return (
-    lower.includes('refrigerante') ||
-    lower.includes('suco') ||
-    lower.includes('cha gelado') ||
-    lower.includes('agua mineral') ||
-    lower.includes('milkshake')
-  );
 }
 
 function isBurgerName(name: string): boolean {
@@ -65,20 +61,6 @@ function isBurgerBuildItemName(name?: string): boolean {
 
 function isFlavorAddon(name: string): boolean {
   return name.toLowerCase().startsWith('sabor ');
-}
-
-function isPotatoUpgrade(name: string): boolean {
-  return name.startsWith('Upgrade Batata');
-}
-
-function isDrinkUpgrade(name: string): boolean {
-  return name.startsWith('Upgrade Bebida');
-}
-
-function getSizeSuffix(name: string | undefined): 'P' | 'M' | 'G' | null {
-  if (!name) return null;
-  const m = name.match(/\s([PMG])$/);
-  return (m?.[1] as 'P' | 'M' | 'G' | undefined) ?? null;
 }
 
 function formatCurrency(value: number): string {
@@ -312,11 +294,16 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
 
   const drinkItem = useMemo(() => {
     if (!combo?.comboItems) return null;
-    return combo.comboItems.find((entry) => isDrinkName(entry.menuItem.name))?.menuItem ?? null;
+    return combo.comboItems.find((entry) => isDrinkMenuItemName(entry.menuItem.name))?.menuItem ?? null;
   }, [combo]);
 
   const { addons: burgerAddons } = useAddons(open && burgerItem ? burgerItem.id : null);
   const { addons: drinkAddons } = useAddons(open && drinkItem ? drinkItem.id : null);
+
+  const availableDrinkAddons = useMemo(
+    () => filterComboUpgradesFromExtras(drinkAddons),
+    [drinkAddons],
+  );
 
   const availableBurgerAddons = useMemo(() => {
     if (!isBurgerBuildItemName(burgerItem?.name)) return burgerAddons;
@@ -324,44 +311,21 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
     return burgerAddons.filter((addon) => addon.addonType !== 'EXTRA' && addon.addonType !== 'SIZE_CHANGE');
   }, [burgerAddons, burgerItem?.name]);
 
-  const upgradeOptions = useMemo(() => {
-    if (!combo?.comboItems) return [];
+  const upgradeOptions = useMemo(() => buildComboUpgradeOptions(allAddons, combo), [allAddons, combo]);
 
-    const byName = new Map(allAddons.map((addon) => [addon.name, addon]));
-    const options: Addon[] = [];
+  const potatoUpgrades = useMemo(
+    () => upgradeOptions.filter((entry) => isPotatoComboUpgradeName(entry.name)),
+    [upgradeOptions],
+  );
+  const drinkUpgrades = useMemo(
+    () => upgradeOptions.filter((entry) => isDrinkComboUpgradeName(entry.name)),
+    [upgradeOptions],
+  );
 
-    const potatoItem = combo.comboItems.find((entry) => entry.menuItem.name.toLowerCase().includes('batata'))?.menuItem;
-    const comboDrinkItem = combo.comboItems.find((entry) => isDrinkName(entry.menuItem.name))?.menuItem;
-
-    const potatoSize = getSizeSuffix(potatoItem?.name);
-    if (potatoSize === 'P') {
-      const m = byName.get(UPGRADE_POTATO_M);
-      const g = byName.get(UPGRADE_POTATO_G);
-      if (m) options.push(m);
-      if (g) options.push(g);
-    } else if (potatoSize === 'M') {
-      const g = byName.get(UPGRADE_POTATO_G);
-      if (g) options.push(g);
-    }
-
-    const drinkSize = getSizeSuffix(comboDrinkItem?.name);
-    if (drinkSize === 'P') {
-      const m = byName.get(UPGRADE_DRINK_M);
-      const g = byName.get(UPGRADE_DRINK_G);
-      if (m) options.push(m);
-      if (g) options.push(g);
-    } else if (drinkSize === 'M') {
-      const g = byName.get(UPGRADE_DRINK_G);
-      if (g) options.push(g);
-    }
-
-    return options;
-  }, [allAddons, combo]);
-
-  const potatoUpgrades = useMemo(() => upgradeOptions.filter((entry) => isPotatoUpgrade(entry.name)), [upgradeOptions]);
-  const drinkUpgrades = useMemo(() => upgradeOptions.filter((entry) => isDrinkUpgrade(entry.name)), [upgradeOptions]);
-
-  const drinkHasFlavorOptions = useMemo(() => drinkAddons.some((addon) => isFlavorAddon(addon.name)), [drinkAddons]);
+  const drinkHasFlavorOptions = useMemo(
+    () => availableDrinkAddons.some((addon) => isFlavorAddon(addon.name)),
+    [availableDrinkAddons],
+  );
   const drinkHasSelectedFlavor = useMemo(
     () => selectedDrinkIngredients.some((entry) => isFlavorAddon(entry.name) && entry.quantityToAdd > 0),
     [selectedDrinkIngredients],
@@ -507,7 +471,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                 onClick={() => setStep('upgrades')}
                 className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'upgrades' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
               >
-                {t('Upgrades')}
+                {t('Upgrade do combo')}
               </button>
             </div>
 
@@ -547,7 +511,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               {step === 'drink' && (
                 <TouchCustomizationPanel
                   title={drinkItem ? t('Bebida: {name}', { name: t(drinkItem.name) }) : t('Bebida')}
-                  addons={drinkAddons}
+                  addons={availableDrinkAddons}
                   selected={selectedDrinkIngredients}
                   onChange={setSelectedDrinkIngredients}
                 />
@@ -555,6 +519,8 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
 
               {step === 'upgrades' && (
                 <div className="h-full space-y-3 rounded-3xl border border-stone-200 bg-white p-4 overflow-hidden">
+                  <p className="text-sm font-bold uppercase tracking-wide text-stone-700">{t('Upgrade do combo')}</p>
+
                   <div className="space-y-2">
                     <p className="text-sm font-bold uppercase tracking-wide text-stone-700">{t('Upgrade batata')}</p>
                     {potatoUpgrades.length === 0 ? (
