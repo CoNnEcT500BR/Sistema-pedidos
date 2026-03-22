@@ -308,6 +308,22 @@ Os proximos passos mais evidentes no codigo atual sao:
 
 ---
 
+## Roadmap Futuro
+
+O projeto possui um roadmap estruturado de melhorias futuras organizado em 5 ondas (F-J) cobrindo seguranca, UX operacional, performance, integrações e analytics.
+
+**Destaques:**
+
+- **Onda F** (Segurança Crítica): Progressive account lockout, validações robustas
+- **Onda G** (UX Operacional): Impressora KDS, melhor feedback visual, Order Board com SLA
+- **Onda H** (Performance): Cache HTTP, lazy loading, consolidação de realtime hooks
+- **Onda I** (Integrações Críticas): Payment Stripe/Mercado Pago, SMS/Email/Push notifications
+- **Onda J** (Analytics): Google Analytics 4, Sentry error tracking, precisão monetária
+
+Veja [docs/FUTURE_IMPROVEMENTS.md](docs/FUTURE_IMPROVEMENTS.md) para detalhes completos de cada onda com prioridades, esforço estimado e timeline.
+
+---
+
 ## Documentacao Relacionada
 
 - docs/index.html
@@ -315,3 +331,4 @@ Os proximos passos mais evidentes no codigo atual sao:
 - docs/DATA_MODEL.md
 - docs/IMPLEMENTATION_CHECKLIST.md
 - docs/MVP_ROADMAP.md
+- docs/FUTURE_IMPROVEMENTS.md

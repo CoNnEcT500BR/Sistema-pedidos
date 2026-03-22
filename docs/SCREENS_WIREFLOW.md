@@ -670,7 +670,7 @@ Observacao de contexto (16/03/2026): este documento descreve wireframes de refer
 
 **Características:**
 
-- Atualização em tempo real (WebSocket)
+- Atualização em tempo real (Polling com debounce 250ms, intervalo 3000ms)
 - Cores/badges por status
 - Filtros rápidos
 - Ações inline

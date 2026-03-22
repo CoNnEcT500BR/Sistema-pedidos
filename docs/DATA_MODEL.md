@@ -1,6 +1,6 @@
 ﻿# Modelo de Dados - Estado Atual (Prisma)
 
-Atualizado em 16/03/2026 com base em apps/server/prisma/schema.prisma.
+Atualizado em 22/03/2026 com base em apps/server/prisma/schema.prisma.
 
 ## 1. Visao Geral
 

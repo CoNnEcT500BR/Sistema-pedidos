@@ -1,6 +1,6 @@
 ﻿# Estrutura do Projeto - Snapshot Atual
 
-Atualizado em 16/03/2026.
+Atualizado em 22/03/2026.
 
 ## 1. Raiz
 

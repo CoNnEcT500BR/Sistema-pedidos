@@ -1,6 +1,6 @@
 ﻿# MVP Roadmap - Sistema de Pedidos
 
-Atualizado em 16/03/2026 com base no estado do repositorio.
+Atualizado em 22/03/2026 com base no estado do repositorio.
 
 ## 1. Status Consolidado
 
@@ -96,6 +96,6 @@ Scripts de validacao:
 
 ### Onda E - Seguranca e Release
 
-- Aplicar rate limiting e bloqueio progressivo no fluxo de autenticacao
-- Adicionar feature flags para liberar mudancas por perfil/canal
-- Instituir checklist de release com smoke tests e rollback documentado
+- ✅ Aplicar rate limiting e bloqueio progressivo no fluxo de autenticacao
+- ✅ Adicionar feature flags para liberar mudancas por perfil/canal (ENTREGUE - veja seção 9 em ARCHITECTURE.md)
+- ✅ Instituir checklist de release com smoke tests e rollback documentado

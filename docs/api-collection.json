@@ -2,7 +2,7 @@
   "info": {
     "name": "Sistema Pedidos API - Fase 5+",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Collection de referencia da fase 5+ cobrindo Auth, Menu, Combos, Orders, Addons, Admin, Reports, Users, Telemetry e Swagger."
+    "description": "Collection de referencia da fase 5+ cobrindo Auth, Menu, Combos, Orders, Addons, Admin, Reports, Users, Audit, Feature Flags, Telemetry e Swagger."
   },
   "variable": [
     {
@@ -60,6 +60,18 @@
     {
       "key": "staffPassword",
       "value": "staff123"
+    },
+    {
+      "key": "auditEntity",
+      "value": "Order"
+    },
+    {
+      "key": "auditAction",
+      "value": "CREATED"
+    },
+    {
+      "key": "featureFlagName",
+      "value": "new_payment_method"
     }
   ],
   "item": [
@@ -1528,6 +1540,243 @@
               "path": [
                 "docs",
                 "json"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "description": "Trilha de auditoria para operações sensíveis (compliance, debugging, detecção de abuso).",
+      "item": [
+        {
+          "name": "Listar Logs de Auditoria",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit/logs?entity=Order&action=CREATED&startDate={{startDate}}&endDate={{endDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "entity",
+                  "value": "Order",
+                  "disabled": false
+                },
+                {
+                  "key": "action",
+                  "value": "CREATED",
+                  "disabled": false
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}"
+                },
+                {
+                  "key": "email",
+                  "value": "{{adminEmail}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Requisicao retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Feature Flags",
+      "description": "Controle de features por role/channel com suporte a rollout gradual e A/B testing.",
+      "item": [
+        {
+          "name": "Listar Feature Flags Habilitadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feature-flags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feature-flags"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Requisicao retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar Feature Flag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"new_payment_method\",\n  \"enabled\": true,\n  \"roles\": [\"ADMIN\"],\n  \"channels\": [\"API\"],\n  \"rolloutPercentage\": 50,\n  \"description\": \"Novo metodo de pagamento (canario)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feature-flags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feature-flags"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Criacao retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Feature Flag",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false,\n  \"rolloutPercentage\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feature-flags/new_payment_method",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feature-flags",
+                "new_payment_method"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Feature Flag",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feature-flags/new_payment_method/toggle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feature-flags",
+                "new_payment_method",
+                "toggle"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Feature Flag",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feature-flags/new_payment_method",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feature-flags",
+                "new_payment_method"
               ]
             }
           }
