@@ -29,6 +29,12 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
   app.post(
     '/orders',
     {
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         tags: ['orders'],
         summary: 'Criar pedido',

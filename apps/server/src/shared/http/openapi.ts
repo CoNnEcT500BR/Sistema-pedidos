@@ -529,6 +529,8 @@ export const listOrdersQueryOpenApiSchema = {
   properties: {
     status: { type: 'string', enum: orderStatusEnum },
     date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+    limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
+    offset: { type: 'integer', minimum: 0, default: 0 },
   },
 } as const;
 

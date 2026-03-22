@@ -16,6 +16,12 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
   app.post(
     '/auth/login',
     {
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: '15 minutes',
+        },
+      },
       schema: {
         tags: ['auth'],
         summary: 'Autenticar usuario',

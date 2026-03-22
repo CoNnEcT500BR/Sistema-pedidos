@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCors from '@fastify/cors';
+import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 
@@ -39,6 +40,12 @@ export async function buildApp(): Promise<FastifyInstance> {
     sign: {
       expiresIn: '7d',
     },
+  });
+
+  await app.register(fastifyRateLimit, {
+    global: false,
+    max: 100,
+    timeWindow: '1 minute',
   });
 
   await app.register(fastifySwagger, {
@@ -93,6 +100,30 @@ export async function buildApp(): Promise<FastifyInstance> {
   await registerRealtime(app);
 
   await registerRoutes(app);
+
+  app.setErrorHandler((error, request, reply) => {
+    if (reply.sent) {
+      return;
+    }
+
+    if ((error as { validation?: unknown }).validation) {
+      reply.code(400).send({ message: error.message });
+      return;
+    }
+
+    const statusCode =
+      typeof (error as { statusCode?: unknown }).statusCode === 'number'
+        ? (error as { statusCode: number }).statusCode
+        : 500;
+
+    if (statusCode >= 500) {
+      request.log.error({ err: error }, 'Unhandled server error');
+    }
+
+    reply.code(statusCode).send({
+      message: statusCode >= 500 ? 'Internal server error' : error.message,
+    });
+  });
 
   return app;
 }

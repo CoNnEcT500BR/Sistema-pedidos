@@ -3,113 +3,133 @@ import type { Addon, Category, Combo, MenuItem } from '../types/menu.types';
 import { menuService } from '../services/menu.service';
 import { useI18n } from '@/i18n';
 
-export function useCategories() {
-  const { t } = useI18n();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+interface QueryState<T> {
+  data: T;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+function useMenuQuery<T>(options: {
+  fetcher: () => Promise<T>;
+  initialData: T;
+  errorMessage: string;
+  enabled?: boolean;
+  resetOnDisabled?: boolean;
+}): QueryState<T> {
+  const { fetcher, initialData, errorMessage, enabled = true, resetOnDisabled = false } = options;
+  const [data, setData] = useState<T>(initialData);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      if (resetOnDisabled) {
+        setData(initialData);
+      }
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const data = await menuService.getCategories();
-      setCategories(data);
+      const result = await fetcher();
+      setData(result);
     } catch {
-      setError(t('Não foi possível carregar as categorias.'));
+      setError(errorMessage);
+      setData(initialData);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [enabled, errorMessage, fetcher, initialData, resetOnDisabled]);
 
   useEffect(() => {
-    fetch();
+    void fetch();
   }, [fetch]);
 
-  return { categories, loading, error, refetch: fetch };
+  return { data, loading, error, refetch: fetch };
+}
+
+export function useCategories() {
+  const { t } = useI18n();
+  const query = useMenuQuery<Category[]>({
+    fetcher: () => menuService.getCategories(),
+    initialData: [],
+    errorMessage: t('Não foi possível carregar as categorias.'),
+  });
+
+  return {
+    categories: query.data,
+    loading: query.loading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 export function useMenuItems(categoryId?: string) {
   const { t } = useI18n();
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useMenuQuery<MenuItem[]>({
+    fetcher: () => menuService.getMenuItems(categoryId),
+    initialData: [],
+    errorMessage: t('Não foi possível carregar os itens.'),
+  });
 
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await menuService.getMenuItems(categoryId);
-      setItems(data);
-    } catch {
-      setError(t('Não foi possível carregar os itens.'));
-    } finally {
-      setLoading(false);
-    }
-  }, [categoryId, t]);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
-  return { items, loading, error, refetch: fetch };
+  return {
+    items: query.data,
+    loading: query.loading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 export function useAddons(menuItemId: string | null) {
-  const [addons, setAddons] = useState<Addon[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { t } = useI18n();
+  const query = useMenuQuery<Addon[]>({
+    fetcher: () => menuService.getAddons(menuItemId as string),
+    initialData: [],
+    errorMessage: t('Não foi possível carregar os adicionais.'),
+    enabled: Boolean(menuItemId),
+    resetOnDisabled: true,
+  });
 
-  useEffect(() => {
-    if (!menuItemId) return;
-    setLoading(true);
-    menuService
-      .getAddons(menuItemId)
-      .then(setAddons)
-      .catch(() => setAddons([]))
-      .finally(() => setLoading(false));
-  }, [menuItemId]);
-
-  return { addons, loading };
+  return {
+    addons: query.data,
+    loading: query.loading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 export function useAllAddons() {
-  const [addons, setAddons] = useState<Addon[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
+  const query = useMenuQuery<Addon[]>({
+    fetcher: () => menuService.getAllAddons(),
+    initialData: [],
+    errorMessage: t('Não foi possível carregar os adicionais.'),
+  });
 
-  useEffect(() => {
-    menuService
-      .getAllAddons()
-      .then(setAddons)
-      .catch(() => setAddons([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { addons, loading };
+  return {
+    addons: query.data,
+    loading: query.loading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 export function useCombos() {
   const { t } = useI18n();
-  const [combos, setCombos] = useState<Combo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useMenuQuery<Combo[]>({
+    fetcher: () => menuService.getCombos(),
+    initialData: [],
+    errorMessage: t('Nao foi possivel carregar os combos.'),
+  });
 
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await menuService.getCombos();
-      setCombos(data);
-    } catch {
-      setError(t('Nao foi possivel carregar os combos.'));
-      setCombos([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
-  return { combos, loading, error, refetch: fetch };
+  return {
+    combos: query.data,
+    loading: query.loading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }

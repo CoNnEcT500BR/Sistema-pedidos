@@ -15,6 +15,7 @@
     "test": "npm run type-check",
     "test:e2e:kiosk": "node scripts/e2e-kiosk-critical-flow.js",
     "test:e2e:admin:orders": "node scripts/e2e-admin-orders-board.js",
+    "test:e2e:smoke": "npm run test:e2e:kiosk && npm run test:e2e:admin:orders",
     "test:e2e:size-change": "node scripts/e2e-size-change-flow.js",
     "test:staff:phase4": "node scripts/manual-test-staff-phase4.js",
     "test:admin:phase5": "node scripts/manual-test-admin-phase5.js",

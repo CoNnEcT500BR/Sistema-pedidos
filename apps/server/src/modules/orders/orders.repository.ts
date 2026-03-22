@@ -2,6 +2,15 @@ import { prisma } from '@/shared/database/prisma.client';
 
 import type { CalculatedOrderResult, OrderStatus } from './orders.types';
 
+function isUniqueConstraintError(error: unknown): error is { code: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'P2002'
+  );
+}
+
 export const ordersRepository = {
   getNextOrderNumber: async () => {
     const result = await prisma.order.aggregate({
@@ -17,65 +26,82 @@ export const ordersRepository = {
     notes?: string;
     calculated: CalculatedOrderResult;
   }) => {
-    const orderNumber = await ordersRepository.getNextOrderNumber();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const orderNumber = await ordersRepository.getNextOrderNumber();
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        status: 'PENDING',
-        paymentStatus: 'PENDING',
-        totalPrice: payload.calculated.totalAmount,
-        discount: 0,
-        finalPrice: payload.calculated.totalAmount,
-        customerName: payload.customerName,
-        customerPhone: payload.customerPhone,
-        notes: payload.notes,
-        items: {
-          create: payload.calculated.items.map((item) => ({
-            menuItemId: item.menuItemId,
-            comboId: item.comboId,
-            quantity: item.quantity,
-            itemPrice: item.unitPrice,
-            notes: item.notes,
-            addons: {
-              create: item.addons.map((addon) => ({
-                addonId: addon.addonId,
-                quantity: addon.quantity,
-                addonPrice: addon.addonPrice,
+      try {
+        const order = await prisma.order.create({
+          data: {
+            orderNumber,
+            status: 'PENDING',
+            paymentStatus: 'PENDING',
+            totalPrice: payload.calculated.totalAmount,
+            discount: 0,
+            finalPrice: payload.calculated.totalAmount,
+            customerName: payload.customerName,
+            customerPhone: payload.customerPhone,
+            notes: payload.notes,
+            items: {
+              create: payload.calculated.items.map((item) => ({
+                menuItemId: item.menuItemId,
+                comboId: item.comboId,
+                quantity: item.quantity,
+                itemPrice: item.unitPrice,
+                notes: item.notes,
+                addons: {
+                  create: item.addons.map((addon) => ({
+                    addonId: addon.addonId,
+                    quantity: addon.quantity,
+                    addonPrice: addon.addonPrice,
+                  })),
+                },
               })),
             },
-          })),
-        },
-        statusHistory: {
-          create: {
-            fromStatus: 'SYSTEM',
-            toStatus: 'PENDING',
-            reason: 'Order created',
-          },
-        },
-      },
-      include: {
-        items: {
-          include: {
-            menuItem: true,
-            combo: true,
-            addons: {
-              include: {
-                addon: true,
+            statusHistory: {
+              create: {
+                fromStatus: 'SYSTEM',
+                toStatus: 'PENDING',
+                reason: 'Order created',
               },
             },
           },
-        },
-        statusHistory: {
-          orderBy: { changedAt: 'asc' },
-        },
-      },
-    });
+          include: {
+            items: {
+              include: {
+                menuItem: true,
+                combo: true,
+                addons: {
+                  include: {
+                    addon: true,
+                  },
+                },
+              },
+            },
+            statusHistory: {
+              orderBy: { changedAt: 'asc' },
+            },
+          },
+        });
 
-    return order;
+        return order;
+      } catch (error) {
+        if (isUniqueConstraintError(error) && attempt < 4) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new Error('Nao foi possivel criar pedido neste momento');
   },
 
-  listOrders: async (filters: { status?: OrderStatus; date?: string }) => {
+  listOrders: async (filters: {
+    status?: OrderStatus;
+    date?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     const where: Record<string, unknown> = {};
 
     if (filters.status) {
@@ -93,6 +119,8 @@ export const ordersRepository = {
 
     return prisma.order.findMany({
       where,
+      take: filters.limit,
+      skip: filters.offset,
       include: {
         items: {
           include: {

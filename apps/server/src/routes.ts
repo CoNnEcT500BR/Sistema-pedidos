@@ -27,7 +27,7 @@ export async function registerRoutes(fastify: FastifyInstance) {
   await fastify.register(registerReportsRoutes, { prefix: '/api' });
   await fastify.register(registerUsersRoutes, { prefix: '/api' });
 
-  console.log(
+  fastify.log.info(
     'Rotas das Fases 2 a 5 (Auth/Menu/Combos/Orders/Addons/Telemetry/Reports/Users) registradas',
   );
 }
