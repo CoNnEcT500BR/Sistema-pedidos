@@ -148,10 +148,110 @@ model Order {
 
     items         OrderItem[]
     statusHistory OrderStatusHistory[]
+    delivery      Delivery?
 
     @@index([status])
     @@index([paymentStatus])
     @@index([createdAt])
+}
+
+// ============ DELIVERY ============
+model DeliveryCourier {
+    id       String  @id @default(cuid())
+    name     String
+    phone    String?
+    zone     String?
+    isActive Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    deliveries Delivery[]
+
+    @@index([isActive])
+    @@index([zone])
+}
+
+model DeliveryRoute {
+    id       String  @id @default(cuid())
+    name     String
+    zone     String
+    isActive Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    deliveries Delivery[]
+
+    @@index([isActive])
+    @@index([zone])
+}
+
+model Delivery {
+    id      String @id @default(cuid())
+    orderId String @unique
+    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    status     String    @default("QUEUED") // QUEUED, ASSIGNED, DISPATCHED, IN_ROUTE, DELIVERED, FAILED
+    priority   Int       @default(3)
+    promisedAt DateTime?
+
+    courierId String?
+    courier   DeliveryCourier? @relation(fields: [courierId], references: [id], onDelete: SetNull)
+
+    routeId String?
+    route   DeliveryRoute? @relation(fields: [routeId], references: [id], onDelete: SetNull)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    history DeliveryStatusHistory[]
+
+    @@index([status])
+    @@index([priority])
+    @@index([promisedAt])
+    @@index([courierId])
+    @@index([routeId])
+}
+
+model DeliveryStatusHistory {
+    id         String   @id @default(cuid())
+    deliveryId String
+    delivery   Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+    fromStatus String
+    toStatus   String
+    reason     String?
+    changedAt  DateTime @default(now())
+
+    @@index([deliveryId])
+    @@index([changedAt])
+}
+
+// ============ AUDITORIA ============
+model AuditLog {
+    id String @id @default(cuid())
+
+    timestamp DateTime @default(now())
+
+    actorId    String?
+    actorEmail String?
+    actorRole  String?
+
+    method     String
+    path       String
+    statusCode Int
+    ip         String?
+
+    entity String
+    action String
+
+    payload String?
+
+    @@index([timestamp])
+    @@index([entity])
+    @@index([action])
+    @@index([actorEmail])
 }
 
 // ============ ITENS DO PEDIDO ============

@@ -2,6 +2,7 @@ import {
   BarChart3,
   Bike,
   BookOpenText,
+  ClipboardList,
   LayoutDashboard,
   ListOrdered,
   LogOut,
@@ -14,6 +15,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useRealtimeConnectionStatus } from '@/hooks/useRealtimeConnectionStatus';
 import { useI18n } from '@/i18n';
 
@@ -26,6 +28,7 @@ const navigation = [
   { to: '/admin/orders', label: 'Pedidos', icon: ListOrdered },
   { to: '/admin/delivery', label: 'Delivery', icon: Bike },
   { to: '/admin/users', label: 'Equipe', icon: Users },
+  { to: '/admin/audit', label: 'Auditoria', icon: ClipboardList },
   { to: '/admin/reports', label: 'Relatórios', icon: BarChart3 },
 ] as const;
 
@@ -33,7 +36,16 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { user, logout } = useAuthStore();
+  const { isEnabled } = useFeatureFlags('ADMIN');
   const realtimeStatus = useRealtimeConnectionStatus();
+
+  const visibleNavigation = navigation.filter((item) => {
+    if (item.to === '/admin/delivery') {
+      return isEnabled('admin.delivery.v1', true);
+    }
+
+    return true;
+  });
 
   const realtimeBadge =
     realtimeStatus === 'connected'
@@ -76,7 +88,7 @@ export function AdminLayout() {
         </div>
 
         <nav className="grid gap-1 px-3 pb-4 lg:px-4">
-          {navigation.map((item) => {
+          {visibleNavigation.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink

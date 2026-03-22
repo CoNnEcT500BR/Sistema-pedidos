@@ -19,6 +19,9 @@ export function OrdersBoardPage() {
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [draggingOrderId, setDraggingOrderId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [slaMinutes, setSlaMinutes] = useState(20);
+  const [onlySlaBreached, setOnlySlaBreached] = useState(false);
+  const [minMinutesInStage, setMinMinutesInStage] = useState(0);
 
   const currency = useMemo(
     () =>
@@ -55,12 +58,42 @@ export function OrdersBoardPage() {
   });
 
   const groupedOrders = useMemo(() => {
-    return {
-      PENDING: orders.filter((order) => order.status === 'PENDING' || order.status === 'CONFIRMED'),
-      PREPARING: orders.filter((order) => order.status === 'PREPARING'),
-      READY: orders.filter((order) => order.status === 'READY'),
+    const now = Date.now();
+
+    const getMinutesInStage = (order: Order) => {
+      return Math.floor((now - new Date(order.createdAt).getTime()) / 60000);
     };
-  }, [orders]);
+
+    const getPriorityScore = (order: Order) => {
+      const minutes = getMinutesInStage(order);
+      const urgency = order.status === 'READY' ? 3 : order.status === 'PREPARING' ? 2 : 1;
+      const slaPressure = minutes > slaMinutes ? 100 : 0;
+      return slaPressure + urgency * 10 + minutes;
+    };
+
+    const base = orders.filter((order) => {
+      const minutes = getMinutesInStage(order);
+      if (minMinutesInStage > 0 && minutes < minMinutesInStage) {
+        return false;
+      }
+
+      if (onlySlaBreached && minutes <= slaMinutes) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const sortByPriority = (a: Order, b: Order) => getPriorityScore(b) - getPriorityScore(a);
+
+    return {
+      PENDING: base
+        .filter((order) => order.status === 'PENDING' || order.status === 'CONFIRMED')
+        .sort(sortByPriority),
+      PREPARING: base.filter((order) => order.status === 'PREPARING').sort(sortByPriority),
+      READY: base.filter((order) => order.status === 'READY').sort(sortByPriority),
+    };
+  }, [orders, minMinutesInStage, onlySlaBreached, slaMinutes]);
 
   async function runOrderTransition(order: Order, steps: OrderStatus[]) {
     setUpdatingOrderId(order.id);
@@ -137,6 +170,37 @@ export function OrdersBoardPage() {
           <p className="mt-2 text-sm text-stone-600">{t('Acompanhe as etapas de aguardo, preparo e pronto com atualização rápida de status.')}</p>
         </div>
 
+        <div className="grid gap-2 sm:grid-cols-3">
+          <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+            {t('SLA (min)')}
+            <input
+              type="number"
+              min={1}
+              value={slaMinutes}
+              onChange={(event) => setSlaMinutes(Math.max(1, Number(event.target.value) || 1))}
+              className="rounded-xl border border-stone-300 px-3 py-2 text-sm text-stone-700"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+            {t('Tempo mínimo na etapa')}
+            <input
+              type="number"
+              min={0}
+              value={minMinutesInStage}
+              onChange={(event) => setMinMinutesInStage(Math.max(0, Number(event.target.value) || 0))}
+              className="rounded-xl border border-stone-300 px-3 py-2 text-sm text-stone-700"
+            />
+          </label>
+          <label className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700">
+            <input
+              type="checkbox"
+              checked={onlySlaBreached}
+              onChange={(event) => setOnlySlaBreached(event.target.checked)}
+            />
+            {t('Somente SLA estourado')}
+          </label>
+        </div>
+
       </div>
 
       {error ? <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
@@ -184,6 +248,10 @@ export function OrdersBoardPage() {
                         <div className="mt-3 flex items-center justify-between text-xs text-stone-500">
                           <span>{new Date(order.createdAt).toLocaleString(language === 'en' ? 'en-US' : 'pt-BR')}</span>
                           <strong className="text-sm text-stone-900">{currency.format(order.finalPrice ?? order.totalPrice)}</strong>
+                        </div>
+
+                        <div className="mt-2 rounded-xl bg-white px-3 py-2 text-xs text-stone-600">
+                          {t('Tempo na etapa')}: {Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000)} min
                         </div>
 
                         <div className="mt-4 flex flex-wrap gap-2">

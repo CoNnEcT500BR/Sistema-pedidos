@@ -7,6 +7,9 @@ import { registerAddonsRoutes } from '@/modules/addons/addons.routes';
 import { registerTelemetryRoutes } from '@/modules/telemetry/telemetry.routes';
 import { registerReportsRoutes } from '@/modules/reports/reports.routes';
 import { registerUsersRoutes } from '@/modules/users/users.routes';
+import { registerDeliveryRoutes } from '@/modules/delivery/delivery.routes';
+import { registerAuditRoutes } from '@/modules/audit/audit.routes';
+import { registerFeatureFlagsRoutes } from '@/modules/feature-flags/feature-flags.routes';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   fastify.get('/status', async () => ({
@@ -26,8 +29,11 @@ export async function registerRoutes(fastify: FastifyInstance) {
   await fastify.register(registerTelemetryRoutes, { prefix: '/api' });
   await fastify.register(registerReportsRoutes, { prefix: '/api' });
   await fastify.register(registerUsersRoutes, { prefix: '/api' });
+  await fastify.register(registerDeliveryRoutes, { prefix: '/api' });
+  await fastify.register(registerAuditRoutes, { prefix: '/api' });
+  await fastify.register(registerFeatureFlagsRoutes, { prefix: '/api' });
 
   fastify.log.info(
-    'Rotas das Fases 2 a 5 (Auth/Menu/Combos/Orders/Addons/Telemetry/Reports/Users) registradas',
+    'Rotas das Fases 2 a 5 (Auth/Menu/Combos/Orders/Addons/Telemetry/Reports/Users/Delivery/Audit/FeatureFlags) registradas',
   );
 }

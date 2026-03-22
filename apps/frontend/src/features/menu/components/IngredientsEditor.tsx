@@ -17,13 +17,29 @@ interface IngredientsEditorProps {
   onChange: (selected: SelectedIngredient[]) => void;
 }
 
+function isAssemblyIngredient(addon: Addon): boolean {
+  if (addon.assignmentType) {
+    return addon.assignmentType === 'ASSEMBLY';
+  }
+
+  return addon.isRequired === true;
+}
+
+function isExtraIngredient(addon: Addon): boolean {
+  if (addon.assignmentType) {
+    return addon.assignmentType === 'EXTRA';
+  }
+
+  return addon.isRequired !== true;
+}
+
 export function IngredientsEditor({ addons, selected, onChange }: IngredientsEditorProps) {
   const { t } = useI18n();
   if (addons.length === 0) return null;
 
   // Separar ingredientes em dois grupos
-  const removableIngredients = addons.filter((a) => a.isRequired === true);
-  const extraIngredients = addons.filter((a) => a.isRequired === false);
+  const removableIngredients = addons.filter((a) => isAssemblyIngredient(a));
+  const extraIngredients = addons.filter((a) => isExtraIngredient(a));
 
   function toggleRemove(addon: Addon) {
     const existing = selected.find((s) => s.addonId === addon.id);

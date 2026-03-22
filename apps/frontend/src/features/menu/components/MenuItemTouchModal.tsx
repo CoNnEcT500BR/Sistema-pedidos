@@ -86,6 +86,22 @@ function formatCurrency(value: number): string {
   return value.toFixed(2).replace('.', ',');
 }
 
+function isAssemblyIngredient(addon: Addon): boolean {
+  if (addon.assignmentType) {
+    return addon.assignmentType === 'ASSEMBLY';
+  }
+
+  return addon.isRequired === true;
+}
+
+function isExtraIngredient(addon: Addon): boolean {
+  if (addon.assignmentType) {
+    return addon.assignmentType === 'EXTRA';
+  }
+
+  return addon.isRequired !== true;
+}
+
 function TouchAddonRow({
   addon,
   status,
@@ -101,7 +117,7 @@ function TouchAddonRow({
   const quantityToAdd = status?.quantityToAdd ?? 0;
   const isRemoved = status?.removed ?? false;
 
-  if (addon.isRequired) {
+  if (isAssemblyIngredient(addon)) {
     return (
       <button
         type="button"
@@ -181,8 +197,14 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
     );
   }, [addons, item]);
 
-  const removableIngredients = useMemo(() => availableAddons.filter((addon) => addon.isRequired === true), [availableAddons]);
-  const extraIngredients = useMemo(() => availableAddons.filter((addon) => addon.isRequired === false), [availableAddons]);
+  const removableIngredients = useMemo(
+    () => availableAddons.filter((addon) => isAssemblyIngredient(addon)),
+    [availableAddons],
+  );
+  const extraIngredients = useMemo(
+    () => availableAddons.filter((addon) => isExtraIngredient(addon)),
+    [availableAddons],
+  );
 
   const isDrinkItem = item ? isDrinkName(item.name) : false;
   const hasFlavorOptions = availableAddons.some((addon) => isFlavorAddon(addon.name));

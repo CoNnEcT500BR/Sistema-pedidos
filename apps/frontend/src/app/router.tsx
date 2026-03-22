@@ -12,6 +12,7 @@ import { IngredientsPage } from '@/routes/admin/IngredientsPage';
 import { OrdersBoardPage } from '@/routes/admin/OrdersBoardPage';
 import { ReportsPage } from '@/routes/admin/ReportsPage';
 import { UsersPage } from '@/routes/admin/UsersPage';
+import { AuditPage } from '@/routes/admin/AuditPage';
 import { CartPage } from '@/routes/kiosk/CartPage';
 import { CategoriesPage } from '@/routes/kiosk/CategoriesPage';
 import { CheckoutPage } from '@/routes/kiosk/CheckoutPage';
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
           { path: 'orders', element: <OrdersBoardPage /> },
           { path: 'delivery', element: <DeliveryPage /> },
           { path: 'users', element: <UsersPage /> },
+          { path: 'audit', element: <AuditPage /> },
           { path: 'reports', element: <ReportsPage /> },
         ],
       },

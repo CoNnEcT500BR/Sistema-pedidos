@@ -1,0 +1,31 @@
+name: Post Deploy Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base:
+        description: Base URL da API para smoke pos deploy (exemplo: https://api.exemplo.com)
+        required: true
+        default: http://localhost:3001
+
+jobs:
+  smoke-post-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run post deploy smoke
+        env:
+          E2E_API_BASE: ${{ github.event.inputs.api_base }}
+        run: npm run test:smoke:post-deploy

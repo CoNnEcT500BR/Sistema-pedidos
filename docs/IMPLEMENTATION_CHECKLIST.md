@@ -1,6 +1,6 @@
 ﻿# Checklist de Implementacao - Estado Atual
 
-Atualizado em 16/03/2026.
+Atualizado em 22/03/2026.
 
 ## 1. Fases Entregues
 
@@ -69,25 +69,25 @@ Admin:
 
 Confiabilidade e qualidade:
 
-- [ ] Integrar todos os E2E no CI com gate de merge
-- [ ] Adicionar testes de contrato para endpoints criticos (Auth, Orders, Reports, Users)
-- [ ] Ampliar cobertura de cenarios negativos para addons e transicoes de status de pedido
-- [ ] Criar smoke test pos-deploy para rotas principais
+- [x] Integrar todos os E2E no CI com gate de merge
+- [x] Adicionar testes de contrato para endpoints criticos (Auth, Orders, Reports, Users)
+- [x] Ampliar cobertura de cenarios negativos para addons e transicoes de status de pedido
+- [x] Criar smoke test pos-deploy para rotas principais
 
 Operacao Admin e Staff:
 
-- [ ] Evoluir fluxo de delivery para uso real (fila, roteirizacao, status de entrega)
-- [ ] Melhorar board de pedidos com filtros por SLA, tempo em etapa e ordenacao por prioridade
-- [ ] Adicionar exportacao CSV em relatorios (alem de JSON)
+- [x] Evoluir fluxo de delivery para uso real (fila, roteirizacao, status de entrega)
+- [x] Melhorar board de pedidos com filtros por SLA, tempo em etapa e ordenacao por prioridade
+- [x] Adicionar exportacao CSV em relatorios (alem de JSON)
 
 Observabilidade e seguranca:
 
-- [ ] Consolidar observabilidade operacional (metricas, logs estruturados e alertas)
-- [ ] Incluir trilha de auditoria para acoes administrativas sensiveis (menu, preco, usuarios)
-- [ ] Aplicar hardening de autenticacao (rate limit de login e bloqueio progressivo)
+- [x] Consolidar observabilidade operacional (metricas, logs estruturados e alertas)
+- [x] Incluir trilha de auditoria para acoes administrativas sensiveis (menu, preco, usuarios)
+- [x] Aplicar hardening de autenticacao (rate limit de login e bloqueio progressivo)
 
 Plataforma e dados:
 
-- [ ] Definir rotina automatizada de backup e restore validado do banco local
-- [ ] Planejar migracao monetaria de Float para Decimal com testes de regressao
-- [ ] Estruturar feature flags para entregas graduais em Admin e Kiosk
+- [x] Definir rotina automatizada de backup e restore validado do banco local
+- [x] Planejar migracao monetaria de Float para Decimal com testes de regressao
+- [x] Estruturar feature flags para entregas graduais em Admin e Kiosk

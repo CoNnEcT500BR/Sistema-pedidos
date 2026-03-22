@@ -4,7 +4,9 @@ import { Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { adminService } from '@/features/admin/services/admin.service';
 import type { SalesReportData } from '@/features/admin/types/admin.types';
+import { buildSalesReportCsv } from '@/features/admin/utils/csv-export';
 import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useOrdersRealtimeRefresh } from '@/hooks/useOrdersRealtimeRefresh';
 import { useI18n } from '@/i18n';
 
@@ -16,6 +18,7 @@ function getDateOffset(offset: number) {
 
 export function ReportsPage() {
   const { t, language } = useI18n();
+  const { isEnabled } = useFeatureFlags('ADMIN');
   const [startDate, setStartDate] = useState(getDateOffset(-6));
   const [endDate, setEndDate] = useState(getDateOffset(0));
   const [report, setReport] = useState<SalesReportData | null>(null);
@@ -66,6 +69,19 @@ export function ReportsPage() {
     URL.revokeObjectURL(url);
   }
 
+  function exportCsv() {
+    if (!report) return;
+
+    const csv = buildSalesReportCsv(report);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `sales-report-${startDate}-${endDate}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-5 py-6 lg:px-8 lg:py-8">
       <div className="flex flex-col gap-4 rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
@@ -83,6 +99,12 @@ export function ReportsPage() {
               <Download size={16} />
               {t('Exportar JSON')}
             </button>
+            {isEnabled('admin.reports.csv_export', true) ? (
+              <button type="button" onClick={exportCsv} disabled={!report} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100 disabled:opacity-60">
+                <Download size={16} />
+                {t('Exportar CSV')}
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

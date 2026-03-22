@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Addon, Category, Combo, MenuItem } from '../types/menu.types';
 import { menuService } from '../services/menu.service';
 import { useI18n } from '@/i18n';
@@ -22,12 +22,20 @@ function useMenuQuery<T>(options: {
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
+  // Use refs for values that shouldn't trigger re-fetch when they change identity
+  const fetcherRef = useRef(fetcher);
+  fetcherRef.current = fetcher;
+  const errorMessageRef = useRef(errorMessage);
+  errorMessageRef.current = errorMessage;
+  const initialDataRef = useRef(initialData);
+  initialDataRef.current = initialData;
+
   const fetch = useCallback(async () => {
     if (!enabled) {
       setLoading(false);
       setError(null);
       if (resetOnDisabled) {
-        setData(initialData);
+        setData(initialDataRef.current);
       }
       return;
     }
@@ -35,15 +43,15 @@ function useMenuQuery<T>(options: {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetcher();
+      const result = await fetcherRef.current();
       setData(result);
     } catch {
-      setError(errorMessage);
-      setData(initialData);
+      setError(errorMessageRef.current);
+      setData(initialDataRef.current);
     } finally {
       setLoading(false);
     }
-  }, [enabled, errorMessage, fetcher, initialData, resetOnDisabled]);
+  }, [enabled, resetOnDisabled]);
 
   useEffect(() => {
     void fetch();

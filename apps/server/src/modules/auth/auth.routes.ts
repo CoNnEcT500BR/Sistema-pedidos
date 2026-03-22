@@ -11,6 +11,7 @@ import {
 import { loginSchema } from './auth.types';
 import { isAuthError, login } from './auth.service';
 import { authenticate } from './auth.middleware';
+import { authLockout } from './auth.lockout';
 
 export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
   app.post(
@@ -42,11 +43,23 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
+      const lock = authLockout.isBlocked(parsed.data.email, request.ip);
+      if (lock.blocked) {
+        reply.header('retry-after', String(lock.retryAfterSec));
+        return reply
+          .code(429)
+          .send({ message: `Muitas tentativas. Tente novamente em ${lock.retryAfterSec}s` });
+      }
+
       try {
         const result = await login(app, parsed.data);
+        authLockout.registerSuccess(parsed.data.email, request.ip);
         return reply.code(200).send(result);
       } catch (error) {
         if (isAuthError(error)) {
+          if (error.statusCode === 401) {
+            authLockout.registerFailure(parsed.data.email, request.ip);
+          }
           return reply.code(error.statusCode).send({ message: error.message });
         }
 

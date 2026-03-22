@@ -9,7 +9,7 @@ import {
   validationErrorSchema,
   arrayDataResponse,
 } from '@/shared/http/openapi';
-import { usersService } from './users.service';
+import { isUsersServiceError, usersService } from './users.service';
 import { createUserSchema, updateUserSchema, updateUserStatusSchema } from './users.types';
 
 const userSchema = {
@@ -107,9 +107,17 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const data = await usersService.createUser(parsed.data);
-      emitUserChanged('CREATED', data.id);
-      return reply.code(201).send({ data });
+      try {
+        const data = await usersService.createUser(parsed.data);
+        emitUserChanged('CREATED', data.id);
+        return reply.code(201).send({ data });
+      } catch (error) {
+        if (isUsersServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -139,9 +147,17 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const data = await usersService.updateUser(params.id, parsed.data);
-      emitUserChanged('UPDATED', data.id);
-      return { data };
+      try {
+        const data = await usersService.updateUser(params.id, parsed.data);
+        emitUserChanged('UPDATED', data.id);
+        return { data };
+      } catch (error) {
+        if (isUsersServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -171,9 +187,17 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
           .send({ message: parsed.error.issues[0]?.message ?? 'Payload invalido' });
       }
 
-      const data = await usersService.updateStatus(params.id, parsed.data.isActive);
-      emitUserChanged('STATUS_CHANGED', data.id);
-      return { data };
+      try {
+        const data = await usersService.updateStatus(params.id, parsed.data.isActive);
+        emitUserChanged('STATUS_CHANGED', data.id);
+        return { data };
+      } catch (error) {
+        if (isUsersServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
+        throw error;
+      }
     },
   );
 
@@ -201,6 +225,10 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
         emitUserChanged('DELETED', data.id);
         return { data };
       } catch (error) {
+        if (isUsersServiceError(error)) {
+          return reply.code(error.statusCode).send({ message: error.message });
+        }
+
         if (error instanceof Error) {
           return reply.code(400).send({ message: error.message });
         }

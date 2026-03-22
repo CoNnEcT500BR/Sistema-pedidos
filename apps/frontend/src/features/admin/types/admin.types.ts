@@ -67,6 +67,30 @@ export interface AdminUser {
   updatedAt: string;
 }
 
+export interface AdminAuditLog {
+  timestamp: string;
+  actorId?: string;
+  actorEmail?: string;
+  actorRole?: string;
+  method: string;
+  path: string;
+  statusCode: number;
+  ip?: string;
+  entity: string;
+  action: string;
+  payload?: Record<string, unknown> | string;
+}
+
+export type AdminAuditSortOrder = 'newest' | 'oldest';
+
+export interface AdminAuditLogsPage {
+  items: AdminAuditLog[];
+  page: number;
+  pageSize: number;
+  total: number;
+  hasNextPage: boolean;
+}
+
 export interface AdminMenuItemPayload {
   categoryId: string;
   name: string;

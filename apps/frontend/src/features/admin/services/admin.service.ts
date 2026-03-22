@@ -6,14 +6,27 @@ import type {
   AdminComboPayload,
   AdminMenuItemDetail,
   AdminMenuItemPayload,
+  AdminAuditSortOrder,
   AdminUser,
   AdminUserPayload,
+  AdminAuditLogsPage,
   DashboardData,
   SalesReportData,
 } from '../types/admin.types';
 
 interface ApiResponse<T> {
   data: T;
+}
+
+interface AuditLogsParams {
+  page?: number;
+  pageSize?: number;
+  entity?: string;
+  action?: string;
+  actorEmail?: string;
+  startAt?: string;
+  endAt?: string;
+  sort?: AdminAuditSortOrder;
 }
 
 export const adminService = {
@@ -193,6 +206,22 @@ export const adminService = {
 
   async deleteUser(id: string): Promise<AdminUser> {
     const res = await apiClient.delete<ApiResponse<AdminUser>>(`/api/users/${id}`);
+    return res.data.data;
+  },
+
+  async getAuditLogs(params: AuditLogsParams = {}): Promise<AdminAuditLogsPage> {
+    const res = await apiClient.get<ApiResponse<AdminAuditLogsPage>>('/api/audit/logs', {
+      params: {
+        page: params.page ?? 1,
+        pageSize: params.pageSize ?? 100,
+        entity: params.entity,
+        action: params.action,
+        actorEmail: params.actorEmail,
+        startAt: params.startAt,
+        endAt: params.endAt,
+        sort: params.sort ?? 'newest',
+      },
+    });
     return res.data.data;
   },
 };

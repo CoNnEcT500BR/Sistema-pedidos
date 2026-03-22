@@ -1,0 +1,45 @@
+[
+  {
+    "key": "admin.delivery.v1",
+    "enabled": true,
+    "description": "Fluxo de delivery no admin",
+    "rules": {
+      "roles": [
+        "ADMIN",
+        "STAFF"
+      ],
+      "channels": [
+        "ADMIN"
+      ],
+      "rolloutPercentage": 100
+    }
+  },
+  {
+    "key": "admin.reports.csv_export",
+    "enabled": true,
+    "description": "Exportacao CSV em relatorios admin",
+    "rules": {
+      "roles": [
+        "ADMIN"
+      ],
+      "channels": [
+        "ADMIN"
+      ],
+      "rolloutPercentage": 100
+    }
+  },
+  {
+    "key": "kiosk.gradual_checkout_v2",
+    "enabled": false,
+    "description": "Nova experiencia de checkout no kiosk",
+    "rules": {
+      "roles": [
+        "PUBLIC"
+      ],
+      "channels": [
+        "KIOSK"
+      ],
+      "rolloutPercentage": 0
+    }
+  }
+]

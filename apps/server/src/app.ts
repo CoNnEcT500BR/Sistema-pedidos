@@ -4,14 +4,34 @@ import fastifyCors from '@fastify/cors';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import { Registry, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
 
 import { registerRoutes } from './routes';
 import { registerRealtime } from '@/shared/realtime/realtime';
+import { auditService } from '@/shared/audit/audit.service';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const usePrettyLogs = !isProduction && process.env.LOG_PRETTY !== 'false';
 
 export async function buildApp(): Promise<FastifyInstance> {
+  const metricsRegistry = new Registry();
+  collectDefaultMetrics({ register: metricsRegistry });
+
+  const httpRequestCounter = new Counter({
+    name: 'sistema_pedidos_http_requests_total',
+    help: 'Total de requisicoes HTTP por metodo, rota e status',
+    labelNames: ['method', 'route', 'status_code'] as const,
+    registers: [metricsRegistry],
+  });
+
+  const httpRequestDuration = new Histogram({
+    name: 'sistema_pedidos_http_request_duration_seconds',
+    help: 'Duracao das requisicoes HTTP em segundos',
+    labelNames: ['method', 'route', 'status_code'] as const,
+    buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+    registers: [metricsRegistry],
+  });
+
   const app = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
@@ -96,6 +116,49 @@ export async function buildApp(): Promise<FastifyInstance> {
     version: '1.0.0',
     database: 'connected',
   }));
+
+  app.get('/metrics', async (_request, reply) => {
+    reply.header('content-type', metricsRegistry.contentType);
+    return metricsRegistry.metrics();
+  });
+
+  app.addHook('onRequest', async (request) => {
+    request.log.debug({ path: request.url, method: request.method }, 'request.received');
+  });
+
+  app.addHook('onResponse', async (request, reply) => {
+    const route = request.routeOptions.url || request.url;
+    const labels = {
+      method: request.method,
+      route,
+      status_code: String(reply.statusCode),
+    };
+
+    httpRequestCounter.inc(labels);
+    httpRequestDuration.observe(labels, reply.elapsedTime / 1000);
+
+    const isAdminMutation =
+      request.url.startsWith('/api') &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
+      reply.statusCode < 500;
+
+    if (isAdminMutation) {
+      const body =
+        request.body && typeof request.body === 'object'
+          ? (request.body as Record<string, unknown>)
+          : undefined;
+      await auditService.append({
+        actorId: request.user?.sub,
+        actorEmail: request.user?.email,
+        actorRole: request.user?.role,
+        method: request.method,
+        path: request.url,
+        statusCode: reply.statusCode,
+        ip: request.ip,
+        payload: body,
+      });
+    }
+  });
 
   await registerRealtime(app);
 

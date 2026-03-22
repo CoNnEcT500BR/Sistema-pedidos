@@ -13,6 +13,11 @@ async function main() {
   ]);
 
   await prisma.$transaction([
+    prisma.auditLog.deleteMany(),
+    prisma.deliveryStatusHistory.deleteMany(),
+    prisma.delivery.deleteMany(),
+    prisma.deliveryRoute.deleteMany(),
+    prisma.deliveryCourier.deleteMany(),
     prisma.orderStatusHistory.deleteMany(),
     prisma.orderItemAddon.deleteMany(),
     prisma.orderItem.deleteMany(),
