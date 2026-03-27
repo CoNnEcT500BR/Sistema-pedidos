@@ -1,5 +1,4 @@
 import { addonsRepository } from './addons.repository';
-import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import {
   inferMenuItemScope,
@@ -88,6 +87,14 @@ function normalizeName(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
+function hasPrismaErrorCode(error: unknown, code: string): boolean {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return false;
+  }
+
+  return (error as { code?: unknown }).code === code;
+}
+
 async function ensureAddonNameAvailable(name: string, excludeId?: string) {
   const target = normalizeName(name);
   const existing = await addonsRepository.listAddonNameIndex();
@@ -110,14 +117,12 @@ function mapAddonPersistenceError(error: unknown): AddonsServiceError {
     return error;
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === 'P2002') {
-      return new AddonsServiceError('Ja existe ingrediente com este nome', 409);
-    }
+  if (hasPrismaErrorCode(error, 'P2002')) {
+    return new AddonsServiceError('Ja existe ingrediente com este nome', 409);
+  }
 
-    if (error.code === 'P2025') {
-      return new AddonsServiceError('Ingrediente nao encontrado', 404);
-    }
+  if (hasPrismaErrorCode(error, 'P2025')) {
+    return new AddonsServiceError('Ingrediente nao encontrado', 404);
   }
 
   return new AddonsServiceError('Falha ao persistir ingrediente', 400);
