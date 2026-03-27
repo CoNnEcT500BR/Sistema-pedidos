@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Bike, Plus, Route, Send } from 'lucide-react';
 
 import { deliveryService } from '@/features/delivery/services/delivery.service';
@@ -36,7 +36,7 @@ export function DeliveryPage() {
 
   const [assigningDeliveryId, setAssigningDeliveryId] = useState<string | null>(null);
 
-  async function loadAll() {
+  const loadAll = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -53,11 +53,11 @@ export function DeliveryPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [t]);
 
   useEffect(() => {
     void loadAll();
-  }, []);
+  }, [loadAll]);
 
   const queueByStatus = useMemo(() => {
     return {
