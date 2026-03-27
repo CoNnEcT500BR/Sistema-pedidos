@@ -11,14 +11,16 @@ const menuItemSchemaBase = z.object({
   isAvailable: z.boolean().optional(),
   addonIds: z.array(z.string().min(1, 'addonId obrigatorio')).optional(),
   assemblyAddonIds: z.array(z.string().min(1, 'addonId obrigatorio')).optional(),
+  breadAddonIds: z.array(z.string().min(1, 'addonId obrigatorio')).optional(),
   extraAddonIds: z.array(z.string().min(1, 'addonId obrigatorio')).optional(),
 });
 
 const validateAddonAssignments = (
-  value: { assemblyAddonIds?: string[]; extraAddonIds?: string[] },
+  value: { assemblyAddonIds?: string[]; breadAddonIds?: string[]; extraAddonIds?: string[] },
   ctx: z.RefinementCtx,
 ) => {
   const assembly = value.assemblyAddonIds ?? [];
+  const breads = value.breadAddonIds ?? [];
   const extras = value.extraAddonIds ?? [];
 
   if (new Set(assembly).size !== assembly.length) {
@@ -26,6 +28,14 @@ const validateAddonAssignments = (
       code: z.ZodIssueCode.custom,
       message: 'assemblyAddonIds com duplicidade',
       path: ['assemblyAddonIds'],
+    });
+  }
+
+  if (new Set(breads).size !== breads.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'breadAddonIds com duplicidade',
+      path: ['breadAddonIds'],
     });
   }
 
@@ -37,12 +47,15 @@ const validateAddonAssignments = (
     });
   }
 
-  const overlap = assembly.some((id) => extras.includes(id));
-  if (overlap) {
+  const overlapAssemblyBread = assembly.some((id) => breads.includes(id));
+  const overlapAssemblyExtra = assembly.some((id) => extras.includes(id));
+  const overlapBreadExtra = breads.some((id) => extras.includes(id));
+
+  if (overlapAssemblyBread || overlapAssemblyExtra || overlapBreadExtra) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'assemblyAddonIds e extraAddonIds nao podem repetir o mesmo addon',
-      path: ['extraAddonIds'],
+      message: 'assemblyAddonIds, breadAddonIds e extraAddonIds nao podem repetir o mesmo addon',
+      path: ['breadAddonIds'],
     });
   }
 };

@@ -71,11 +71,13 @@ function TouchAddonRow({
   addon,
   status,
   onToggleRemove,
+  onSelectFlavor,
   onChangeQuantity,
 }: {
   addon: Addon;
   status: SelectedIngredient | undefined;
   onToggleRemove: (addon: Addon) => void;
+  onSelectFlavor: (addon: Addon) => void;
   onChangeQuantity: (addon: Addon, delta: number) => void;
 }) {
   const { t } = useI18n();
@@ -98,6 +100,27 @@ function TouchAddonRow({
           </div>
           <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isRemoved ? 'bg-red-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
             {isRemoved ? t('Sem') : t('Manter')}
+          </span>
+        </div>
+      </button>
+    );
+  }
+
+  if (isFlavorAddon(addon.name)) {
+    const isSelectedFlavor = quantityToAdd > 0;
+    return (
+      <button
+        type="button"
+        onClick={() => onSelectFlavor(addon)}
+        className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${isSelectedFlavor ? 'border-primary-300 bg-primary-50' : 'border-stone-200 bg-white hover:bg-stone-50'}`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
+            {addon.price > 0 && <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p>}
+          </div>
+          <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isSelectedFlavor ? 'bg-primary-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
+            {isSelectedFlavor ? t('Selecionado') : t('Selecionar')}
           </span>
         </div>
       </button>
@@ -180,32 +203,31 @@ function TouchCustomizationPanel({
     ]);
   }
 
-  function updateQuantityToAdd(addon: Addon, delta: number) {
-    const existing = getStatus(addon);
-    const isFlavorOption = isFlavorAddon(addon.name);
-    const rawNext = (existing?.quantityToAdd ?? 0) + delta;
-    const newQuantity = isFlavorOption ? (rawNext > 0 ? 1 : 0) : Math.max(0, rawNext);
+  function selectFlavor(addon: Addon) {
+    const flavorIds = new Set(addons.filter((entry) => isFlavorAddon(entry.name)).map((entry) => entry.id));
+    const cleaned = selected.filter((entry) => !flavorIds.has(entry.addonId)).map((entry) => ({ ...entry }));
+    const alreadySelected = selected.some((entry) => entry.addonId === addon.id && entry.quantityToAdd > 0);
 
-    if (isFlavorOption && newQuantity > 0) {
-      const flavorIds = new Set(addons.filter((entry) => isFlavorAddon(entry.name)).map((entry) => entry.id));
-      const cleaned = selected.filter((entry) => !flavorIds.has(entry.addonId)).map((entry) => ({ ...entry }));
-
-      if (existing) {
-        onChange([...cleaned, { ...existing, quantityToAdd: 1, removed: false }]);
-      } else {
-        onChange([
-          ...cleaned,
-          {
-            addonId: addon.id,
-            name: addon.name,
-            basePrice: addon.price,
-            quantityToAdd: 1,
-            removed: false,
-          },
-        ]);
-      }
+    if (alreadySelected) {
+      onChange(cleaned);
       return;
     }
+
+    onChange([
+      ...cleaned,
+      {
+        addonId: addon.id,
+        name: addon.name,
+        basePrice: addon.price,
+        quantityToAdd: 1,
+        removed: false,
+      },
+    ]);
+  }
+
+  function updateQuantityToAdd(addon: Addon, delta: number) {
+    const existing = getStatus(addon);
+    const newQuantity = Math.max(0, (existing?.quantityToAdd ?? 0) + delta);
 
     if (newQuantity === 0 && (!existing || existing.quantityToAdd === 0)) {
       onChange(selected.filter((entry) => entry.addonId !== addon.id));
@@ -269,6 +291,7 @@ function TouchCustomizationPanel({
               addon={addon}
               status={getStatus(addon)}
               onToggleRemove={toggleRemove}
+              onSelectFlavor={selectFlavor}
               onChangeQuantity={updateQuantityToAdd}
             />
           ))}

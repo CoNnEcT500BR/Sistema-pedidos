@@ -161,12 +161,17 @@ export const menuRepository = {
     isAvailable?: boolean;
     addonIds?: string[];
     assemblyAddonIds?: string[];
+    breadAddonIds?: string[];
     extraAddonIds?: string[];
   }) => {
-    const { addonIds = [], assemblyAddonIds, extraAddonIds, ...menuItemData } = data;
+    const { addonIds = [], assemblyAddonIds, breadAddonIds, extraAddonIds, ...menuItemData } = data;
 
-    const useSegmented = Array.isArray(assemblyAddonIds) || Array.isArray(extraAddonIds);
+    const useSegmented =
+      Array.isArray(assemblyAddonIds) ||
+      Array.isArray(breadAddonIds) ||
+      Array.isArray(extraAddonIds);
     const segmentedAssembly = assemblyAddonIds ?? [];
+    const segmentedBreads = breadAddonIds ?? [];
     const segmentedExtras = extraAddonIds ?? [];
 
     const assignmentRows = useSegmented
@@ -177,11 +182,17 @@ export const menuRepository = {
             isRequired: true,
             displayOrder: index,
           })),
+          ...segmentedBreads.map((addonId, index) => ({
+            addonId,
+            assignmentType: 'BREAD' as const,
+            isRequired: false,
+            displayOrder: segmentedAssembly.length + index,
+          })),
           ...segmentedExtras.map((addonId, index) => ({
             addonId,
             assignmentType: 'EXTRA' as const,
             isRequired: false,
-            displayOrder: index,
+            displayOrder: segmentedAssembly.length + segmentedBreads.length + index,
           })),
         ]
       : addonIds.map((addonId, index) => ({
@@ -213,17 +224,19 @@ export const menuRepository = {
   },
 
   updateMenuItem: async (id: string, data: Record<string, unknown>) => {
-    const { addonIds, assemblyAddonIds, extraAddonIds, ...menuItemData } = data as Record<
-      string,
-      unknown
-    > & {
-      addonIds?: string[];
-      assemblyAddonIds?: string[];
-      extraAddonIds?: string[];
-    };
+    const { addonIds, assemblyAddonIds, breadAddonIds, extraAddonIds, ...menuItemData } =
+      data as Record<string, unknown> & {
+        addonIds?: string[];
+        assemblyAddonIds?: string[];
+        breadAddonIds?: string[];
+        extraAddonIds?: string[];
+      };
 
     const shouldRewriteAddons =
-      Array.isArray(addonIds) || Array.isArray(assemblyAddonIds) || Array.isArray(extraAddonIds);
+      Array.isArray(addonIds) ||
+      Array.isArray(assemblyAddonIds) ||
+      Array.isArray(breadAddonIds) ||
+      Array.isArray(extraAddonIds);
 
     if (!shouldRewriteAddons) {
       return prisma.menuItem.update({
@@ -241,8 +254,12 @@ export const menuRepository = {
       });
     }
 
-    const useSegmented = Array.isArray(assemblyAddonIds) || Array.isArray(extraAddonIds);
+    const useSegmented =
+      Array.isArray(assemblyAddonIds) ||
+      Array.isArray(breadAddonIds) ||
+      Array.isArray(extraAddonIds);
     const segmentedAssembly = assemblyAddonIds ?? [];
+    const segmentedBreads = breadAddonIds ?? [];
     const segmentedExtras = extraAddonIds ?? [];
     const legacyAddonIds = addonIds ?? [];
 
@@ -254,11 +271,17 @@ export const menuRepository = {
             isRequired: true,
             displayOrder: index,
           })),
+          ...segmentedBreads.map((addonId, index) => ({
+            addonId,
+            assignmentType: 'BREAD' as const,
+            isRequired: false,
+            displayOrder: segmentedAssembly.length + index,
+          })),
           ...segmentedExtras.map((addonId, index) => ({
             addonId,
             assignmentType: 'EXTRA' as const,
             isRequired: false,
-            displayOrder: index,
+            displayOrder: segmentedAssembly.length + segmentedBreads.length + index,
           })),
         ]
       : legacyAddonIds.map((addonId, index) => ({

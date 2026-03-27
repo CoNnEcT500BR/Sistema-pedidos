@@ -7,7 +7,7 @@ export interface AdminMenuItemDetail extends MenuItem {
     menuItemId: string;
     addonId: string;
     isRequired: boolean;
-    assignmentType: 'ASSEMBLY' | 'EXTRA';
+    assignmentType: 'ASSEMBLY' | 'BREAD' | 'EXTRA';
     displayOrder: number;
     addon: Addon;
   }>;
@@ -102,6 +102,7 @@ export interface AdminMenuItemPayload {
   isAvailable?: boolean;
   addonIds?: string[];
   assemblyAddonIds?: string[];
+  breadAddonIds?: string[];
   extraAddonIds?: string[];
 }
 
@@ -137,6 +138,17 @@ export interface AdminAddonPayload {
   name: string;
   addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL' | 'SIZE_CHANGE';
   price: number;
+  scope?: 'BURGER' | 'BURGER_BUILD' | 'DRINK' | 'SIDE' | 'COMBO' | 'GENERAL';
+  station?:
+    | 'PROTEINS'
+    | 'CHEESES'
+    | 'VEGETABLES'
+    | 'SAUCES'
+    | 'DRINKS'
+    | 'SIDES'
+    | 'FINISHING'
+    | 'GENERAL';
+  priority?: 'FAST' | 'MEDIUM' | 'CRITICAL';
   description?: string;
   isActive?: boolean;
 }

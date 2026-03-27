@@ -33,6 +33,7 @@ interface MenuFormState {
   displayOrder: string;
   isAvailable: boolean;
   assemblyAddonIds: string[];
+  breadAddonIds: string[];
   extraAddonIds: string[];
 }
 
@@ -46,6 +47,7 @@ const emptyForm: MenuFormState = {
   displayOrder: '0',
   isAvailable: true,
   assemblyAddonIds: [],
+  breadAddonIds: [],
   extraAddonIds: [],
 };
 
@@ -82,6 +84,11 @@ function isNamedAsExtra(value: string): boolean {
   return /\bextra\b|\bextras\b|\badicional\b|\badicionais\b/.test(normalized);
 }
 
+function isNamedAsBread(value: string): boolean {
+  const normalized = normalizeScopeSource(value);
+  return /\bpao\b|\bpao\s+de\b|\bbread\b|\bbun\b/.test(normalized);
+}
+
 function isAddonTypeAllowedForScope(addonType: Addon['addonType'], scope: ProductScope): boolean {
   if (scope === 'BURGER_BUILD') {
     return addonType === 'SUBSTITUTION' || addonType === 'REMOVAL';
@@ -110,6 +117,38 @@ function isAddonCompatibleWithScope(addon: Addon, scope: ProductScope): boolean 
   return addonScope === scope;
 }
 
+function getAddonIncompatibilityReason(addon: Addon, scope: ProductScope): string {
+  const addonScope = resolveIngredientMeta(addon).scope;
+
+  if (!isAddonTypeAllowedForScope(addon.addonType, scope)) {
+    if (scope === 'BURGER_BUILD') {
+      return 'Itens de criação aceitam apenas montagem (remover/substituir).';
+    }
+    if (addon.addonType === 'SIZE_CHANGE') {
+      return 'Variação de tamanho só é válida para bebida, acompanhamento ou combo.';
+    }
+    return 'Tipo de adicional não permitido para este item.';
+  }
+
+  if (scope === 'BURGER_BUILD' && isNamedAsExtra(addon.name)) {
+    return 'Extras não são permitidos em criação de hambúrguer.';
+  }
+
+  if (scope === 'GENERAL' || addonScope === 'GENERAL') {
+    return '';
+  }
+
+  if (scope === 'BURGER_BUILD' && !(addonScope === 'BURGER_BUILD' || addonScope === 'BURGER')) {
+    return 'Escopo incompatível com criação de hambúrguer.';
+  }
+
+  if (addonScope !== scope) {
+    return 'Escopo do ingrediente não corresponde ao escopo do item.';
+  }
+
+  return '';
+}
+
 export function MenuManagementPage() {
   const { t, language } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -121,7 +160,7 @@ export function MenuManagementPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeAddonTab, setActiveAddonTab] = useState<'ASSEMBLY' | 'EXTRA'>('ASSEMBLY');
+  const [activeAddonTab, setActiveAddonTab] = useState<'ASSEMBLY' | 'BREAD' | 'EXTRA'>('ASSEMBLY');
   const [showAllAddons, setShowAllAddons] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<MenuItem | null>(null);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
@@ -185,8 +224,8 @@ export function MenuManagementPage() {
   );
 
   const selectedAddonIds = useMemo(
-    () => [...form.assemblyAddonIds, ...form.extraAddonIds],
-    [form.assemblyAddonIds, form.extraAddonIds],
+    () => [...form.assemblyAddonIds, ...form.breadAddonIds, ...form.extraAddonIds],
+    [form.assemblyAddonIds, form.breadAddonIds, form.extraAddonIds],
   );
 
   const selectedAddonIdSet = useMemo(() => new Set(selectedAddonIds), [selectedAddonIds]);
@@ -223,6 +262,24 @@ export function MenuManagementPage() {
     );
   }, [addonCompatibilityById, addons, form.assemblyAddonIds, showAllAddons]);
 
+  const showBreadTab = currentItemScope === 'BURGER';
+
+  const filteredBreadAddons = useMemo(() => {
+    if (!showBreadTab) {
+      return [];
+    }
+
+    const breadSource = addons.filter((addon) => addon.addonType !== 'EXTRA' && isNamedAsBread(addon.name));
+
+    if (showAllAddons) return breadSource;
+
+    return breadSource.filter(
+      (addon) =>
+        (addonCompatibilityById.get(addon.id)?.compatible ?? false) ||
+        form.breadAddonIds.includes(addon.id),
+    );
+  }, [addonCompatibilityById, addons, form.breadAddonIds, showAllAddons, showBreadTab]);
+
   const filteredExtraAddons = useMemo(() => {
     const extraSource = addons.filter((addon) => addon.addonType === 'EXTRA');
     if (currentItemScope === 'BURGER_BUILD') {
@@ -237,6 +294,17 @@ export function MenuManagementPage() {
         form.extraAddonIds.includes(addon.id),
     );
   }, [addonCompatibilityById, addons, currentItemScope, form.extraAddonIds, showAllAddons]);
+
+  const incompatibleVisibleCount = useMemo(() => {
+    const source =
+      activeAddonTab === 'ASSEMBLY'
+        ? filteredAssemblyAddons
+        : activeAddonTab === 'BREAD'
+          ? filteredBreadAddons
+          : filteredExtraAddons;
+
+    return source.filter((addon) => !(addonCompatibilityById.get(addon.id)?.compatible ?? false)).length;
+  }, [activeAddonTab, addonCompatibilityById, filteredAssemblyAddons, filteredBreadAddons, filteredExtraAddons]);
 
   const selectedCategoryItems = useMemo(
     () =>
@@ -343,6 +411,12 @@ export function MenuManagementPage() {
     setForm((current) => ({ ...current, displayOrder: String(availableDisplayOrders[0]) }));
   }, [availableDisplayOrders, dialogOpen, form.displayOrder]);
 
+  useEffect(() => {
+    if (activeAddonTab === 'BREAD' && !showBreadTab) {
+      setActiveAddonTab('ASSEMBLY');
+    }
+  }, [activeAddonTab, showBreadTab]);
+
   function resetMessages() {
     setError('');
     setSuccess('');
@@ -365,6 +439,9 @@ export function MenuManagementPage() {
     const assemblyAddonIds = detail.addons
       .filter((addon) => addon.assignmentType === 'ASSEMBLY')
       .map((addon) => addon.addonId);
+    const breadAddonIds = detail.addons
+      .filter((addon) => addon.assignmentType === 'BREAD')
+      .map((addon) => addon.addonId);
     const extraAddonIds = detail.addons
       .filter((addon) => addon.assignmentType === 'EXTRA')
       .map((addon) => addon.addonId);
@@ -385,6 +462,7 @@ export function MenuManagementPage() {
       displayOrder: String(detail.displayOrder ?? 0),
       isAvailable: duplicate ? true : detail.isAvailable,
       assemblyAddonIds,
+      breadAddonIds,
       extraAddonIds: extraAddonIds.length ? extraAddonIds : fallbackExtraIds,
     });
     setDialogOpen(true);
@@ -404,15 +482,19 @@ export function MenuManagementPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function toggleAddon(addonId: string, target: 'ASSEMBLY' | 'EXTRA') {
+  function toggleAddon(addonId: string, target: 'ASSEMBLY' | 'BREAD' | 'EXTRA') {
     const addon = addonById.get(addonId);
     if (!addon) return;
 
     const isCompatible = addonCompatibilityById.get(addonId)?.compatible ?? false;
 
     setForm((current) => {
-      const currentTargetIds = target === 'ASSEMBLY' ? current.assemblyAddonIds : current.extraAddonIds;
-      const oppositeTargetIds = target === 'ASSEMBLY' ? current.extraAddonIds : current.assemblyAddonIds;
+      const currentTargetIds =
+        target === 'ASSEMBLY'
+          ? current.assemblyAddonIds
+          : target === 'BREAD'
+            ? current.breadAddonIds
+            : current.extraAddonIds;
       const isSelected = currentTargetIds.includes(addonId);
 
       if (isSelected) {
@@ -422,6 +504,10 @@ export function MenuManagementPage() {
             target === 'ASSEMBLY'
               ? current.assemblyAddonIds.filter((id) => id !== addonId)
               : current.assemblyAddonIds,
+          breadAddonIds:
+            target === 'BREAD'
+              ? current.breadAddonIds.filter((id) => id !== addonId)
+              : current.breadAddonIds,
           extraAddonIds:
             target === 'EXTRA'
               ? current.extraAddonIds.filter((id) => id !== addonId)
@@ -440,10 +526,14 @@ export function MenuManagementPage() {
           target === 'ASSEMBLY'
             ? [...current.assemblyAddonIds, addonId]
             : current.assemblyAddonIds.filter((id) => id !== addonId),
+        breadAddonIds:
+          target === 'BREAD'
+            ? [...current.breadAddonIds, addonId]
+            : current.breadAddonIds.filter((id) => id !== addonId),
         extraAddonIds:
           target === 'EXTRA'
             ? [...current.extraAddonIds, addonId]
-            : oppositeTargetIds.filter((id) => id !== addonId),
+            : current.extraAddonIds.filter((id) => id !== addonId),
       };
     });
   }
@@ -511,6 +601,13 @@ export function MenuManagementPage() {
         return addonCompatibilityById.get(addonId)?.compatible ?? false;
       });
 
+      const validatedBreadAddonIds = form.breadAddonIds.filter((addonId) => {
+        const addon = addonById.get(addonId);
+        if (!addon) return false;
+        if (!isNamedAsBread(addon.name)) return false;
+        return addonCompatibilityById.get(addonId)?.compatible ?? false;
+      });
+
       const validatedExtraAddonIds = form.extraAddonIds.filter((addonId) => {
         const addon = addonById.get(addonId);
         if (!addon) return false;
@@ -520,6 +617,7 @@ export function MenuManagementPage() {
 
       if (
         validatedAssemblyAddonIds.length !== form.assemblyAddonIds.length ||
+        validatedBreadAddonIds.length !== form.breadAddonIds.length ||
         validatedExtraAddonIds.length !== form.extraAddonIds.length
       ) {
         setError(t('Alguns adicionais incompatíveis foram removidos antes de salvar.'));
@@ -535,6 +633,7 @@ export function MenuManagementPage() {
         displayOrder: Number(form.displayOrder || 0),
         isAvailable: form.isAvailable,
         assemblyAddonIds: validatedAssemblyAddonIds,
+        breadAddonIds: showBreadTab ? validatedBreadAddonIds : [],
         extraAddonIds: currentItemScope === 'BURGER_BUILD' ? [] : validatedExtraAddonIds,
       };
 
@@ -858,6 +957,14 @@ export function MenuManagementPage() {
                     </div>
                   ) : null}
 
+                  {showAllAddons && incompatibleVisibleCount > 0 ? (
+                    <div className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                      {t('{count} adicionais estão bloqueados por escopo para este item.', {
+                        count: incompatibleVisibleCount,
+                      })}
+                    </div>
+                  ) : null}
+
                   {currentItemScope === 'BURGER_BUILD' ? (
                     <div className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                       {t('No fluxo de criação de hambúrguer, adicionais do tipo Extra ficam bloqueados por regra de operação.')}
@@ -872,6 +979,15 @@ export function MenuManagementPage() {
                     >
                       {t('Montagem')} ({form.assemblyAddonIds.length})
                     </button>
+                    {showBreadTab ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveAddonTab('BREAD')}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeAddonTab === 'BREAD' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-600'}`}
+                      >
+                        {t('Pães')} ({form.breadAddonIds.length})
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => setActiveAddonTab('EXTRA')}
@@ -883,24 +999,33 @@ export function MenuManagementPage() {
                   </div>
 
                   <div className="grid max-h-[260px] gap-2 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50 p-3">
-                    {(activeAddonTab === 'ASSEMBLY' ? filteredAssemblyAddons : filteredExtraAddons).map(
-                      (addon) => {
+                    {(activeAddonTab === 'ASSEMBLY'
+                      ? filteredAssemblyAddons
+                      : activeAddonTab === 'BREAD'
+                        ? filteredBreadAddons
+                        : filteredExtraAddons).map((addon) => {
                         const isChecked =
                           activeAddonTab === 'ASSEMBLY'
                             ? form.assemblyAddonIds.includes(addon.id)
-                            : form.extraAddonIds.includes(addon.id);
+                            : activeAddonTab === 'BREAD'
+                              ? form.breadAddonIds.includes(addon.id)
+                              : form.extraAddonIds.includes(addon.id);
                         const compatibility = addonCompatibilityById.get(addon.id);
                         const isCompatible = compatibility?.compatible ?? false;
                         const addonScope = compatibility?.scope ?? resolveIngredientMeta(addon).scope;
+                        const incompatibilityReason = getAddonIncompatibilityReason(addon, currentItemScope);
 
                         return (
                           <label
                             key={addon.id}
-                            className={`flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm ${isCompatible || isChecked ? 'text-stone-700' : 'text-stone-400'}`}
+                            className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm ${isCompatible || isChecked ? 'bg-white text-stone-700' : 'border border-red-200 bg-red-50 text-red-700'}`}
                           >
                             <span className="flex min-w-0 flex-col">
                               <span className="truncate">{addon.name}</span>
                               <span className="text-xs text-stone-500">{t(productScopeLabels[addonScope])}</span>
+                              {!isCompatible && !isChecked && incompatibilityReason ? (
+                                <span className="text-xs text-red-600">{t(incompatibilityReason)}</span>
+                              ) : null}
                             </span>
                             <input
                               type="checkbox"
@@ -913,6 +1038,12 @@ export function MenuManagementPage() {
                         );
                       },
                     )}
+
+                    {activeAddonTab === 'BREAD' && showBreadTab && filteredBreadAddons.length === 0 ? (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                        {t('Nenhum adicional de pão encontrado. Cadastre ingredientes com nome de pão para habilitar seleção.')}
+                      </p>
+                    ) : null}
 
                     {activeAddonTab === 'EXTRA' && currentItemScope === 'BURGER_BUILD' ? (
                       <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">

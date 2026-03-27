@@ -68,6 +68,38 @@ export function CombosPage() {
     [language],
   );
 
+  const availableDisplayOrders = useMemo(() => {
+    const siblingCombos = combos.filter((combo) => !form.id || combo.id !== form.id);
+    const usedOrders = new Set(
+      siblingCombos
+        .map((combo) => combo.displayOrder)
+        .filter((order): order is number => typeof order === 'number'),
+    );
+    const highestTaken = siblingCombos.reduce(
+      (max, combo) => Math.max(max, combo.displayOrder ?? -1),
+      -1,
+    );
+
+    const available: number[] = [];
+    for (let order = 0; order <= highestTaken + 1; order += 1) {
+      if (!usedOrders.has(order)) {
+        available.push(order);
+      }
+    }
+
+    const currentOrder = Number(form.displayOrder || 0);
+    if (
+      Number.isInteger(currentOrder) &&
+      currentOrder >= 0 &&
+      !usedOrders.has(currentOrder) &&
+      !available.includes(currentOrder)
+    ) {
+      available.push(currentOrder);
+    }
+
+    return available.sort((a, b) => a - b);
+  }, [combos, form.displayOrder, form.id]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setPageError('');
@@ -92,6 +124,19 @@ export function CombosPage() {
   useCatalogRealtimeRefresh(() => {
     void loadData();
   });
+
+  useEffect(() => {
+    if (!dialogOpen || !availableDisplayOrders.length) {
+      return;
+    }
+
+    const currentOrder = Number(form.displayOrder || 0);
+    if (availableDisplayOrders.includes(currentOrder)) {
+      return;
+    }
+
+    setForm((current) => ({ ...current, displayOrder: String(availableDisplayOrders[0]) }));
+  }, [availableDisplayOrders, dialogOpen, form.displayOrder]);
 
   function openCreate() {
     setForm({
@@ -349,7 +394,20 @@ export function CombosPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-stone-700">{t('Ordem de exibição')}</label>
-                  <Input type="number" min="0" step="1" value={form.displayOrder} onChange={(event) => setForm((current) => ({ ...current, displayOrder: event.target.value }))} />
+                  <select
+                    value={form.displayOrder}
+                    onChange={(event) => setForm((current) => ({ ...current, displayOrder: event.target.value }))}
+                    className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    {availableDisplayOrders.map((order) => (
+                      <option key={order} value={String(order)}>
+                        {t('Posição {order}', { order: order + 1 })}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-stone-500">
+                    {t('A lista mostra apenas posições livres para evitar repetição entre combos.')}
+                  </p>
                 </div>
                 <div>
                   <div className="mb-2 flex items-center justify-between">

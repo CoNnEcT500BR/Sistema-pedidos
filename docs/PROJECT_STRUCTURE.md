@@ -17,12 +17,14 @@ Atualizado em 22/03/2026.
 ### apps/frontend
 
 Arquivos de build/config:
+
 - index.html
 - vite.config.ts
 - tailwind.config.js
 - tsconfig.json
 
 Codigo em src/:
+
 - app/router.tsx: roteamento principal por contexto
 - routes/kiosk: fluxo do cliente
 - routes/staff: fluxo de balcao
@@ -35,6 +37,7 @@ Codigo em src/:
 - components/ui: componentes base + dialogs/inputs custom
 
 Rotas admin implementadas:
+
 - /admin/login
 - /admin/dashboard
 - /admin/menu
@@ -49,6 +52,7 @@ Rotas admin implementadas:
 ### apps/server
 
 Infra e dados:
+
 - prisma/schema.prisma
 - prisma/seed.ts
 - prisma/migrations/
@@ -57,6 +61,7 @@ Infra e dados:
 - src/routes.ts
 
 Modulos em src/modules:
+
 - auth
 - menu
 - combos
@@ -67,6 +72,7 @@ Modulos em src/modules:
 - users
 
 Shared:
+
 - src/shared/database
 - src/shared/http/openapi.ts
 - src/shared/http/error-handler.ts
@@ -85,6 +91,7 @@ Uso principal: contratos e tipos compartilhados entre frontend/backend.
 ## 4. Scripts
 
 Scripts manuais e E2E relevantes:
+
 - scripts/e2e-kiosk-critical-flow.js
 - scripts/e2e-admin-orders-board.js
 - scripts/e2e-size-change-flow.js

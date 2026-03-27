@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pencil, Plus, Power, Trash2 } from 'lucide-react';
 
 import {
@@ -48,6 +48,38 @@ export function CategoriesPage() {
   const [removing, setRemoving] = useState(false);
   const [form, setForm] = useState<CategoryFormState>(emptyForm);
 
+  const availableDisplayOrders = useMemo(() => {
+    const siblingCategories = categories.filter((category) => !form.id || category.id !== form.id);
+    const usedOrders = new Set(
+      siblingCategories
+        .map((category) => category.displayOrder)
+        .filter((order): order is number => typeof order === 'number'),
+    );
+    const highestTaken = siblingCategories.reduce(
+      (max, category) => Math.max(max, category.displayOrder ?? -1),
+      -1,
+    );
+
+    const available: number[] = [];
+    for (let order = 0; order <= highestTaken + 1; order += 1) {
+      if (!usedOrders.has(order)) {
+        available.push(order);
+      }
+    }
+
+    const currentOrder = Number(form.displayOrder || 0);
+    if (
+      Number.isInteger(currentOrder) &&
+      currentOrder >= 0 &&
+      !usedOrders.has(currentOrder) &&
+      !available.includes(currentOrder)
+    ) {
+      available.push(currentOrder);
+    }
+
+    return available.sort((a, b) => a - b);
+  }, [categories, form.displayOrder, form.id]);
+
   const resolveCategoryApiErrorMessage = useCallback(
     (err: unknown, fallbackMessage: string) =>
       resolveApiErrorMessage(err, fallbackMessage, t, categoryErrorRules),
@@ -74,6 +106,19 @@ export function CategoriesPage() {
   useCatalogRealtimeRefresh(() => {
     void loadCategories();
   });
+
+  useEffect(() => {
+    if (!dialogOpen || !availableDisplayOrders.length) {
+      return;
+    }
+
+    const currentOrder = Number(form.displayOrder || 0);
+    if (availableDisplayOrders.includes(currentOrder)) {
+      return;
+    }
+
+    setForm((current) => ({ ...current, displayOrder: String(availableDisplayOrders[0]) }));
+  }, [availableDisplayOrders, dialogOpen, form.displayOrder]);
 
   function resetMessages() {
     setError('');
@@ -320,13 +365,20 @@ export function CategoriesPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-stone-700">{t('Ordem de exibição')}</label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="1"
+                  <select
                     value={form.displayOrder}
                     onChange={(event) => updateField('displayOrder', event.target.value)}
-                  />
+                    className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    {availableDisplayOrders.map((order) => (
+                      <option key={order} value={String(order)}>
+                        {t('Posição {order}', { order: order + 1 })}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-stone-500">
+                    {t('A lista mostra apenas posições livres para evitar repetição entre categorias.')}
+                  </p>
                 </div>
               </div>
 

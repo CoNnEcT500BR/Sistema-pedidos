@@ -275,173 +275,550 @@ async function main() {
   const itemByName = new Map(allMenuItems.map((item) => [item.name, item]));
 
   const addonsData = [
-    { name: 'Mostarda', addonType: 'REMOVAL', price: 0, description: 'Mostarda do item' },
-    { name: 'Ketchup', addonType: 'REMOVAL', price: 0, description: 'Ketchup do item' },
-    { name: 'Cebola', addonType: 'REMOVAL', price: 0, description: 'Cebola do item' },
-    { name: 'Picles', addonType: 'REMOVAL', price: 0, description: 'Picles do item' },
-    { name: 'Alface', addonType: 'REMOVAL', price: 0, description: 'Alface do item' },
-    { name: 'Tomate', addonType: 'REMOVAL', price: 0, description: 'Tomate do item' },
-    { name: 'Maionese', addonType: 'REMOVAL', price: 0, description: 'Maionese do item' },
-    { name: 'Bacon', addonType: 'REMOVAL', price: 0, description: 'Bacon do item' },
-    { name: 'Queijo', addonType: 'REMOVAL', price: 0, description: 'Queijo do item' },
+    // Ingredientes base para TODOS os lanches
+    {
+      name: 'Pao Tradicional',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Pao base do lanche',
+      scope: 'BURGER',
+      station: 'GENERAL',
+      priority: 'FAST',
+    },
+    {
+      name: 'Carne',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Carne base do lanche',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'FAST',
+    },
+    {
+      name: 'Frango Grelhado',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Proteina de frango do lanche',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'FAST',
+    },
+    {
+      name: 'Burger Vegetal',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Proteina vegetal do lanche',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'FAST',
+    },
+
+    // REMOVAL - escopo BURGER
+    {
+      name: 'Mostarda',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Mostarda do lanche',
+      scope: 'BURGER',
+      station: 'SAUCES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Ketchup',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Ketchup do lanche',
+      scope: 'BURGER',
+      station: 'SAUCES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Cebola',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Cebola do lanche',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Picles',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Picles do lanche',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Alface',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Alface do lanche',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Tomate',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Tomate do lanche',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Maionese',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Maionese do lanche',
+      scope: 'BURGER',
+      station: 'SAUCES',
+      priority: 'FAST',
+    },
+    {
+      name: 'Bacon',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Bacon do lanche',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'FAST',
+    },
+    {
+      name: 'Queijo',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Queijo do lanche',
+      scope: 'BURGER',
+      station: 'CHEESES',
+      priority: 'FAST',
+    },
     {
       name: 'Molho Especial',
       addonType: 'REMOVAL',
       price: 0,
-      description: 'Molho especial do item',
+      description: 'Molho especial do lanche',
+      scope: 'BURGER',
+      station: 'SAUCES',
+      priority: 'FAST',
     },
-    { name: 'Gelo', addonType: 'REMOVAL', price: 0, description: 'Gelo da bebida' },
-    { name: 'Chantilly', addonType: 'REMOVAL', price: 0, description: 'Chantilly da sobremesa' },
 
-    { name: 'Sabor Cola', addonType: 'EXTRA', price: 0, description: 'Troca sabor para cola' },
+    // REMOVAL - bebidas/sobremesas
+    {
+      name: 'Gelo',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Gelo da bebida',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
+    },
+    {
+      name: 'Chantilly',
+      addonType: 'REMOVAL',
+      price: 0,
+      description: 'Chantilly da sobremesa',
+      scope: 'DRINK',
+      station: 'FINISHING',
+      priority: 'FAST',
+    },
+
+    // SUBSTITUTION
+    {
+      name: 'Pao Brioche',
+      addonType: 'SUBSTITUTION',
+      price: 2.0,
+      description: 'Trocar pao por brioche artesanal',
+      scope: 'BURGER',
+      station: 'GENERAL',
+      priority: 'CRITICAL',
+    },
+
+    // SABORES de bebida (mantidos como EXTRA para compatibilidade de contrato)
+    {
+      name: 'Sabor Cola',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Sabor cola',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
+    },
     {
       name: 'Sabor Guarana',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para guarana',
+      description: 'Sabor guarana',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
     {
       name: 'Sabor Laranja',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para laranja',
+      description: 'Sabor laranja',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
-    { name: 'Sabor Uva', addonType: 'EXTRA', price: 0, description: 'Troca sabor para uva' },
+    {
+      name: 'Sabor Uva',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Sabor uva',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
+    },
     {
       name: 'Sabor Maracuja',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para maracuja',
+      description: 'Sabor maracuja',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
-    { name: 'Sabor Limao', addonType: 'EXTRA', price: 0, description: 'Troca sabor para limao' },
+    {
+      name: 'Sabor Limao',
+      addonType: 'EXTRA',
+      price: 0,
+      description: 'Sabor limao',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
+    },
     {
       name: 'Sabor Pessego',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para pessego',
+      description: 'Sabor pessego',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
     {
       name: 'Sabor Chocolate',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para chocolate',
+      description: 'Sabor chocolate',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
     {
       name: 'Sabor Morango',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para morango',
+      description: 'Sabor morango',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
     {
       name: 'Sabor Baunilha',
       addonType: 'EXTRA',
       price: 0,
-      description: 'Troca sabor para baunilha',
+      description: 'Sabor baunilha',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'FAST',
     },
 
-    { name: 'Carne Extra', addonType: 'EXTRA', price: 5.0, description: 'Adicionar carne extra' },
-    { name: 'Frango Extra', addonType: 'EXTRA', price: 4.5, description: 'Adicionar frango extra' },
-    { name: 'Bacon Extra', addonType: 'EXTRA', price: 3.5, description: 'Adicionar bacon extra' },
-    { name: 'Queijo Extra', addonType: 'EXTRA', price: 2.5, description: 'Adicionar queijo extra' },
+    // EXTRA - lanches
+    {
+      name: 'Carne Extra',
+      addonType: 'EXTRA',
+      price: 5.0,
+      description: 'Adicionar carne extra',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Frango Extra',
+      addonType: 'EXTRA',
+      price: 4.5,
+      description: 'Adicionar frango grelhado extra',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Bacon Extra',
+      addonType: 'EXTRA',
+      price: 3.5,
+      description: 'Adicionar bacon extra',
+      scope: 'BURGER',
+      station: 'PROTEINS',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Queijo Extra',
+      addonType: 'EXTRA',
+      price: 2.5,
+      description: 'Adicionar fatia de queijo extra',
+      scope: 'BURGER',
+      station: 'CHEESES',
+      priority: 'MEDIUM',
+    },
     {
       name: 'Molho Especial Extra',
       addonType: 'EXTRA',
       price: 1.5,
       description: 'Adicionar molho especial extra',
+      scope: 'BURGER',
+      station: 'SAUCES',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Alface Extra',
+      addonType: 'EXTRA',
+      price: 1.5,
+      description: 'Adicionar alface extra',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Tomate Extra',
+      addonType: 'EXTRA',
+      price: 1.5,
+      description: 'Adicionar tomate extra',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Cebola Extra',
+      addonType: 'EXTRA',
+      price: 1.0,
+      description: 'Adicionar cebola extra',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Picles Extra',
+      addonType: 'EXTRA',
+      price: 1.0,
+      description: 'Adicionar picles extra',
+      scope: 'BURGER',
+      station: 'VEGETABLES',
+      priority: 'MEDIUM',
     },
     {
       name: 'Brinquedo Surpresa Extra',
       addonType: 'EXTRA',
       price: 7.9,
       description: 'Adicionar brinquedo surpresa',
+      scope: 'GENERAL',
+      station: 'GENERAL',
+      priority: 'FAST',
     },
 
+    // EXTRA - sobremesas
+    {
+      name: 'Calda de Caramelo',
+      addonType: 'EXTRA',
+      price: 2.0,
+      description: 'Calda de caramelo para sobremesas',
+      scope: 'DRINK',
+      station: 'FINISHING',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Calda de Chocolate',
+      addonType: 'EXTRA',
+      price: 2.0,
+      description: 'Calda de chocolate para sobremesas',
+      scope: 'DRINK',
+      station: 'FINISHING',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Calda de Morango',
+      addonType: 'EXTRA',
+      price: 2.0,
+      description: 'Calda de morango para sobremesas',
+      scope: 'DRINK',
+      station: 'FINISHING',
+      priority: 'MEDIUM',
+    },
+    {
+      name: 'Granulado',
+      addonType: 'EXTRA',
+      price: 1.0,
+      description: 'Granulado de chocolate',
+      scope: 'DRINK',
+      station: 'FINISHING',
+      priority: 'FAST',
+    },
+
+    // SIZE_CHANGE
     {
       name: 'Upgrade Batata para M',
       addonType: 'SIZE_CHANGE',
       price: 2.5,
-      description: 'Troca batata para tamanho M [meta|station=SIDES|scope=SIDE|priority=CRITICAL]',
+      description: 'Troca batata para tamanho M',
+      scope: 'SIDE',
+      station: 'SIDES',
+      priority: 'CRITICAL',
     },
     {
       name: 'Upgrade Batata para G',
       addonType: 'SIZE_CHANGE',
       price: 5.0,
-      description: 'Troca batata para tamanho G [meta|station=SIDES|scope=SIDE|priority=CRITICAL]',
+      description: 'Troca batata para tamanho G',
+      scope: 'SIDE',
+      station: 'SIDES',
+      priority: 'CRITICAL',
     },
     {
       name: 'Upgrade Bebida para M',
       addonType: 'SIZE_CHANGE',
       price: 1.5,
-      description:
-        'Troca bebida para tamanho M [meta|station=DRINKS|scope=DRINK|priority=CRITICAL]',
+      description: 'Troca bebida para tamanho M',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'CRITICAL',
     },
     {
       name: 'Upgrade Bebida para G',
       addonType: 'SIZE_CHANGE',
       price: 3.0,
-      description:
-        'Troca bebida para tamanho G [meta|station=DRINKS|scope=DRINK|priority=CRITICAL]',
+      description: 'Troca bebida para tamanho G',
+      scope: 'DRINK',
+      station: 'DRINKS',
+      priority: 'CRITICAL',
     },
-  ] as const;
+  ];
 
-  await prisma.addon.createMany({ data: addonsData.map((addon) => ({ ...addon })) });
+  await prisma.addon.createMany({ data: addonsData });
 
   const allAddons = await prisma.addon.findMany();
   const addonByName = new Map(allAddons.map((addon) => [addon.name, addon]));
 
-  const menuItemAddonsConfig = [
+  type MenuAddonConfig = {
+    item: string;
+    breads?: string[];
+    removables: string[];
+    extras: string[];
+    sizeChanges?: string[];
+  };
+
+  const menuItemAddonsConfig: MenuAddonConfig[] = [
+    // ── Hambúrgueres ────────────────────────────────────────────────────
     {
       item: 'Classic Burger P',
-      removables: ['Queijo', 'Ketchup', 'Picles'],
-      extras: ['Carne Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Queijo', 'Ketchup', 'Picles'],
+      extras: ['Carne Extra', 'Queijo Extra', 'Picles Extra', 'Brinquedo Surpresa Extra'],
     },
     {
       item: 'Classic Burger M',
-      removables: ['Mostarda', 'Ketchup', 'Cebola', 'Picles'],
-      extras: ['Carne Extra', 'Queijo Extra', 'Bacon Extra', 'Brinquedo Surpresa Extra'],
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Mostarda', 'Ketchup', 'Cebola', 'Picles'],
+      extras: [
+        'Carne Extra',
+        'Queijo Extra',
+        'Bacon Extra',
+        'Cebola Extra',
+        'Picles Extra',
+        'Brinquedo Surpresa Extra',
+      ],
     },
     {
       item: 'Classic Burger G',
-      removables: ['Queijo', 'Mostarda', 'Ketchup', 'Cebola', 'Picles'],
-      extras: ['Carne Extra', 'Queijo Extra', 'Bacon Extra', 'Brinquedo Surpresa Extra'],
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Queijo', 'Mostarda', 'Ketchup', 'Cebola', 'Picles'],
+      extras: [
+        'Carne Extra',
+        'Queijo Extra',
+        'Bacon Extra',
+        'Cebola Extra',
+        'Picles Extra',
+        'Brinquedo Surpresa Extra',
+      ],
     },
     {
       item: 'Bacon Burger M',
-      removables: ['Bacon', 'Queijo', 'Cebola', 'Maionese'],
-      extras: ['Carne Extra', 'Bacon Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
-    },
-    {
-      item: 'Bacon Burger G',
-      removables: ['Bacon', 'Queijo', 'Cebola', 'Maionese'],
-      extras: ['Carne Extra', 'Bacon Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
-    },
-    {
-      item: 'Chicken Burger M',
-      removables: ['Queijo', 'Alface', 'Tomate', 'Maionese'],
-      extras: ['Frango Extra', 'Queijo Extra', 'Brinquedo Surpresa Extra'],
-    },
-    {
-      item: 'Veggie Burger P',
-      removables: ['Alface', 'Tomate', 'Molho Especial'],
-      extras: ['Queijo Extra', 'Molho Especial Extra', 'Brinquedo Surpresa Extra'],
-    },
-    {
-      item: 'Veggie Burger M',
-      removables: ['Alface', 'Tomate', 'Molho Especial'],
-      extras: ['Queijo Extra', 'Molho Especial Extra', 'Brinquedo Surpresa Extra'],
-    },
-    {
-      item: 'Monster Burger G',
-      removables: ['Queijo', 'Bacon', 'Cebola', 'Molho Especial'],
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Bacon', 'Queijo', 'Cebola', 'Maionese'],
       extras: [
         'Carne Extra',
         'Bacon Extra',
         'Queijo Extra',
+        'Cebola Extra',
+        'Brinquedo Surpresa Extra',
+      ],
+    },
+    {
+      item: 'Bacon Burger G',
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Bacon', 'Queijo', 'Cebola', 'Maionese'],
+      extras: [
+        'Carne Extra',
+        'Bacon Extra',
+        'Queijo Extra',
+        'Cebola Extra',
+        'Brinquedo Surpresa Extra',
+      ],
+    },
+    {
+      item: 'Chicken Burger M',
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Frango Grelhado', 'Queijo', 'Alface', 'Tomate', 'Maionese'],
+      extras: [
+        'Frango Extra',
+        'Queijo Extra',
+        'Alface Extra',
+        'Tomate Extra',
+        'Brinquedo Surpresa Extra',
+      ],
+    },
+    {
+      item: 'Veggie Burger P',
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Burger Vegetal', 'Alface', 'Tomate', 'Molho Especial'],
+      extras: [
+        'Queijo Extra',
+        'Alface Extra',
+        'Tomate Extra',
+        'Molho Especial Extra',
+        'Brinquedo Surpresa Extra',
+      ],
+    },
+    {
+      item: 'Veggie Burger M',
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Burger Vegetal', 'Alface', 'Tomate', 'Molho Especial'],
+      extras: [
+        'Queijo Extra',
+        'Alface Extra',
+        'Tomate Extra',
+        'Molho Especial Extra',
+        'Brinquedo Surpresa Extra',
+      ],
+    },
+    {
+      item: 'Monster Burger G',
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Queijo', 'Bacon', 'Cebola', 'Molho Especial'],
+      extras: [
+        'Carne Extra',
+        'Bacon Extra',
+        'Queijo Extra',
+        'Cebola Extra',
         'Molho Especial Extra',
         'Brinquedo Surpresa Extra',
       ],
     },
 
+    // ── Bebidas – Refrigerantes ──────────────────────────────────────
     {
       item: 'Refrigerante P',
       removables: ['Gelo'],
@@ -460,24 +837,28 @@ async function main() {
       extras: ['Sabor Cola', 'Sabor Guarana', 'Sabor Laranja', 'Sabor Uva'],
       sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
+
+    // ── Bebidas – Sucos ──────────────────────────────────────────────
     {
       item: 'Suco P',
       removables: ['Gelo'],
-      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja', 'Sabor Morango'],
       sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Suco M',
       removables: ['Gelo'],
-      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja', 'Sabor Morango'],
       sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
     {
       item: 'Suco G',
       removables: ['Gelo'],
-      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja'],
+      extras: ['Sabor Laranja', 'Sabor Uva', 'Sabor Maracuja', 'Sabor Morango'],
       sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
+
+    // ── Bebidas – Cha Gelado ─────────────────────────────────────────
     {
       item: 'Cha Gelado P',
       removables: ['Gelo'],
@@ -497,6 +878,27 @@ async function main() {
       sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
     },
 
+    // ── Bebidas – Agua Mineral ───────────────────────────────────────
+    {
+      item: 'Agua Mineral P',
+      removables: ['Gelo'],
+      extras: [],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
+    },
+    {
+      item: 'Agua Mineral M',
+      removables: ['Gelo'],
+      extras: [],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
+    },
+    {
+      item: 'Agua Mineral G',
+      removables: ['Gelo'],
+      extras: [],
+      sizeChanges: ['Upgrade Bebida para M', 'Upgrade Bebida para G'],
+    },
+
+    // ── Acompanhamentos ──────────────────────────────────────────────
     {
       item: 'Batata Frita P',
       removables: [],
@@ -516,27 +918,89 @@ async function main() {
       sizeChanges: ['Upgrade Batata para M', 'Upgrade Batata para G'],
     },
 
+    // ── Sobremesas ───────────────────────────────────────────────────
     {
       item: 'Milkshake P',
       removables: ['Chantilly'],
-      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+      extras: [
+        'Sabor Chocolate',
+        'Sabor Morango',
+        'Sabor Baunilha',
+        'Calda de Caramelo',
+        'Calda de Chocolate',
+        'Calda de Morango',
+        'Granulado',
+      ],
     },
     {
       item: 'Milkshake M',
       removables: ['Chantilly'],
-      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+      extras: [
+        'Sabor Chocolate',
+        'Sabor Morango',
+        'Sabor Baunilha',
+        'Calda de Caramelo',
+        'Calda de Chocolate',
+        'Calda de Morango',
+        'Granulado',
+      ],
     },
     {
       item: 'Milkshake G',
       removables: ['Chantilly'],
-      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+      extras: [
+        'Sabor Chocolate',
+        'Sabor Morango',
+        'Sabor Baunilha',
+        'Calda de Caramelo',
+        'Calda de Chocolate',
+        'Calda de Morango',
+        'Granulado',
+      ],
     },
     {
       item: 'Sundae',
       removables: ['Chantilly'],
-      extras: ['Sabor Chocolate', 'Sabor Morango', 'Sabor Baunilha'],
+      extras: [
+        'Sabor Chocolate',
+        'Sabor Morango',
+        'Sabor Baunilha',
+        'Calda de Caramelo',
+        'Calda de Chocolate',
+        'Calda de Morango',
+        'Granulado',
+      ],
     },
-  ] as const;
+    {
+      item: 'Brownie com Sorvete',
+      removables: ['Chantilly'],
+      extras: ['Calda de Chocolate', 'Calda de Caramelo', 'Calda de Morango', 'Granulado'],
+    },
+    {
+      item: 'Torta de Maca',
+      removables: [],
+      extras: ['Calda de Caramelo', 'Calda de Morango', 'Granulado'],
+    },
+    {
+      item: 'Casquinha',
+      removables: [],
+      extras: ['Sabor Baunilha', 'Sabor Chocolate', 'Sabor Morango', 'Granulado'],
+    },
+
+    // ── Kids ─────────────────────────────────────────────────────────
+    {
+      item: 'Lanche Kids P',
+      breads: ['Pao Tradicional', 'Pao Brioche'],
+      removables: ['Carne', 'Queijo', 'Ketchup', 'Picles'],
+      extras: ['Queijo Extra', 'Brinquedo Surpresa Extra'],
+    },
+    {
+      item: 'Suco Kids P',
+      removables: ['Gelo'],
+      extras: ['Sabor Laranja', 'Sabor Morango', 'Sabor Maracuja'],
+      sizeChanges: [],
+    },
+  ];
 
   // Atualizar removablesJson em cada item
   for (const config of menuItemAddonsConfig) {
@@ -553,14 +1017,15 @@ async function main() {
     const menuItem = itemByName.get(config.item);
     if (!menuItem) continue;
 
-    const removables = config.removables
+    const breads = (config.breads ?? [])
       .map((name, index) => {
         const addon = addonByName.get(name);
         if (!addon) return null;
         return {
           menuItemId: menuItem.id,
           addonId: addon.id,
-          isRequired: true,
+          isRequired: false,
+          assignmentType: 'BREAD',
           displayOrder: index + 1,
         };
       })
@@ -571,6 +1036,31 @@ async function main() {
           menuItemId: string;
           addonId: string;
           isRequired: boolean;
+          assignmentType: string;
+          displayOrder: number;
+        } => row !== null,
+      );
+
+    const removables = config.removables
+      .map((name, index) => {
+        const addon = addonByName.get(name);
+        if (!addon) return null;
+        return {
+          menuItemId: menuItem.id,
+          addonId: addon.id,
+          isRequired: true,
+          assignmentType: 'ASSEMBLY',
+          displayOrder: index + breads.length + 1,
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          menuItemId: string;
+          addonId: string;
+          isRequired: boolean;
+          assignmentType: string;
           displayOrder: number;
         } => row !== null,
       );
@@ -583,7 +1073,8 @@ async function main() {
           menuItemId: menuItem.id,
           addonId: addon.id,
           isRequired: false,
-          displayOrder: index + 1,
+          assignmentType: 'EXTRA',
+          displayOrder: index + breads.length + removables.length + 1,
         };
       })
       .filter(
@@ -593,6 +1084,7 @@ async function main() {
           menuItemId: string;
           addonId: string;
           isRequired: boolean;
+          assignmentType: string;
           displayOrder: number;
         } => row !== null,
       );
@@ -605,7 +1097,8 @@ async function main() {
           menuItemId: menuItem.id,
           addonId: addon.id,
           isRequired: false,
-          displayOrder: index + extras.length + 1,
+          assignmentType: 'EXTRA',
+          displayOrder: index + breads.length + removables.length + extras.length + 1,
         };
       })
       .filter(
@@ -615,12 +1108,15 @@ async function main() {
           menuItemId: string;
           addonId: string;
           isRequired: boolean;
+          assignmentType: string;
           displayOrder: number;
         } => row !== null,
       );
 
-    if (removables.length || extras.length || sizeChanges.length) {
-      await prisma.menuItemAddon.createMany({ data: [...removables, ...extras, ...sizeChanges] });
+    if (breads.length || removables.length || extras.length || sizeChanges.length) {
+      await prisma.menuItemAddon.createMany({
+        data: [...breads, ...removables, ...extras, ...sizeChanges],
+      });
     }
   }
 

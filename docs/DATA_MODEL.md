@@ -13,52 +13,64 @@ Atualizado em 22/03/2026 com base em apps/server/prisma/schema.prisma.
 ## 2. Entidades
 
 ### Category
+
 Campos principais: id, name (unico), description, icon, displayOrder, isActive, createdAt, updatedAt.
 Relacao: 1:N com MenuItem.
 
 ### MenuItem
+
 Campos principais: id, categoryId, name, description, price, icon, imageUrl, isAvailable, removablesJson, displayOrder, createdAt, updatedAt.
 Restricao: unique(categoryId, name).
 Relacoes: N:1 Category, M:N Addon (via MenuItemAddon), 1:N OrderItem, 1:N ComboItem.
 
 ### Addon
+
 Campos principais: id, name (unico), addonType, price, description, isActive, createdAt, updatedAt.
 Relacoes: M:N MenuItem (via MenuItemAddon), 1:N OrderItemAddon.
 
 Observacao importante:
+
 - addonType suportado no dominio: EXTRA, SUBSTITUTION, REMOVAL, SIZE_CHANGE.
 - Campo continua String no banco, sem enum SQL.
 
 ### MenuItemAddon
+
 Tabela de permissao de addon por item.
 Campos: id, menuItemId, addonId, isRequired, displayOrder.
 Restricao: unique(menuItemId, addonId).
 
 ### Combo
+
 Campos principais: id, name (unico), description, price, icon, isActive, displayOrder, createdAt, updatedAt.
 Relacoes: 1:N ComboItem, 1:N OrderItem.
 
 ### ComboItem
+
 Campos: id, comboId, menuItemId, quantity.
 Restricao: unique(comboId, menuItemId).
 
 ### Order
+
 Campos principais: id, orderNumber (unico), status, paymentStatus, totalPrice, discount, finalPrice, customerName, customerPhone, notes, createdAt, updatedAt, completedAt.
 Relacoes: 1:N OrderItem, 1:N OrderStatusHistory.
 
 ### OrderItem
+
 Campos: id, orderId, menuItemId?, comboId?, quantity, itemPrice, notes.
 Relacao: 1:N OrderItemAddon.
 
 ### OrderItemAddon
+
 Snapshot de addons aplicados no pedido.
 Campos: id, orderItemId, addonId, quantity, addonPrice.
 
 ### OrderStatusHistory
+
 Historico de transicoes.
 Campos: id, orderId, fromStatus, toStatus, reason, changedAt.
 
 ### User
+
 Campos principais: id, email (unico), password, role, name, isActive, lastLogin, createdAt, updatedAt.
 Uso atual: autenticacao e administracao de usuarios internos.
 

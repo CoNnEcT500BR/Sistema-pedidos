@@ -24,6 +24,9 @@ export const addonsRepository = {
     name: string;
     addonType: string;
     price: number;
+    scope?: string;
+    station?: string;
+    priority?: string;
     description?: string;
     isActive?: boolean;
   }) =>

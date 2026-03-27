@@ -23,6 +23,7 @@ type AddonCompatibilityInput = {
 type NormalizedAddonPayload = {
   addonIds: string[];
   assemblyAddonIds?: string[];
+  breadAddonIds?: string[];
   extraAddonIds?: string[];
   usedSegmentedInput: boolean;
 };
@@ -103,10 +104,13 @@ async function ensureDisplayOrderAvailable(
 function normalizeAddonPayload(payload: {
   addonIds?: string[];
   assemblyAddonIds?: string[];
+  breadAddonIds?: string[];
   extraAddonIds?: string[];
 }): NormalizedAddonPayload {
   const hasSegmentedInput =
-    Array.isArray(payload.assemblyAddonIds) || Array.isArray(payload.extraAddonIds);
+    Array.isArray(payload.assemblyAddonIds) ||
+    Array.isArray(payload.breadAddonIds) ||
+    Array.isArray(payload.extraAddonIds);
 
   if (!hasSegmentedInput) {
     return {
@@ -116,11 +120,13 @@ function normalizeAddonPayload(payload: {
   }
 
   const assemblyAddonIds = payload.assemblyAddonIds ?? [];
+  const breadAddonIds = payload.breadAddonIds ?? [];
   const extraAddonIds = payload.extraAddonIds ?? [];
 
   return {
-    addonIds: [...assemblyAddonIds, ...extraAddonIds],
+    addonIds: [...assemblyAddonIds, ...breadAddonIds, ...extraAddonIds],
     assemblyAddonIds,
+    breadAddonIds,
     extraAddonIds,
     usedSegmentedInput: true,
   };
@@ -203,6 +209,7 @@ export const menuService = {
     }
 
     let inferredAssemblyAddonIds = normalizedAddons.assemblyAddonIds;
+    let inferredBreadAddonIds = normalizedAddons.breadAddonIds;
     let inferredExtraAddonIds = normalizedAddons.extraAddonIds;
     if (!normalizedAddons.usedSegmentedInput && hydratedAddons.length) {
       inferredExtraAddonIds = hydratedAddons
@@ -211,6 +218,7 @@ export const menuService = {
       inferredAssemblyAddonIds = hydratedAddons
         .filter((addon) => addon.addonType !== 'EXTRA')
         .map((addon) => addon.id);
+      inferredBreadAddonIds = [];
     }
 
     return menuRepository.createMenuItem({
@@ -218,6 +226,7 @@ export const menuService = {
       displayOrder: nextDisplayOrder,
       addonIds: undefined,
       assemblyAddonIds: inferredAssemblyAddonIds,
+      breadAddonIds: inferredBreadAddonIds,
       extraAddonIds: inferredExtraAddonIds,
     });
   },
@@ -288,6 +297,7 @@ export const menuService = {
     }
 
     let inferredAssemblyAddonIds = normalizedAddons.assemblyAddonIds;
+    let inferredBreadAddonIds = normalizedAddons.breadAddonIds;
     let inferredExtraAddonIds = normalizedAddons.extraAddonIds;
     if (!normalizedAddons.usedSegmentedInput && hydratedPayloadAddons.length) {
       inferredExtraAddonIds = hydratedPayloadAddons
@@ -296,6 +306,7 @@ export const menuService = {
       inferredAssemblyAddonIds = hydratedPayloadAddons
         .filter((addon) => addon.addonType !== 'EXTRA')
         .map((addon) => addon.id);
+      inferredBreadAddonIds = [];
     }
 
     return menuRepository.updateMenuItem(id, {
@@ -304,6 +315,10 @@ export const menuService = {
       assemblyAddonIds:
         normalizedAddons.usedSegmentedInput || Array.isArray(payload.addonIds)
           ? inferredAssemblyAddonIds
+          : undefined,
+      breadAddonIds:
+        normalizedAddons.usedSegmentedInput || Array.isArray(payload.addonIds)
+          ? inferredBreadAddonIds
           : undefined,
       extraAddonIds:
         normalizedAddons.usedSegmentedInput || Array.isArray(payload.addonIds)

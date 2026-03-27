@@ -120,8 +120,13 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
     [selectedBurgerIngredients],
   );
 
+  const drinkFlavorSummary = useMemo(
+    () => selectedDrinkIngredients.filter((ing) => isFlavorAddon(ing.name) && ing.quantityToAdd > 0),
+    [selectedDrinkIngredients],
+  );
+
   const drinkExtraSummary = useMemo(
-    () => selectedDrinkIngredients.filter((ing) => ing.quantityToAdd > 0),
+    () => selectedDrinkIngredients.filter((ing) => !isFlavorAddon(ing.name) && ing.quantityToAdd > 0),
     [selectedDrinkIngredients],
   );
 
@@ -148,6 +153,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
     burgerRemovedSummary.length > 0 ||
     burgerExtraSummary.length > 0 ||
     drinkRemovedSummary.length > 0 ||
+    drinkFlavorSummary.length > 0 ||
     drinkExtraSummary.length > 0;
 
   function handleClose() {
@@ -475,6 +481,19 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
                       {drinkExtraSummary.map((ing) => (
                         <p key={`drink-extra-${ing.addonId}`} className="text-xs text-gray-600">
                           + {t('{quantity}x {name} ({type})', { quantity: String(ing.quantityToAdd), name: t(ing.name), type: t('bebida') })}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {drinkFlavorSummary.length > 0 && (
+                  <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-600">{t('Sabor da bebida')}</p>
+                    <div className="mt-1 flex flex-col gap-1">
+                      {drinkFlavorSummary.map((ing) => (
+                        <p key={`drink-flavor-${ing.addonId}`} className="text-xs font-medium text-indigo-700">
+                          {t(ing.name)}
                         </p>
                       ))}
                     </div>

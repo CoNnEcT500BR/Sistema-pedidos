@@ -59,6 +59,9 @@ model Addon {
     name        String  @unique
     addonType   String  @default("EXTRA") // EXTRA, SUBSTITUTION, REMOVAL
     price       Float   @default(0)
+    scope       String  @default("GENERAL") // BURGER, BURGER_BUILD, DRINK, SIDE, COMBO, GENERAL
+    station     String  @default("GENERAL") // PROTEINS, CHEESES, VEGETABLES, SAUCES, DRINKS, SIDES, FINISHING, GENERAL
+    priority    String  @default("FAST") // FAST, MEDIUM, CRITICAL
     description String?
 
     isActive  Boolean  @default(true)

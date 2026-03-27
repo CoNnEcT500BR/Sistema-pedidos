@@ -18,10 +18,8 @@ import { resolveApiErrorMessage } from '@/features/admin/utils/api-error';
 import { useCatalogRealtimeRefresh } from '@/hooks/useCatalogRealtimeRefresh';
 import type { Addon } from '@/features/menu/types/menu.types';
 import {
-  buildIngredientDescription,
   defaultIngredientMeta,
   resolveIngredientMeta,
-  stripIngredientMeta,
   type IngredientPriority,
   type KitchenStation,
   type ProductScope,
@@ -247,7 +245,7 @@ export function IngredientsPage() {
     const searchTerm = search.trim().toLowerCase();
 
     return addons.filter((addon) => {
-      const cleanDescription = stripIngredientMeta(addon.description ?? '');
+      const cleanDescription = addon.description ?? '';
       const matchesSearch =
         !searchTerm ||
         addon.name.toLowerCase().includes(searchTerm) ||
@@ -380,7 +378,7 @@ export function IngredientsPage() {
       name: addon.name,
       addonType: addon.addonType,
       price: String(addon.price),
-      description: stripIngredientMeta(addon.description ?? ''),
+      description: addon.description ?? '',
       isActive: addon.isActive ?? true,
       station: meta.station,
       scope: meta.scope,
@@ -469,11 +467,10 @@ export function IngredientsPage() {
         name: form.name.trim(),
         addonType: form.addonType,
         price: normalizedPrice,
-        description: buildIngredientDescription(form.description, {
-          station: form.station,
-          scope: form.scope,
-          priority: form.priority,
-        }),
+        description: form.description.trim() || undefined,
+        station: form.station,
+        scope: form.scope,
+        priority: form.priority,
         isActive: form.isActive,
       };
 
@@ -731,7 +728,7 @@ export function IngredientsPage() {
                     <tr key={addon.id} className="align-top">
                       <td className="px-5 py-4">
                         <p className="font-semibold text-stone-900">{addon.name}</p>
-                        <p className="mt-1 text-xs text-stone-500">{stripIngredientMeta(addon.description ?? '') || t('Sem descrição')}</p>
+                        <p className="mt-1 text-xs text-stone-500">{addon.description || t('Sem descrição')}</p>
                       </td>
                       <td className="px-5 py-4 text-stone-700">{t(addonTypeLabels[addon.addonType])}</td>
                       <td className="px-5 py-4 text-stone-700">{t(kitchenStationLabels[meta.station])}</td>

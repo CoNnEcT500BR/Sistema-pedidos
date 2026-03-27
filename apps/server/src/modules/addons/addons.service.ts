@@ -6,10 +6,26 @@ import {
   isAddonCompatibleWithScope,
 } from '../../shared/utils/addon-scope-compatibility';
 
+const addonScopeEnum = z.enum(['BURGER', 'BURGER_BUILD', 'DRINK', 'SIDE', 'COMBO', 'GENERAL']);
+const addonStationEnum = z.enum([
+  'PROTEINS',
+  'CHEESES',
+  'VEGETABLES',
+  'SAUCES',
+  'DRINKS',
+  'SIDES',
+  'FINISHING',
+  'GENERAL',
+]);
+const addonPriorityEnum = z.enum(['FAST', 'MEDIUM', 'CRITICAL']);
+
 export const createAddonSchema = z.object({
   name: z.string().trim().min(2, 'name obrigatorio'),
   addonType: z.enum(['EXTRA', 'SUBSTITUTION', 'REMOVAL', 'SIZE_CHANGE']),
   price: z.number().min(0, 'price deve ser maior ou igual a zero'),
+  scope: addonScopeEnum.optional().default('GENERAL'),
+  station: addonStationEnum.optional().default('GENERAL'),
+  priority: addonPriorityEnum.optional().default('FAST'),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
 });
@@ -170,6 +186,9 @@ export const addonsService = {
         id: entry.addon.id,
         name: entry.addon.name,
         addonType: entry.addon.addonType,
+        scope: entry.addon.scope,
+        station: entry.addon.station,
+        priority: entry.addon.priority,
         assignmentType: entry.assignmentType,
         price: entry.addon.price,
         description: entry.addon.description,

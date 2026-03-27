@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { CartAddon } from '@/features/cart/store/cart.store';
-import type { MenuItem } from '../types/menu.types';
+import type { Addon, MenuItem } from '../types/menu.types';
 import { useAddons } from '../hooks/useMenu';
 import { IngredientsEditor, type SelectedIngredient } from './IngredientsEditor';
 import { useI18n } from '@/i18n';
@@ -26,6 +26,10 @@ function isDrinkName(name: string): boolean {
 
 function isFlavorAddon(name: string): boolean {
   return name.toLowerCase().startsWith('sabor ');
+}
+
+function isBreadAddonAssignment(assignmentType?: Addon['assignmentType']): boolean {
+  return assignmentType === 'BREAD';
 }
 
 function normalizeScopeSource(value: string): string {
@@ -94,13 +98,23 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
       (addon) => addon.addonType !== 'SIZE_CHANGE' || isAllowedSizeChange(addon.name, item.name),
     );
   }, [addons, item]);
+  const breadAddons = useMemo(
+    () => availableAddons.filter((addon) => isBreadAddonAssignment(addon.assignmentType)),
+    [availableAddons],
+  );
   const isDrinkItem = item ? isDrinkName(item.name) : false;
   const hasFlavorOptions = availableAddons.some((addon) => isFlavorAddon(addon.name));
   const hasSelectedFlavor = selectedIngredients.some(
     (ingredient) => isFlavorAddon(ingredient.name) && ingredient.quantityToAdd > 0,
   );
+  const hasSelectedBread = selectedIngredients.some(
+    (ingredient) => breadAddons.some((breadAddon) => breadAddon.id === ingredient.addonId) && ingredient.quantityToAdd > 0,
+  );
   const mustSelectFlavor = isDrinkItem && hasFlavorOptions;
+  const mustSelectBread = breadAddons.length > 1;
   const isFlavorSelectionValid = !mustSelectFlavor || hasSelectedFlavor;
+  const isBreadSelectionValid = !mustSelectBread || hasSelectedBread;
+  const isSelectionValid = isFlavorSelectionValid && isBreadSelectionValid;
 
   useEffect(() => {
     if (!open) return;
@@ -111,6 +125,35 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
 
     return () => cancelAnimationFrame(frame);
   }, [open, item?.id]);
+
+  useEffect(() => {
+    if (!open || breadAddons.length !== 1) {
+      return;
+    }
+
+    const singleBread = breadAddons[0];
+    const alreadySelected = selectedIngredients.some(
+      (ingredient) => ingredient.addonId === singleBread.id && ingredient.quantityToAdd > 0,
+    );
+
+    if (alreadySelected) {
+      return;
+    }
+
+    const breadIds = new Set(breadAddons.map((addon) => addon.id));
+    const withoutBread = selectedIngredients.filter((ingredient) => !breadIds.has(ingredient.addonId));
+
+    setSelectedIngredients([
+      ...withoutBread,
+      {
+        addonId: singleBread.id,
+        name: singleBread.name,
+        basePrice: singleBread.price,
+        quantityToAdd: 1,
+        removed: false,
+      },
+    ]);
+  }, [breadAddons, open, selectedIngredients]);
 
   function handleClose() {
     setQuantity(1);
@@ -132,7 +175,7 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
         removed: ing.removed,
       }));
 
-    if (!isFlavorSelectionValid) {
+    if (!isSelectionValid) {
       return;
     }
 
@@ -215,6 +258,12 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
             </p>
           )}
 
+          {mustSelectBread && !hasSelectedBread && (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              {t('Escolha obrigatoriamente um tipo de pão para o hambúrguer.')}
+            </p>
+          )}
+
           {/* Quantidade */}
           <div className="flex items-center justify-between">
             <span className="text-base font-semibold text-gray-700">{t('Quantidade')}</span>
@@ -242,7 +291,7 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
           {/* Botão confirmar */}
           <button
             onClick={handleAdd}
-            disabled={!isFlavorSelectionValid}
+            disabled={!isSelectionValid}
             className="flex w-full items-center justify-between rounded-2xl bg-primary-500 px-6 py-4 text-white shadow-md transition hover:bg-primary-600 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
           >
             <span className="text-lg font-bold">{t('Adicionar ao Carrinho')}</span>

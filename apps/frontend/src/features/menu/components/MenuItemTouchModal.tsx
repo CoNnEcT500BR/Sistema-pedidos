@@ -94,6 +94,10 @@ function isAssemblyIngredient(addon: Addon): boolean {
   return addon.isRequired === true;
 }
 
+function isBreadIngredient(addon: Addon): boolean {
+  return addon.assignmentType === 'BREAD';
+}
+
 function isExtraIngredient(addon: Addon): boolean {
   if (addon.assignmentType) {
     return addon.assignmentType === 'EXTRA';
@@ -102,15 +106,29 @@ function isExtraIngredient(addon: Addon): boolean {
   return addon.isRequired !== true;
 }
 
+function isSizeChangeIngredient(addon: Addon): boolean {
+  return addon.addonType === 'SIZE_CHANGE';
+}
+
+function isFlavorIngredient(addon: Addon): boolean {
+  return isFlavorAddon(addon.name);
+}
+
 function TouchAddonRow({
   addon,
   status,
   onToggleRemove,
+  onSelectBread,
+  onSelectFlavor,
+  onSelectSizeUpgrade,
   onChangeQuantity,
 }: {
   addon: Addon;
   status: SelectedIngredient | undefined;
   onToggleRemove: (addon: Addon) => void;
+  onSelectBread: (addon: Addon) => void;
+  onSelectFlavor: (addon: Addon) => void;
+  onSelectSizeUpgrade: (addon: Addon) => void;
   onChangeQuantity: (addon: Addon, delta: number) => void;
 }) {
   const { t } = useI18n();
@@ -135,6 +153,69 @@ function TouchAddonRow({
           </div>
           <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isRemoved ? 'bg-red-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
             {isRemoved ? t('Removido') : t('Manter')}
+          </span>
+        </div>
+      </button>
+    );
+  }
+
+  if (isBreadIngredient(addon)) {
+    const isSelectedBread = quantityToAdd > 0;
+    return (
+      <button
+        type="button"
+        onClick={() => onSelectBread(addon)}
+        className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${isSelectedBread ? 'border-primary-300 bg-primary-50' : 'border-stone-200 bg-white hover:bg-stone-50'}`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
+            {addon.price > 0 ? <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p> : null}
+          </div>
+          <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isSelectedBread ? 'bg-primary-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
+            {isSelectedBread ? t('Selecionado') : t('Selecionar')}
+          </span>
+        </div>
+      </button>
+    );
+  }
+
+  if (isFlavorIngredient(addon)) {
+    const isSelectedFlavor = quantityToAdd > 0;
+    return (
+      <button
+        type="button"
+        onClick={() => onSelectFlavor(addon)}
+        className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${isSelectedFlavor ? 'border-primary-300 bg-primary-50' : 'border-stone-200 bg-white hover:bg-stone-50'}`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
+            {addon.price > 0 ? <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p> : null}
+          </div>
+          <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isSelectedFlavor ? 'bg-primary-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
+            {isSelectedFlavor ? t('Selecionado') : t('Selecionar')}
+          </span>
+        </div>
+      </button>
+    );
+  }
+
+  if (isSizeChangeIngredient(addon)) {
+    const isSelectedUpgrade = quantityToAdd > 0;
+    return (
+      <button
+        type="button"
+        onClick={() => onSelectSizeUpgrade(addon)}
+        className={`w-full rounded-2xl border px-4 py-3 text-left transition-colors ${isSelectedUpgrade ? 'border-primary-300 bg-primary-50' : 'border-stone-200 bg-white hover:bg-stone-50'}`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
+            {addon.price > 0 ? <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p> : null}
+          </div>
+          <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isSelectedUpgrade ? 'bg-primary-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
+            {isSelectedUpgrade ? t('Selecionado') : t('Selecionar')}
           </span>
         </div>
       </button>
@@ -201,20 +282,50 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
     () => availableAddons.filter((addon) => isAssemblyIngredient(addon)),
     [availableAddons],
   );
+  const breadIngredients = useMemo(
+    () => availableAddons.filter((addon) => isBreadIngredient(addon)),
+    [availableAddons],
+  );
+  const flavorIngredients = useMemo(
+    () => availableAddons.filter((addon) => isFlavorIngredient(addon)),
+    [availableAddons],
+  );
+  const sizeUpgradeIngredients = useMemo(
+    () => availableAddons.filter((addon) => isSizeChangeIngredient(addon)),
+    [availableAddons],
+  );
   const extraIngredients = useMemo(
-    () => availableAddons.filter((addon) => isExtraIngredient(addon)),
+    () =>
+      availableAddons.filter(
+        (addon) =>
+          isExtraIngredient(addon) && !isFlavorIngredient(addon) && !isSizeChangeIngredient(addon),
+      ),
     [availableAddons],
   );
 
   const isDrinkItem = item ? isDrinkName(item.name) : false;
-  const hasFlavorOptions = availableAddons.some((addon) => isFlavorAddon(addon.name));
-  const hasSelectedFlavor = selectedIngredients.some((ingredient) => isFlavorAddon(ingredient.name) && ingredient.quantityToAdd > 0);
+  const hasFlavorOptions = flavorIngredients.length > 0;
+  const hasSelectedFlavor = selectedIngredients.some(
+    (ingredient) => flavorIngredients.some((flavor) => flavor.id === ingredient.addonId) && ingredient.quantityToAdd > 0,
+  );
+  const hasSelectedBread = selectedIngredients.some(
+    (ingredient) => breadIngredients.some((bread) => bread.id === ingredient.addonId) && ingredient.quantityToAdd > 0,
+  );
   const mustSelectFlavor = isDrinkItem && hasFlavorOptions;
+  const mustSelectBread = breadIngredients.length > 1;
   const isFlavorSelectionValid = !mustSelectFlavor || hasSelectedFlavor;
+  const isBreadSelectionValid = !mustSelectBread || hasSelectedBread;
+  const isSelectionValid = isFlavorSelectionValid && isBreadSelectionValid;
 
   const ingredientItems = useMemo(() => {
-    return [...removableIngredients, ...extraIngredients];
-  }, [removableIngredients, extraIngredients]);
+    return [
+      ...removableIngredients,
+      ...breadIngredients,
+      ...flavorIngredients,
+      ...sizeUpgradeIngredients,
+      ...extraIngredients,
+    ];
+  }, [removableIngredients, breadIngredients, flavorIngredients, sizeUpgradeIngredients, extraIngredients]);
 
   const ingredientsPagesCount = Math.max(1, Math.ceil(ingredientItems.length / INGREDIENTS_PER_PAGE));
 
@@ -245,6 +356,35 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
     if (ingredientsPageIndex <= ingredientsPagesCount - 1) return;
     setIngredientsPageIndex(Math.max(0, ingredientsPagesCount - 1));
   }, [ingredientsPageIndex, ingredientsPagesCount]);
+
+  useEffect(() => {
+    if (!open || breadIngredients.length !== 1) {
+      return;
+    }
+
+    const singleBread = breadIngredients[0];
+    const alreadySelected = selectedIngredients.some(
+      (ingredient) => ingredient.addonId === singleBread.id && ingredient.quantityToAdd > 0,
+    );
+
+    if (alreadySelected) {
+      return;
+    }
+
+    const breadIds = new Set(breadIngredients.map((ingredient) => ingredient.id));
+    const withoutBread = selectedIngredients.filter((ingredient) => !breadIds.has(ingredient.addonId));
+
+    setSelectedIngredients([
+      ...withoutBread,
+      {
+        addonId: singleBread.id,
+        name: singleBread.name,
+        basePrice: singleBread.price,
+        quantityToAdd: 1,
+        removed: false,
+      },
+    ]);
+  }, [breadIngredients, open, selectedIngredients]);
 
   function handleClose() {
     setQuantity(1);
@@ -286,34 +426,84 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
     ]));
   }
 
-  function updateQuantityToAdd(addon: Addon, delta: number) {
-    const existing = getStatus(addon);
-    const isFlavorOption = isFlavorAddon(addon.name);
-    const rawNext = (existing?.quantityToAdd ?? 0) + delta;
-    const newQuantity = isFlavorOption ? (rawNext > 0 ? 1 : 0) : Math.max(0, rawNext);
+  function selectBread(addon: Addon) {
+    const breadIds = new Set(breadIngredients.map((ingredient) => ingredient.id));
+    const cleaned = selectedIngredients.filter((entry) => !breadIds.has(entry.addonId)).map((entry) => ({ ...entry }));
 
-    if (isFlavorOption && newQuantity > 0) {
-      const flavorIds = new Set(
-        availableAddons.filter((entry) => isFlavorAddon(entry.name)).map((entry) => entry.id),
-      );
-      const cleaned = selectedIngredients.filter((entry) => !flavorIds.has(entry.addonId)).map((entry) => ({ ...entry }));
+    const alreadySelected = selectedIngredients.some(
+      (entry) => entry.addonId === addon.id && entry.quantityToAdd > 0,
+    );
 
-      if (existing) {
-        setSelectedIngredients([...cleaned, { ...existing, quantityToAdd: 1, removed: false }]);
-      } else {
-        setSelectedIngredients([
-          ...cleaned,
-          {
-            addonId: addon.id,
-            name: addon.name,
-            basePrice: addon.price,
-            quantityToAdd: 1,
-            removed: false,
-          },
-        ]);
-      }
+    if (alreadySelected) {
+      setSelectedIngredients(cleaned);
       return;
     }
+
+    setSelectedIngredients([
+      ...cleaned,
+      {
+        addonId: addon.id,
+        name: addon.name,
+        basePrice: addon.price,
+        quantityToAdd: 1,
+        removed: false,
+      },
+    ]);
+  }
+
+  function selectFlavor(addon: Addon) {
+    const flavorIds = new Set(flavorIngredients.map((ingredient) => ingredient.id));
+    const cleaned = selectedIngredients.filter((entry) => !flavorIds.has(entry.addonId)).map((entry) => ({ ...entry }));
+
+    const alreadySelected = selectedIngredients.some(
+      (entry) => entry.addonId === addon.id && entry.quantityToAdd > 0,
+    );
+
+    if (alreadySelected) {
+      setSelectedIngredients(cleaned);
+      return;
+    }
+
+    setSelectedIngredients([
+      ...cleaned,
+      {
+        addonId: addon.id,
+        name: addon.name,
+        basePrice: addon.price,
+        quantityToAdd: 1,
+        removed: false,
+      },
+    ]);
+  }
+
+  function selectSizeUpgrade(addon: Addon) {
+    const sizeUpgradeIds = new Set(sizeUpgradeIngredients.map((ingredient) => ingredient.id));
+    const cleaned = selectedIngredients.filter((entry) => !sizeUpgradeIds.has(entry.addonId)).map((entry) => ({ ...entry }));
+
+    const alreadySelected = selectedIngredients.some(
+      (entry) => entry.addonId === addon.id && entry.quantityToAdd > 0,
+    );
+
+    if (alreadySelected) {
+      setSelectedIngredients(cleaned);
+      return;
+    }
+
+    setSelectedIngredients([
+      ...cleaned,
+      {
+        addonId: addon.id,
+        name: addon.name,
+        basePrice: addon.price,
+        quantityToAdd: 1,
+        removed: false,
+      },
+    ]);
+  }
+
+  function updateQuantityToAdd(addon: Addon, delta: number) {
+    const existing = getStatus(addon);
+    const newQuantity = Math.max(0, (existing?.quantityToAdd ?? 0) + delta);
 
     if (newQuantity === 0 && (!existing || existing.quantityToAdd === 0)) {
       setSelectedIngredients((current) => current.filter((entry) => entry.addonId !== addon.id));
@@ -352,7 +542,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
   }
 
   function handleAdd() {
-    if (!item || !isFlavorSelectionValid) return;
+    if (!item || !isSelectionValid) return;
 
     const cartAddons: CartAddon[] = selectedIngredients
       .filter((ingredient) => ingredient.quantityToAdd > 0 || ingredient.removed)
@@ -474,6 +664,9 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
                           addon={addon}
                           status={getStatus(addon)}
                           onToggleRemove={toggleRemove}
+                          onSelectBread={selectBread}
+                          onSelectFlavor={selectFlavor}
+                          onSelectSizeUpgrade={selectSizeUpgrade}
                           onChangeQuantity={updateQuantityToAdd}
                         />
                       ))}
@@ -486,6 +679,12 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
             {mustSelectFlavor && !hasSelectedFlavor && (
               <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
                 {t('Para bebida, escolha um sabor antes de adicionar.')}
+              </p>
+            )}
+
+            {mustSelectBread && !hasSelectedBread && (
+              <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
+                {t('Escolha um tipo de pão para continuar.')}
               </p>
             )}
           </div>
@@ -506,7 +705,7 @@ export function MenuItemTouchModal({ item, open, onClose, onAddToCart }: MenuIte
             <button
               type="button"
               onClick={handleAdd}
-              disabled={!isFlavorSelectionValid}
+              disabled={!isSelectionValid}
               className="mt-auto w-full rounded-2xl bg-primary-500 px-4 py-3.5 text-base font-bold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t('Adicionar ao pedido')}

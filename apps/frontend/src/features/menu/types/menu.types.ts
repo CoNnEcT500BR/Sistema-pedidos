@@ -24,8 +24,19 @@ export interface Addon {
   id: string;
   name: string;
   addonType: 'EXTRA' | 'SUBSTITUTION' | 'REMOVAL' | 'SIZE_CHANGE';
-  assignmentType?: 'ASSEMBLY' | 'EXTRA';
+  assignmentType?: 'ASSEMBLY' | 'BREAD' | 'EXTRA';
   price: number;
+  scope?: 'BURGER' | 'BURGER_BUILD' | 'DRINK' | 'SIDE' | 'COMBO' | 'GENERAL';
+  station?:
+    | 'PROTEINS'
+    | 'CHEESES'
+    | 'VEGETABLES'
+    | 'SAUCES'
+    | 'DRINKS'
+    | 'SIDES'
+    | 'FINISHING'
+    | 'GENERAL';
+  priority?: 'FAST' | 'MEDIUM' | 'CRITICAL';
   description?: string;
   isRequired?: boolean;
   isActive?: boolean;
