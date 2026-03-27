@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       api_base:
-        description: Base URL da API para smoke pos deploy (exemplo: https://api.exemplo.com)
+        description: "Base URL da API para smoke pos deploy (exemplo: https://api.exemplo.com)"
         required: true
-        default: http://localhost:3001
+        default: "http://localhost:3001"
 
 jobs:
   smoke-post-deploy:
