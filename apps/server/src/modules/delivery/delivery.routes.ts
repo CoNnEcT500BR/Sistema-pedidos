@@ -90,6 +90,62 @@ const routeSchema = {
   },
 } as const;
 
+const listDeliveriesQueryOpenApiSchema = {
+  type: 'object',
+  properties: {
+    status: {
+      type: 'string',
+      enum: ['QUEUED', 'ASSIGNED', 'DISPATCHED', 'IN_ROUTE', 'DELIVERED', 'FAILED'],
+    },
+    courierId: { type: 'string' },
+    zone: { type: 'string' },
+  },
+} as const;
+
+const createCourierBodySchema = {
+  type: 'object',
+  required: ['name'],
+  properties: {
+    name: { type: 'string', minLength: 2 },
+    phone: { type: 'string' },
+    zone: { type: 'string' },
+    isActive: { type: 'boolean', default: true },
+  },
+} as const;
+
+const createRouteBodySchema = {
+  type: 'object',
+  required: ['name', 'zone'],
+  properties: {
+    name: { type: 'string', minLength: 2 },
+    zone: { type: 'string', minLength: 1 },
+    isActive: { type: 'boolean', default: true },
+  },
+} as const;
+
+const assignDeliveryBodySchema = {
+  type: 'object',
+  required: ['courierId'],
+  properties: {
+    courierId: { type: 'string', minLength: 1 },
+    routeId: { type: 'string' },
+    priority: { type: 'integer', minimum: 1, maximum: 5 },
+    promisedAt: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
+const updateDeliveryStatusBodySchema = {
+  type: 'object',
+  required: ['status'],
+  properties: {
+    status: {
+      type: 'string',
+      enum: ['QUEUED', 'ASSIGNED', 'DISPATCHED', 'IN_ROUTE', 'DELIVERED', 'FAILED'],
+    },
+    reason: { type: 'string' },
+  },
+} as const;
+
 export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void> {
   app.get(
     '/delivery/queue',
@@ -98,9 +154,12 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Listar fila de entregas',
+        description: 'Lista entregas com filtros opcionais por status, entregador e zona.',
         security: bearerAuthSecurity,
+        querystring: listDeliveriesQueryOpenApiSchema,
         response: {
           200: arrayDataResponse(deliverySchema),
+          400: validationErrorSchema,
           401: unauthorizedErrorSchema,
         },
       },
@@ -124,6 +183,7 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Sincronizar fila de entregas com pedidos prontos',
+        description: 'Cria registros de entrega para pedidos prontos ainda nao enfileirados.',
         security: bearerAuthSecurity,
         response: {
           200: arrayDataResponse(deliverySchema),
@@ -141,6 +201,7 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Listar entregadores',
+        description: 'Retorna entregadores cadastrados para operacao de delivery.',
         security: bearerAuthSecurity,
         response: {
           200: arrayDataResponse(courierSchema),
@@ -158,7 +219,9 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Criar entregador',
+        description: 'Cadastra novo entregador para atribuicao de entregas.',
         security: bearerAuthSecurity,
+        body: createCourierBodySchema,
         response: {
           201: dataResponse(courierSchema),
           400: validationErrorSchema,
@@ -185,6 +248,7 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Listar rotas de entrega',
+        description: 'Retorna rotas de entrega configuradas no sistema.',
         security: bearerAuthSecurity,
         response: {
           200: arrayDataResponse(routeSchema),
@@ -202,7 +266,9 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Criar rota de entrega',
+        description: 'Cadastra uma nova rota de entrega por zona.',
         security: bearerAuthSecurity,
+        body: createRouteBodySchema,
         response: {
           201: dataResponse(routeSchema),
           400: validationErrorSchema,
@@ -229,8 +295,11 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Atribuir entrega para entregador e rota',
+        description:
+          'Atribui entregador/rota e atualiza prioridade e horario prometido da entrega.',
         security: bearerAuthSecurity,
         params: pathIdSchema,
+        body: assignDeliveryBodySchema,
         response: {
           200: dataResponse(deliverySchema),
           400: validationErrorSchema,
@@ -266,8 +335,10 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       schema: {
         tags: ['delivery', 'admin'],
         summary: 'Atualizar status de entrega',
+        description: 'Atualiza o status da entrega e registra motivo quando informado.',
         security: bearerAuthSecurity,
         params: pathIdSchema,
+        body: updateDeliveryStatusBodySchema,
         response: {
           200: dataResponse(deliverySchema),
           400: validationErrorSchema,

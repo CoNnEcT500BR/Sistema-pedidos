@@ -72,8 +72,9 @@ export async function buildApp(): Promise<FastifyInstance> {
     openapi: {
       info: {
         title: 'Sistema de Pedidos API',
-        description: 'Documentacao da API (Auth, Menu, Combos, Orders, Addons e Telemetry)',
-        version: '1.1.0',
+        description:
+          'Documentacao da API (Auth, Menu, Combos, Orders, Addons, Telemetry, Reports, Users, Delivery, Audit e Feature Flags)',
+        version: '1.2.0',
       },
       servers: [{ url: 'http://localhost:3001' }],
       tags: [
@@ -83,6 +84,12 @@ export async function buildApp(): Promise<FastifyInstance> {
         { name: 'orders', description: 'Pedidos e status' },
         { name: 'addons', description: 'Adicionais e regras por item' },
         { name: 'telemetry', description: 'Eventos de jornada do kiosk' },
+        { name: 'reports', description: 'Relatorios operacionais e financeiros' },
+        { name: 'users', description: 'Gestao de usuarios internos' },
+        { name: 'delivery', description: 'Fila e operacao de entregas' },
+        { name: 'audit', description: 'Trilha de auditoria administrativa' },
+        { name: 'feature-flags', description: 'Gerenciamento e avaliacao de feature flags' },
+        { name: 'admin', description: 'Operacoes administrativas restritas' },
       ],
       components: {
         securitySchemes: {

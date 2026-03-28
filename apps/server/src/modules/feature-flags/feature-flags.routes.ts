@@ -42,6 +42,22 @@ const evaluateQuerySchema = z.object({
   userKey: z.string().min(1, 'userKey obrigatorio'),
 });
 
+const evaluateQuerystringOpenApiSchema = {
+  type: 'object',
+  required: ['userKey'],
+  properties: {
+    key: { type: 'string' },
+    role: { type: 'string', enum: ['ADMIN', 'STAFF', 'PUBLIC'], default: 'PUBLIC' },
+    channel: { type: 'string', enum: ['ADMIN', 'STAFF', 'KIOSK', 'API'], default: 'API' },
+    userKey: { type: 'string', minLength: 1 },
+  },
+} as const;
+
+const evaluateResponseSchema = {
+  type: 'object',
+  additionalProperties: { type: 'boolean' },
+} as const;
+
 const upsertSchema = z.object({
   key: z.string().min(1, 'key obrigatoria'),
   enabled: z.boolean(),
@@ -108,6 +124,13 @@ export async function registerFeatureFlagsRoutes(app: FastifyInstance): Promise<
       schema: {
         tags: ['feature-flags'],
         summary: 'Avaliar feature flags para role/canal',
+        description:
+          'Avalia as flags considerando role, channel e rollout percentual para um userKey consistente.',
+        querystring: evaluateQuerystringOpenApiSchema,
+        response: {
+          200: dataResponse(evaluateResponseSchema),
+          400: validationErrorSchema,
+        },
       },
     },
     async (request, reply) => {

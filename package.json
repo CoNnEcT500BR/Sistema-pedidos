@@ -28,6 +28,7 @@
     "test:contract": "npm run test:contract:auth && npm run test:contract:orders && npm run test:contract:reports && npm run test:contract:users",
     "test:smoke:post-deploy": "node scripts/e2e-smoke-post-deploy.js",
     "test:e2e:all": "npm run test:e2e:smoke && npm run test:e2e:size-change && npm run test:e2e:menu:assembly-extra && npm run test:e2e:delivery:persisted && npm run test:e2e:orders:negative && npm run test:contract",
+    "docs:openapi:validate": "npm run -w apps/server docs:validate",
     "ops:db:backup": "node scripts/ops/db-backup.js",
     "ops:db:restore:validate": "node scripts/ops/db-restore-validate.js",
     "ops:money:regression": "node scripts/ops/verify-monetary-regression.js",

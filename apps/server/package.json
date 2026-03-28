@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "type-check": "tsc --noEmit",
     "lint": "tsc --noEmit",
+    "docs:validate": "tsx scripts/validate-openapi.ts",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev && prisma generate",

@@ -4,6 +4,7 @@ import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
 import {
   bearerAuthSecurity,
   dataResponse,
+  notFoundErrorSchema,
   pathIdSchema,
   unauthorizedErrorSchema,
   validationErrorSchema,
@@ -73,6 +74,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       schema: {
         tags: ['users', 'admin'],
         summary: 'Listar usuarios internos',
+        description: 'Retorna usuarios internos ativos e inativos para gestao administrativa.',
         security: bearerAuthSecurity,
         response: {
           200: arrayDataResponse(userSchema),
@@ -90,6 +92,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       schema: {
         tags: ['users', 'admin'],
         summary: 'Criar usuario interno',
+        description: 'Cria um usuario interno com perfil ADMIN ou STAFF.',
         security: bearerAuthSecurity,
         body: createUserBodySchema,
         response: {
@@ -128,6 +131,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       schema: {
         tags: ['users', 'admin'],
         summary: 'Atualizar usuario interno',
+        description: 'Atualiza campos do usuario interno identificado pelo id.',
         security: bearerAuthSecurity,
         params: pathIdSchema,
         body: updateUserBodySchema,
@@ -135,6 +139,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
           200: dataResponse(userSchema),
           400: validationErrorSchema,
           401: unauthorizedErrorSchema,
+          404: notFoundErrorSchema,
         },
       },
     },
@@ -168,6 +173,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       schema: {
         tags: ['users', 'admin'],
         summary: 'Ativar ou desativar usuario interno',
+        description: 'Atualiza o status de ativacao do usuario interno.',
         security: bearerAuthSecurity,
         params: pathIdSchema,
         body: updateUserStatusBodySchema,
@@ -175,6 +181,7 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
           200: dataResponse(userSchema),
           400: validationErrorSchema,
           401: unauthorizedErrorSchema,
+          404: notFoundErrorSchema,
         },
       },
     },
@@ -208,12 +215,14 @@ export async function registerUsersRoutes(app: FastifyInstance): Promise<void> {
       schema: {
         tags: ['users', 'admin'],
         summary: 'Remover usuario interno',
+        description: 'Remove um usuario interno pelo id, exceto a propria conta autenticada.',
         security: bearerAuthSecurity,
         params: pathIdSchema,
         response: {
           200: dataResponse(userSchema),
           400: validationErrorSchema,
           401: unauthorizedErrorSchema,
+          404: notFoundErrorSchema,
         },
       },
     },

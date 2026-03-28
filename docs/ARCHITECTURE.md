@@ -158,16 +158,14 @@ O módulo feature-flags permite liberar mudanças gradualmente por perfil de usu
 
 **Entidades:**
 
-- FeatureFlag: name, enabled, roles (array), channels (array), rolloutPercentage, description
+- FeatureFlag: key, enabled, description, rules (roles/channels/rolloutPercentage)
 - Permite lógica "canary" e A/B testing por percentual
 
 **Endpoints:**
 
-- GET /api/feature-flags: listagem de flags habilitadas para o usuário autenticado
-- POST /api/feature-flags: criar nova flag (admin)
-- PUT /api/feature-flags/:name: atualizar flag (admin)
-- PATCH /api/feature-flags/:name/toggle: ativar/desativar (admin)
-- DELETE /api/feature-flags/:name: remover flag (admin)
+- GET /api/feature-flags: listagem de feature flags para perfil ADMIN
+- PUT /api/feature-flags/:key: cria/atualiza feature flag (upsert, ADMIN)
+- GET /api/feature-flags/evaluate?key=&role=&channel=&userKey=: avalia habilitação efetiva por contexto
 
 **Casos de Uso:**
 
@@ -204,12 +202,14 @@ O módulo delivery gerencia a entrega e roteamento de pedidos, integrando com op
 
 **Endpoints:**
 
-- GET /api/delivery/orders: listagem de pedidos aguardando/em entrega
-- POST /api/delivery/orders/:orderId/assign: assignar courier específico
-- PATCH /api/delivery/orders/:orderId/status: atualizar status (PENDING → ASSIGNED → IN_DELIVERY → DELIVERED)
+- GET /api/delivery/queue: listagem da fila de entregas com filtros opcionais
+- POST /api/delivery/queue/from-ready: sincroniza pedidos READY para a fila de entrega
+- PATCH /api/delivery/:id/assign: assignar courier/rota e prioridade
+- PATCH /api/delivery/:id/status: atualizar status (QUEUED → ASSIGNED → DISPATCHED → IN_ROUTE → DELIVERED/FAILED)
 - GET /api/delivery/couriers: listagem de entregadores ativos
 - POST /api/delivery/couriers: criar novo courier (admin)
 - GET /api/delivery/routes: listagem de rotas otimizadas
+- POST /api/delivery/routes: criar nova rota (admin)
 
 **Casos de Uso:**
 

@@ -71,7 +71,19 @@
     },
     {
       "key": "featureFlagName",
-      "value": "new_payment_method"
+      "value": "admin.delivery.v1"
+    },
+    {
+      "key": "featureFlagUserKey",
+      "value": "local-user"
+    },
+    {
+      "key": "deliveryId",
+      "value": "placeholder-delivery-id"
+    },
+    {
+      "key": "courierId",
+      "value": ""
     }
   ],
   "item": [
@@ -1004,6 +1016,38 @@
           }
         },
         {
+          "name": "Admin Reordenar Itens",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"orderedItemIds\": [\n    \"{{menuItemId}}\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/menu/reorder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "menu",
+                "reorder"
+              ]
+            }
+          }
+        },
+        {
           "name": "Admin Remover Item Definitivo",
           "request": {
             "method": "DELETE",
@@ -1511,6 +1555,497 @@
       ]
     },
     {
+      "name": "Delivery",
+      "description": "Operacao da fila de entregas, entregadores e rotas.",
+      "item": [
+        {
+          "name": "Selecionar Item para Pedido de Entrega",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Requisicao retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "var picked = (json.data || []).find(function (x) { return x && x.id; });",
+                  "pm.expect(picked, 'Necessario ao menos 1 item de menu para o fluxo Delivery').to.exist;",
+                  "pm.collectionVariables.set('menuItemId', picked.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar Pedido para Delivery",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Cliente Delivery Collection\",\n  \"customerPhone\": \"11999998888\",\n  \"notes\": \"Pedido para validar fluxo de delivery na collection\",\n  \"items\": [\n    {\n      \"menuItemId\": \"{{menuItemId}}\",\n      \"quantity\": 1,\n      \"addons\": []\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pedido criado com sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.expect(json && json.data && json.data.id, 'orderId deve existir na resposta').to.exist;",
+                  "pm.collectionVariables.set('orderId', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar Pedido como CONFIRMED",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\",\n  \"reason\": \"Pedido confirmado na collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pedido marcado como CONFIRMED com sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar Pedido como PREPARING",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PREPARING\",\n  \"reason\": \"Pedido em preparo na collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pedido marcado como PREPARING com sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar Pedido como READY",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"READY\",\n  \"reason\": \"Preparado para entrega (collection)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pedido marcado como READY com sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Fila de Entregas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/queue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "queue"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Requisicao retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "var picked = (json.data || []).find(function (x) { return x && x.id; });",
+                  "if (picked && picked.id) {",
+                  "  pm.collectionVariables.set('deliveryId', picked.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sincronizar Fila com Pedidos Prontos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/queue/from-ready",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "queue",
+                "from-ready"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Requisicao retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "var picked = (json.data || []).find(function (x) { return x && x.id; });",
+                  "if (picked && picked.id) {",
+                  "  pm.collectionVariables.set('deliveryId', picked.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar Entregador para Teste",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Courier Collection {{$timestamp}}\",\n  \"phone\": \"11911112222\",\n  \"zone\": \"CENTRO\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/couriers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "couriers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Criacao de entregador retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.expect(json && json.data && json.data.id, 'courierId deve existir na resposta').to.exist;",
+                  "pm.collectionVariables.set('courierId', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar Entregadores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/couriers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "couriers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atribuir Entrega",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"priority\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/{{deliveryId}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "{{deliveryId}}",
+                "assign"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atribuicao de entrega retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Status para IN_ROUTE",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_ROUTE\",\n  \"reason\": \"Saiu para entrega\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/{{deliveryId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "{{deliveryId}}",
+                "status"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualizacao para IN_ROUTE retornou sucesso', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Status para DELIVERED",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\",\n  \"reason\": \"Entrega concluida na collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/delivery/{{deliveryId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "delivery",
+                "{{deliveryId}}",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Swagger",
       "item": [
         {
@@ -1518,12 +2053,14 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/docs",
+              "raw": "{{baseUrl}}/docs/static/index.html",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "docs"
+                "docs",
+                "static",
+                "index.html"
               ]
             }
           }
@@ -1653,9 +2190,9 @@
           ]
         },
         {
-          "name": "Criar Feature Flag",
+          "name": "Atualizar Feature Flag",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Authorization",
@@ -1668,16 +2205,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"new_payment_method\",\n  \"enabled\": true,\n  \"roles\": [\"ADMIN\"],\n  \"channels\": [\"API\"],\n  \"rolloutPercentage\": 50,\n  \"description\": \"Novo metodo de pagamento (canario)\"\n}"
+              "raw": "{\n  \"enabled\": true,\n  \"description\": \"Fluxo de delivery no admin\",\n  \"rules\": {\n    \"roles\": [\"ADMIN\", \"STAFF\"],\n    \"channels\": [\"ADMIN\"],\n    \"rolloutPercentage\": 100\n  }\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/feature-flags",
+              "raw": "{{baseUrl}}/api/feature-flags/{{featureFlagName}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "feature-flags"
+                "feature-flags",
+                "{{featureFlagName}}"
               ]
             }
           },
@@ -1696,87 +2234,36 @@
           ]
         },
         {
-          "name": "Atualizar Feature Flag",
+          "name": "Avaliar Feature Flags",
           "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"enabled\": false,\n  \"rolloutPercentage\": 100\n}"
-            },
+            "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/feature-flags/new_payment_method",
+              "raw": "{{baseUrl}}/api/feature-flags/evaluate?key={{featureFlagName}}&role=PUBLIC&channel=API&userKey={{featureFlagUserKey}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "feature-flags",
-                "new_payment_method"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Toggle Feature Flag",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/feature-flags/new_payment_method/toggle",
-              "host": [
-                "{{baseUrl}}"
+                "evaluate"
               ],
-              "path": [
-                "api",
-                "feature-flags",
-                "new_payment_method",
-                "toggle"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Remover Feature Flag",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/feature-flags/new_payment_method",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "feature-flags",
-                "new_payment_method"
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{featureFlagName}}"
+                },
+                {
+                  "key": "role",
+                  "value": "PUBLIC"
+                },
+                {
+                  "key": "channel",
+                  "value": "API"
+                },
+                {
+                  "key": "userKey",
+                  "value": "{{featureFlagUserKey}}"
+                }
               ]
             }
           }
