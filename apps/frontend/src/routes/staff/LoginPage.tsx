@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { authService } from '@/features/auth/services/auth.service';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { useI18n } from '@/i18n';
 
@@ -23,6 +24,8 @@ export function LoginPage() {
     return stored === 'touch' ? 'touch' : 'classic';
   });
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
+  const [unlockMessage, setUnlockMessage] = useState('');
+  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -41,6 +44,7 @@ export function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     clearError();
+    setUnlockMessage('');
     if (!validate()) return;
     try {
       await login(email.trim(), password);
@@ -48,6 +52,27 @@ export function LoginPage() {
       navigate(getStaffPathByMode(mode), { replace: true });
     } catch {
       // error is set in the store
+    }
+  }
+
+  async function handleUnlockRequest() {
+    clearError();
+    setUnlockMessage('');
+
+    if (!email.trim()) {
+      setFieldErrors((prev) => ({ ...prev, email: t('Email obrigatório.') }));
+      return;
+    }
+
+    setUnlocking(true);
+    try {
+      const payload = await authService.unlockRequest(email.trim());
+      setUnlockMessage(payload.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('Não foi possível solicitar o desbloqueio nesse momento.');
+      setUnlockMessage(message);
+    } finally {
+      setUnlocking(false);
     }
   }
 
@@ -128,15 +153,30 @@ export function LoginPage() {
               {error}
             </div>
           )}
+          {unlockMessage && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl px-4 py-3 text-sm">
+              {unlockMessage}
+            </div>
+          )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-primary-500 hover:bg-primary-600 disabled:opacity-60 disabled:cursor-not-allowed
-              text-white font-semibold py-3 rounded-xl text-base transition-colors mt-2"
-          >
-            {isLoading ? t('Entrando...') : t('Entrar')}
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 disabled:cursor-not-allowed
+                text-white font-semibold py-3 rounded-xl text-base transition-colors"
+            >
+              {isLoading ? t('Entrando...') : t('Entrar')}
+            </button>
+            <button
+              type="button"
+              disabled={unlocking || !email.trim()}
+              onClick={handleUnlockRequest}
+              className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-400"
+            >
+              {unlocking ? t('Solicitando...') : t('Desbloquear')}
+            </button>
+          </div>
         </form>
       </div>
     </div>

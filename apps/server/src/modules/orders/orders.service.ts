@@ -1,11 +1,11 @@
-import { calculateOrderTotal, OrderCalculationError } from './orders.calculator';
-import { ordersRepository } from './orders.repository';
+import { calculateOrderTotal, OrderCalculationError } from './orders.calculator.js';
+import { ordersRepository } from './orders.repository.js';
 import type {
   CreateOrderInput,
   ListOrdersQuery,
   OrderStatus,
   UpdateOrderStatusInput,
-} from './orders.types';
+} from './ordersTypes.js';
 
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],

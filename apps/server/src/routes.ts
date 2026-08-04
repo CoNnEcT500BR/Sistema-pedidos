@@ -1,15 +1,15 @@
 import { FastifyInstance } from 'fastify';
-import { registerAuthRoutes } from '@/modules/auth/auth.routes';
-import { registerMenuRoutes } from '@/modules/menu/menu.routes';
-import { registerCombosRoutes } from '@/modules/combos/combos.routes';
-import { registerOrdersRoutes } from '@/modules/orders/orders.routes';
-import { registerAddonsRoutes } from '@/modules/addons/addons.routes';
-import { registerTelemetryRoutes } from '@/modules/telemetry/telemetry.routes';
-import { registerReportsRoutes } from '@/modules/reports/reports.routes';
-import { registerUsersRoutes } from '@/modules/users/users.routes';
-import { registerDeliveryRoutes } from '@/modules/delivery/delivery.routes';
-import { registerAuditRoutes } from '@/modules/audit/audit.routes';
-import { registerFeatureFlagsRoutes } from '@/modules/feature-flags/feature-flags.routes';
+import { registerAuthRoutes } from '@/modules/auth/auth.routes.js';
+import { registerMenuRoutes } from '@/modules/menu/menu.routes.js';
+import { registerCombosRoutes } from '@/modules/combos/combos.routes.js';
+import { registerOrdersRoutes } from '@/modules/orders/orders.routes.js';
+import { registerAddonsRoutes } from '@/modules/addons/addons.routes.js';
+import { registerTelemetryRoutes } from '@/modules/telemetry/telemetry.routes.js';
+import { registerReportsRoutes } from '@/modules/reports/reports.routes.js';
+import { registerUsersRoutes } from '@/modules/users/users.routes.js';
+import { registerDeliveryRoutes } from '@/modules/delivery/delivery.routes.js';
+import { registerAuditRoutes } from '@/modules/audit/audit.routes.js';
+import { registerFeatureFlagsRoutes } from '@/modules/feature-flags/feature-flags.routes.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   fastify.get('/status', async () => ({

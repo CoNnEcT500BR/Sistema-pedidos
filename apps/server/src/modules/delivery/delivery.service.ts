@@ -1,5 +1,5 @@
-import { prisma } from '@/shared/database/prisma.client';
-import { updateOrderStatus } from '@/modules/orders/orders.service';
+import { prisma } from '@/shared/database/prismaClient.js';
+import { updateOrderStatus } from '@/modules/orders/orders.service.js';
 import type {
   AssignDeliveryInput,
   CreateCourierInput,
@@ -10,7 +10,7 @@ import type {
   DeliveryRoute,
   DeliveryStatus,
   ListDeliveriesQueryInput,
-} from './delivery.types';
+} from './deliveryTypes.js';
 
 function mapDeliveryRecord(input: {
   id: string;

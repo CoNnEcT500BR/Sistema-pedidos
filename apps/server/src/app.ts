@@ -6,9 +6,9 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { Registry, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
 
-import { registerRoutes } from './routes';
-import { registerRealtime } from '@/shared/realtime/realtime';
-import { auditService } from '@/shared/audit/audit.service';
+import { registerRoutes } from './routes.js';
+import { registerRealtime } from '@/shared/realtime/realtime.js';
+import { auditService } from '@/shared/audit/audit.service.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const usePrettyLogs = !isProduction && process.env.LOG_PRETTY !== 'false';

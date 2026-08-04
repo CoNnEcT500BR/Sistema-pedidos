@@ -106,6 +106,27 @@ export const loginResponseSchema = {
   ],
 } as const;
 
+export const unlockRequestBodySchema = {
+  type: 'object',
+  description: 'Solicitacao de desbloqueio para o login',
+  required: ['email'],
+  properties: {
+    email: { type: 'string', format: 'email' },
+  },
+  examples: [{ email: 'admin@sistema.local' }],
+} as const;
+
+export const unlockRequestResponseSchema = {
+  ...messageSchema,
+  description: 'Resposta padrao para solicitacao de desbloqueio',
+  examples: [
+    {
+      message:
+        'Se a conta estiver associada a um usuário ativo, o bloqueio será liberado para nova tentativa.',
+    },
+  ],
+} as const;
+
 export const authMeResponseSchema = {
   type: 'object',
   required: ['user'],

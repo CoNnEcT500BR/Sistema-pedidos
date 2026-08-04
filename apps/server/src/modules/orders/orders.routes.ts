@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   arrayDataResponse,
   bearerAuthSecurity,
@@ -14,16 +14,20 @@ import {
   unauthorizedErrorSchema,
   updateOrderStatusBodySchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
-import { OrderValidationError } from './orders.calculator';
+} from '@/shared/http/openapi.js';
+import { OrderValidationError } from './orders.calculator.js';
 import {
   createOrder,
   getOrderById,
   isOrderServiceError,
   listOrders,
   updateOrderStatus,
-} from './orders.service';
-import { createOrderSchema, listOrdersQuerySchema, updateOrderStatusSchema } from './orders.types';
+} from './orders.service.js';
+import {
+  createOrderSchema,
+  listOrdersQuerySchema,
+  updateOrderStatusSchema,
+} from './ordersTypes.js';
 
 export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> {
   app.post(

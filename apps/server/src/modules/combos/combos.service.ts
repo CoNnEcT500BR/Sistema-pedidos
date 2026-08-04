@@ -1,5 +1,5 @@
-import { combosRepository } from './combos.repository';
-import type { CreateComboInput, UpdateComboInput } from './combos.types';
+import { combosRepository } from './combos.repository.js';
+import type { CreateComboInput, UpdateComboInput } from './combosTypes.js';
 
 export const combosService = {
   listCombos: async () => combosRepository.listActiveCombos(),

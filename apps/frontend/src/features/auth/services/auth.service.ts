@@ -18,12 +18,21 @@ interface ApiResponse<T> {
   token?: string;
 }
 
+interface UnlockResponse {
+  message: string;
+}
+
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
     const res = await apiClient.post<LoginResponse>('/api/auth/login', { email, password });
     const { user, token } = res.data;
     localStorage.setItem('auth_token', token);
     return { user, token };
+  },
+
+  async unlockRequest(email: string): Promise<UnlockResponse> {
+    const res = await apiClient.post<UnlockResponse>('/api/auth/unlock-request', { email });
+    return res.data;
   },
 
   async me(): Promise<AuthUser> {

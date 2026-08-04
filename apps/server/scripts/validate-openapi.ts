@@ -1,5 +1,4 @@
 import { buildApp } from '../src/app';
-import { prisma } from '../src/shared/database/prisma.client';
 
 const requiredTags = [
   'auth',
@@ -69,7 +68,6 @@ async function main() {
     console.log(`Endpoints verificados: ${requiredPaths.length}`);
   } finally {
     await app.close();
-    await prisma.$disconnect();
   }
 }
 

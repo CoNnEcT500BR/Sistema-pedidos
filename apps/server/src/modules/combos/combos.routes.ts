@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   arrayDataResponse,
   availabilityBodySchema,
@@ -14,13 +14,13 @@ import {
   unauthorizedErrorSchema,
   updateComboBodySchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
-import { combosService } from './combos.service';
+} from '@/shared/http/openapi.js';
+import { combosService } from './combos.service.js';
 import {
   createComboSchema,
   updateComboAvailabilitySchema,
   updateComboSchema,
-} from './combos.types';
+} from './combosTypes.js';
 
 export async function registerCombosRoutes(app: FastifyInstance): Promise<void> {
   const emitCatalogChanged = (

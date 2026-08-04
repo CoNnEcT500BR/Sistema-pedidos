@@ -1,5 +1,5 @@
-import { prisma } from '@/shared/database/prisma.client';
-import type { CalculatedOrderItem, CalculatedOrderResult, OrderItemInput } from './orders.types';
+import { prisma } from '@/shared/database/prismaClient.js';
+import type { CalculatedOrderItem, CalculatedOrderResult, OrderItemInput } from './ordersTypes.js';
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100;

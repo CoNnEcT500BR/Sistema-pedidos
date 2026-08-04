@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   arrayDataResponse,
   availabilityBodySchema,
@@ -17,7 +17,7 @@ import {
   unauthorizedErrorSchema,
   updateMenuItemBodySchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
+} from '@/shared/http/openapi.js';
 import {
   createCategorySchema,
   createMenuItemSchema,
@@ -26,8 +26,8 @@ import {
   updateCategorySchema,
   updateCategoryStatusSchema,
   updateMenuItemSchema,
-} from './menu.types';
-import { isMenuServiceError, menuService } from './menu.service';
+} from './menuTypes.js';
+import { isMenuServiceError, menuService } from './menu.service.js';
 
 export async function registerMenuRoutes(app: FastifyInstance): Promise<void> {
   const emitCatalogChanged = (

@@ -1,4 +1,4 @@
-import { prisma } from '@/shared/database/prisma.client';
+import { prisma } from '@/shared/database/prismaClient.js';
 
 export const menuRepository = {
   listActiveCategories: () =>

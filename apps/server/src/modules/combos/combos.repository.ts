@@ -1,6 +1,6 @@
-import { prisma } from '@/shared/database/prisma.client';
+import { prisma } from '@/shared/database/prismaClient.js';
 
-import type { CreateComboInput, UpdateComboInput } from './combos.types';
+import type { CreateComboInput, UpdateComboInput } from './combosTypes.js';
 
 export const combosRepository = {
   listActiveCombos: () =>

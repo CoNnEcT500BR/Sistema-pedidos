@@ -1,6 +1,6 @@
-import { prisma } from '@/shared/database/prisma.client';
+import { prisma } from '@/shared/database/prismaClient.js';
 
-import type { CalculatedOrderResult, OrderStatus } from './orders.types';
+import type { CalculatedOrderResult, OrderStatus } from './ordersTypes.js';
 
 function isUniqueConstraintError(error: unknown): error is { code: string } {
   return (

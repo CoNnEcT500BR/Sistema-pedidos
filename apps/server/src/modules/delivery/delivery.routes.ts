@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   bearerAuthSecurity,
   dataResponse,
@@ -8,15 +8,15 @@ import {
   unauthorizedErrorSchema,
   validationErrorSchema,
   arrayDataResponse,
-} from '@/shared/http/openapi';
-import { deliveryService } from './delivery.service';
+} from '@/shared/http/openapi.js';
+import { deliveryService } from './delivery.service.js';
 import {
   assignDeliverySchema,
   createCourierSchema,
   createRouteSchema,
   listDeliveriesQuerySchema,
   updateDeliveryStatusSchema,
-} from './delivery.types';
+} from './deliveryTypes.js';
 
 const deliveryHistorySchema = {
   type: 'object',

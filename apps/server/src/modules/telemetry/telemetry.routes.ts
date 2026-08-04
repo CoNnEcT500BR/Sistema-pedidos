@@ -6,7 +6,7 @@ import {
   telemetryIngestResponseSchema,
   telemetryRecentEventsResponseSchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
+} from '@/shared/http/openapi.js';
 
 const telemetryEventSchema = z.object({
   event: z.string().min(1),

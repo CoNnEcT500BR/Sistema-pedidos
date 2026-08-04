@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authService, type AuthUser } from '../services/auth.service';
@@ -29,14 +30,19 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const { user, token } = await authService.login(email, password);
           set({ user, token, isAuthenticated: true, isLoading: false });
-        } catch {
+        } catch (error) {
           authService.logout();
+          const nextError = isAxiosError(error)
+            ? typeof error.response?.data?.message === 'string'
+              ? error.response.data.message
+              : null
+            : null;
           set({
             user: null,
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            error: translateStatic('Email ou senha inválidos.'),
+            error: nextError ?? translateStatic('Email ou senha inválidos.'),
           });
           throw new Error('Login failed');
         }

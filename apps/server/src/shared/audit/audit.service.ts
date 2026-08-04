@@ -1,4 +1,4 @@
-import { prisma } from '@/shared/database/prisma.client';
+import { prisma } from '@/shared/database/prismaClient.js';
 
 export interface AuditLogEntry {
   timestamp: string;
@@ -34,6 +34,7 @@ export interface AuditListResult {
 }
 
 function toEntity(pathname: string): string {
+  if (pathname.includes('/auth')) return 'AUTH';
   if (pathname.includes('/users')) return 'USER';
   if (pathname.includes('/menu')) return 'MENU_ITEM';
   if (pathname.includes('/categories')) return 'CATEGORY';
@@ -44,7 +45,9 @@ function toEntity(pathname: string): string {
   return 'SYSTEM';
 }
 
-function toAction(method: string): string {
+function toAction(method: string, pathname: string): string {
+  if (pathname.includes('/auth/login') && method === 'POST') return 'LOGIN_ATTEMPT';
+  if (pathname.includes('/auth/unlock-request') && method === 'POST') return 'UNLOCK_REQUESTED';
   if (method === 'POST') return 'CREATED';
   if (method === 'PUT') return 'UPDATED';
   if (method === 'PATCH') return 'STATUS_CHANGED';
@@ -52,10 +55,25 @@ function toAction(method: string): string {
   return 'READ';
 }
 
+function sanitizePayloadForAudit(pathname: string, payload: unknown): unknown {
+  if (!payload || typeof payload !== 'object') {
+    return payload;
+  }
+
+  if (pathname.includes('/auth/login')) {
+    const cloned = { ...(payload as Record<string, unknown>) };
+    delete cloned.password;
+    return cloned;
+  }
+
+  return payload;
+}
+
 export const auditService = {
   async append(entry: Omit<AuditLogEntry, 'timestamp' | 'entity' | 'action'>): Promise<void> {
+    const safePayload = sanitizePayloadForAudit(entry.path, entry.payload);
     const payload =
-      entry.payload === undefined ? null : JSON.stringify(entry.payload, (_key, value) => value);
+      safePayload === undefined ? null : JSON.stringify(safePayload, (_key, value) => value);
 
     await prisma.auditLog.create({
       data: {
@@ -67,7 +85,7 @@ export const auditService = {
         statusCode: entry.statusCode,
         ip: entry.ip,
         entity: toEntity(entry.path),
-        action: toAction(entry.method),
+        action: toAction(entry.method, entry.path),
         payload,
       },
     });

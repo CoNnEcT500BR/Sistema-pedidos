@@ -4,14 +4,14 @@ import type {
   ReorderMenuItemsInput,
   UpdateCategoryInput,
   UpdateMenuItemInput,
-} from './menu.types';
-import { menuRepository } from './menu.repository';
+} from './menuTypes.js';
+import { menuRepository } from './menu.repository.js';
 import {
   inferMenuItemScope,
   isNamedAsExtra,
   isAddonCompatibleWithScope,
   type ProductScope,
-} from '../../shared/utils/addon-scope-compatibility';
+} from '../../shared/utils/addon-scope-compatibility.js';
 
 type AddonCompatibilityInput = {
   id: string;

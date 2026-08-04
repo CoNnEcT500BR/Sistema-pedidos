@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 
-import { prisma } from '@/shared/database/prisma.client';
-import type { CreateUserInput, UpdateUserInput } from './users.types';
+import { prisma } from '@/shared/database/prismaClient.js';
+import type { CreateUserInput, UpdateUserInput } from './usersTypes.js';
 
 class UsersServiceError extends Error {
   statusCode: number;

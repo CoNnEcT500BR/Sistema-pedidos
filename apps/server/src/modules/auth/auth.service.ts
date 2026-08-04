@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import bcrypt from 'bcryptjs';
 
-import { prisma } from '@/shared/database/prisma.client';
-import type { LoginInput, LoginResult } from './auth.types';
+import { prisma } from '@/shared/database/prismaClient.js';
+import type { LoginInput, LoginResult } from './authTypes.js';
 
 class AuthError extends Error {
   statusCode: number;
@@ -27,8 +27,10 @@ async function isPasswordValid(plainText: string, storedPassword: string): Promi
 }
 
 export async function login(app: FastifyInstance, payload: LoginInput): Promise<LoginResult> {
+  const normalizedEmail = payload.email.toLowerCase().trim();
+
   const user = await prisma.user.findUnique({
-    where: { email: payload.email },
+    where: { email: normalizedEmail },
     select: {
       id: true,
       email: true,

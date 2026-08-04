@@ -1,15 +1,15 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   arrayDataResponse,
   bearerAuthSecurity,
   dataResponse,
   unauthorizedErrorSchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
-import { featureFlagsService } from './feature-flags.service';
+} from '@/shared/http/openapi.js';
+import { featureFlagsService } from './feature-flags.service.js';
 
 const featureFlagSchema = {
   type: 'object',

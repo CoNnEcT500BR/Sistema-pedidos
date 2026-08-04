@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   bearerAuthSecurity,
   dataResponse,
@@ -9,9 +9,9 @@ import {
   unauthorizedErrorSchema,
   validationErrorSchema,
   arrayDataResponse,
-} from '@/shared/http/openapi';
-import { isUsersServiceError, usersService } from './users.service';
-import { createUserSchema, updateUserSchema, updateUserStatusSchema } from './users.types';
+} from '@/shared/http/openapi.js';
+import { isUsersServiceError, usersService } from './users.service.js';
+import { createUserSchema, updateUserSchema, updateUserStatusSchema } from './usersTypes.js';
 
 const userSchema = {
   type: 'object',

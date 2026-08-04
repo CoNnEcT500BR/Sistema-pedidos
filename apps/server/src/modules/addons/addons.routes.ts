@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   addonSchema,
   arrayDataResponse,
@@ -12,14 +12,14 @@ import {
   pathIdSchema,
   unauthorizedErrorSchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
+} from '@/shared/http/openapi.js';
 import {
   addonsService,
   createAddonSchema,
   isAddonsServiceError,
   updateAddonSchema,
   updateAddonStatusSchema,
-} from './addons.service';
+} from './addons.service.js';
 
 export async function registerAddonsRoutes(app: FastifyInstance): Promise<void> {
   const emitCatalogChanged = (

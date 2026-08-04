@@ -1,9 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
-import { bearerAuthSecurity, dataResponse, unauthorizedErrorSchema } from '@/shared/http/openapi';
-import { auditService } from '@/shared/audit/audit.service';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
+import {
+  bearerAuthSecurity,
+  dataResponse,
+  unauthorizedErrorSchema,
+} from '@/shared/http/openapi.js';
+import { auditService } from '@/shared/audit/audit.service.js';
 
 const auditLogSchema = {
   type: 'object',

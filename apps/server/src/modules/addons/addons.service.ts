@@ -1,9 +1,9 @@
-import { addonsRepository } from './addons.repository';
+import { addonsRepository } from './addons.repository.js';
 import { z } from 'zod';
 import {
   inferMenuItemScope,
   isAddonCompatibleWithScope,
-} from '../../shared/utils/addon-scope-compatibility';
+} from '../../shared/utils/addon-scope-compatibility.js';
 
 const addonScopeEnum = z.enum(['BURGER', 'BURGER_BUILD', 'DRINK', 'SIDE', 'COMBO', 'GENERAL']);
 const addonStationEnum = z.enum([

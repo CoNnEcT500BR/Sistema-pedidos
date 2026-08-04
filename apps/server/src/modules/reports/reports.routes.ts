@@ -1,14 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate, checkRole } from '@/modules/auth/auth.middleware';
+import { authenticate, checkRole } from '@/modules/auth/authMiddleware.js';
 import {
   bearerAuthSecurity,
   dataResponse,
   unauthorizedErrorSchema,
   validationErrorSchema,
-} from '@/shared/http/openapi';
-import { reportsService } from './reports.service';
-import { reportsDateRangeSchema } from './reports.types';
+} from '@/shared/http/openapi.js';
+import { reportsService } from './reports.service.js';
+import { reportsDateRangeSchema } from './reportsTypes.js';
 
 const reportsDashboardSchema = {
   type: 'object',

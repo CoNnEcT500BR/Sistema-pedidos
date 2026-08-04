@@ -1,5 +1,5 @@
-import { buildApp } from './app';
-import { prisma } from '@/shared/database/prisma.client';
+import { buildApp } from './app.js';
+import { prisma } from '@/shared/database/prismaClient.js';
 
 const app = await buildApp();
 

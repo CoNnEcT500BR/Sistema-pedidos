@@ -1,5 +1,5 @@
-import { prisma } from '@/shared/database/prisma.client';
-import type { ReportsDateRangeInput } from './reports.types';
+import { prisma } from '@/shared/database/prismaClient.js';
+import type { ReportsDateRangeInput } from './reportsTypes.js';
 
 function getDateRange(input: ReportsDateRangeInput) {
   if (input.startDate && input.endDate) {
