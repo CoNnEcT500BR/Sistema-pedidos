@@ -2,7 +2,9 @@ import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
+const databaseUrl =
+  (globalThis as typeof globalThis & { process?: { env?: { DATABASE_URL?: string } } }).process?.env
+    ?.DATABASE_URL || 'file:./prisma/dev.db';
 const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
@@ -1238,5 +1240,5 @@ main()
   .catch(async (error) => {
     console.error('Falha no seed:', error);
     await prisma.$disconnect();
-    process.exit(1);
+    throw error;
   });
