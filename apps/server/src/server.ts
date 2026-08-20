@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { buildApp } from './app.js';
 import { prisma } from '@/shared/database/prismaClient.js';
 
@@ -8,6 +9,8 @@ const start = async () => {
   try {
     const port = parseInt(process.env.PORT || '3001', 10);
     const host = process.env.HOST || '0.0.0.0';
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
 
     await app.listen({ port, host });
 

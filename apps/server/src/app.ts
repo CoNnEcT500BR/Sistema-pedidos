@@ -9,9 +9,30 @@ import { Registry, collectDefaultMetrics, Counter, Histogram } from 'prom-client
 import { registerRoutes } from './routes.js';
 import { registerRealtime } from '@/shared/realtime/realtime.js';
 import { auditService } from '@/shared/audit/audit.service.js';
+import { prisma } from '@/shared/database/prismaClient.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const usePrettyLogs = !isProduction && process.env.LOG_PRETTY !== 'false';
+const configuredCorsOrigins = new Set(
+  (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
+const defaultCorsOrigins = new Set(['http://localhost:5173', 'http://localhost:3000']);
+const localNetworkOriginPattern = /^https?:\/\/192\.168\.\d+\.\d+(?::\d+)?$/;
+
+function isAllowedCorsOrigin(origin?: string): boolean {
+  if (!origin) {
+    return true;
+  }
+
+  return (
+    defaultCorsOrigins.has(origin) ||
+    configuredCorsOrigins.has(origin) ||
+    localNetworkOriginPattern.test(origin)
+  );
+}
 
 export async function buildApp(): Promise<FastifyInstance> {
   const metricsRegistry = new Registry();
@@ -51,7 +72,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   await app.register(fastifyCors, {
-    origin: ['http://localhost:5173', 'http://localhost:3000', /192\.168\.\d+\.\d+/],
+    origin: (origin, callback) => {
+      callback(null, isAllowedCorsOrigin(origin));
+    },
     credentials: true,
   });
 
@@ -118,11 +141,26 @@ export async function buildApp(): Promise<FastifyInstance> {
     uptime: process.uptime(),
   }));
 
-  app.get('/api/v1/health', async () => ({
-    status: 'ok',
-    version: '1.0.0',
-    database: 'connected',
-  }));
+  app.get('/api/v1/health', async (request, reply) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+
+      return {
+        status: 'ok',
+        version: '1.0.0',
+        database: 'connected',
+      };
+    } catch (error) {
+      request.log.error({ err: error }, 'database.healthcheck.failed');
+      reply.code(503);
+      return {
+        status: 'error',
+        version: '1.0.0',
+        database: 'disconnected',
+        message: 'Database connection check failed',
+      };
+    }
+  });
 
   app.get('/metrics', async (_request, reply) => {
     reply.header('content-type', metricsRegistry.contentType);
