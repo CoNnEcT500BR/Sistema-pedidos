@@ -2,335 +2,390 @@
 // learn more about it in the docs: https://www.prisma.io/docs/concepts/components/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
+  provider = "sqlite"
 }
 
 // ============ CATEGORIAS ============
 model Category {
-    id           String   @id @default(cuid())
-    name         String   @unique
-    description  String?
-    icon         String? // Emoji ou ícone
-    displayOrder Int      @default(0)
-    isActive     Boolean  @default(true)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String   @unique
+  description  String?
+  icon         String? // Emoji ou ícone
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-    menuItems MenuItem[]
+  menuItems MenuItem[]
 
-    @@index([isActive])
+  @@index([isActive])
 }
 
 // ============ ITENS DO MENU ============
 model MenuItem {
-    id         String   @id @default(cuid())
-    categoryId String
-    category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-    name        String
-    description String?
-    price       Float
-    icon        String? // Emoji
-    imageUrl    String?
+  name        String
+  description String?
+  price       Float
+  icon        String? // Emoji
+  imageUrl    String?
 
-    isAvailable    Boolean  @default(true)
-    removablesJson String? // JSON array de nomes de removíveis permitidos, ex: '["Gelo", "Cebola"]'
-    displayOrder   Int      @default(0)
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @updatedAt
+  isAvailable    Boolean  @default(true)
+  removablesJson String? // JSON array de nomes de removíveis permitidos, ex: '["Gelo", "Cebola"]'
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-    addons     MenuItemAddon[]
-    orderItems OrderItem[]
-    comboItems ComboItem[]
+  addons     MenuItemAddon[]
+  orderItems OrderItem[]
+  comboItems ComboItem[]
 
-    @@unique([categoryId, name])
-    @@index([categoryId])
-    @@index([categoryId, displayOrder])
-    @@index([isAvailable])
+  @@unique([categoryId, name])
+  @@index([categoryId])
+  @@index([categoryId, displayOrder])
+  @@index([isAvailable])
 }
 
 // ============ ADICIONAIS/EXTRAS ============
 model Addon {
-    id          String  @id @default(cuid())
-    name        String  @unique
-    addonType   String  @default("EXTRA") // EXTRA, SUBSTITUTION, REMOVAL
-    price       Float   @default(0)
-    scope       String  @default("GENERAL") // BURGER, BURGER_BUILD, DRINK, SIDE, COMBO, GENERAL
-    station     String  @default("GENERAL") // PROTEINS, CHEESES, VEGETABLES, SAUCES, DRINKS, SIDES, FINISHING, GENERAL
-    priority    String  @default("FAST") // FAST, MEDIUM, CRITICAL
-    description String?
+  id          String  @id @default(cuid())
+  name        String  @unique
+  addonType   String  @default("EXTRA") // EXTRA, SUBSTITUTION, REMOVAL
+  price       Float   @default(0)
+  scope       String  @default("GENERAL") // BURGER, BURGER_BUILD, DRINK, SIDE, COMBO, GENERAL
+  station     String  @default("GENERAL") // PROTEINS, CHEESES, VEGETABLES, SAUCES, DRINKS, SIDES, FINISHING, GENERAL
+  priority    String  @default("FAST") // FAST, MEDIUM, CRITICAL
+  description String?
 
-    isActive  Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    menuItemAddons  MenuItemAddon[]
-    orderItemAddons OrderItemAddon[]
+  menuItemAddons  MenuItemAddon[]
+  orderItemAddons OrderItemAddon[]
 
-    @@index([addonType])
-    @@index([isActive])
+  @@index([addonType])
+  @@index([isActive])
+}
+
+model InventoryIngredient {
+  id                String   @id @default(cuid())
+  name              String   @unique
+  unit              String   @default("UNIT")
+  currentQuantity   Float?
+  lowStockThreshold Float?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  menuItemAddons MenuItemAddon[]
+  reservations   StockReservation[]
+  movements      InventoryMovement[]
+
+  @@index([isActive])
 }
 
 // ============ RELACIONAMENTO ITEM X ADICIONAL ============
 model MenuItemAddon {
-    id         String   @id @default(cuid())
-    menuItemId String
-    menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
-    addonId String
-    addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
+  addonId String
+  addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
 
-    isRequired     Boolean @default(false)
-    assignmentType String  @default("ASSEMBLY") // ASSEMBLY, EXTRA
-    displayOrder   Int     @default(0)
+  inventoryIngredientId String?
+  inventoryIngredient   InventoryIngredient? @relation(fields: [inventoryIngredientId], references: [id], onDelete: SetNull)
+  stockQuantity         Float?
 
-    @@unique([menuItemId, addonId])
-    @@index([menuItemId])
-    @@index([addonId])
-    @@index([assignmentType])
+  isRequired     Boolean  @default(false)
+  assignmentType String   @default("ASSEMBLY") // ASSEMBLY, EXTRA
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@unique([menuItemId, addonId])
+  @@index([menuItemId])
+  @@index([addonId])
+  @@index([assignmentType])
 }
 
 // ============ COMBOS/PROMOÇÕES ============
 model Combo {
-    id          String  @id @default(cuid())
-    name        String  @unique
-    description String?
-    price       Float
-    icon        String? // Emoji
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  price       Float
+  icon        String? // Emoji
 
-    isActive     Boolean  @default(true)
-    displayOrder Int      @default(0)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-    comboItems ComboItem[]
-    orderItems OrderItem[]
+  comboItems ComboItem[]
+  orderItems OrderItem[]
 
-    @@index([isActive])
+  @@index([isActive])
 }
 
 // ============ ITENS DO COMBO ============
 model ComboItem {
-    id      String @id @default(cuid())
-    comboId String
-    combo   Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  comboId String
+  combo   Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
 
-    menuItemId String
-    menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
-    quantity Int @default(1)
+  quantity Int @default(1)
 
-    @@unique([comboId, menuItemId])
-    @@index([comboId])
-    @@index([menuItemId])
+  @@unique([comboId, menuItemId])
+  @@index([comboId])
+  @@index([menuItemId])
 }
 
 // ============ PEDIDOS ============
 model Order {
-    id          String @id @default(cuid())
-    orderNumber Int    @unique @default(0)
+  id          String @id @default(cuid())
+  orderNumber Int    @unique @default(0)
 
-    status        String @default("PENDING") // PENDING, PREPARING, READY, COMPLETED, CANCELLED
-    paymentStatus String @default("PENDING") // PENDING, PAID, REFUNDED
+  status        String @default("PENDING") // PENDING, PREPARING, READY, COMPLETED, CANCELLED
+  paymentStatus String @default("PENDING") // PENDING, PAID, REFUNDED
 
-    totalPrice Float
-    discount   Float @default(0)
-    finalPrice Float
+  totalPrice Float
+  discount   Float @default(0)
+  finalPrice Float
 
-    customerName  String?
-    customerPhone String?
-    notes         String?
+  customerName  String?
+  customerPhone String?
+  notes         String?
 
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
-    completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
 
-    items         OrderItem[]
-    statusHistory OrderStatusHistory[]
-    delivery      Delivery?
+  items              OrderItem[]
+  statusHistory      OrderStatusHistory[]
+  delivery           Delivery?
+  stockReservations  StockReservation[]
+  inventoryMovements InventoryMovement[]
 
-    @@index([status])
-    @@index([paymentStatus])
-    @@index([createdAt])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }
 
 // ============ DELIVERY ============
 model DeliveryCourier {
-    id       String  @id @default(cuid())
-    name     String
-    phone    String?
-    zone     String?
-    isActive Boolean @default(true)
+  id       String  @id @default(cuid())
+  name     String
+  phone    String?
+  zone     String?
+  isActive Boolean @default(true)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    deliveries Delivery[]
+  deliveries Delivery[]
 
-    @@index([isActive])
-    @@index([zone])
+  @@index([isActive])
+  @@index([zone])
 }
 
 model DeliveryRoute {
-    id       String  @id @default(cuid())
-    name     String
-    zone     String
-    isActive Boolean @default(true)
+  id       String  @id @default(cuid())
+  name     String
+  zone     String
+  isActive Boolean @default(true)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    deliveries Delivery[]
+  deliveries Delivery[]
 
-    @@index([isActive])
-    @@index([zone])
+  @@index([isActive])
+  @@index([zone])
 }
 
 model Delivery {
-    id      String @id @default(cuid())
-    orderId String @unique
-    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-    status     String    @default("QUEUED") // QUEUED, ASSIGNED, DISPATCHED, IN_ROUTE, DELIVERED, FAILED
-    priority   Int       @default(3)
-    promisedAt DateTime?
+  status     String    @default("QUEUED") // QUEUED, ASSIGNED, DISPATCHED, IN_ROUTE, DELIVERED, FAILED
+  priority   Int       @default(3)
+  promisedAt DateTime?
 
-    courierId String?
-    courier   DeliveryCourier? @relation(fields: [courierId], references: [id], onDelete: SetNull)
+  courierId String?
+  courier   DeliveryCourier? @relation(fields: [courierId], references: [id], onDelete: SetNull)
 
-    routeId String?
-    route   DeliveryRoute? @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  routeId String?
+  route   DeliveryRoute? @relation(fields: [routeId], references: [id], onDelete: SetNull)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    history DeliveryStatusHistory[]
+  history DeliveryStatusHistory[]
 
-    @@index([status])
-    @@index([priority])
-    @@index([promisedAt])
-    @@index([courierId])
-    @@index([routeId])
+  @@index([status])
+  @@index([priority])
+  @@index([promisedAt])
+  @@index([courierId])
+  @@index([routeId])
 }
 
 model DeliveryStatusHistory {
-    id         String   @id @default(cuid())
-    deliveryId String
-    delivery   Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  deliveryId String
+  delivery   Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
 
-    fromStatus String
-    toStatus   String
-    reason     String?
-    changedAt  DateTime @default(now())
+  fromStatus String
+  toStatus   String
+  reason     String?
+  changedAt  DateTime @default(now())
 
-    @@index([deliveryId])
-    @@index([changedAt])
+  @@index([deliveryId])
+  @@index([changedAt])
 }
 
 // ============ AUDITORIA ============
 model AuditLog {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    timestamp DateTime @default(now())
+  timestamp DateTime @default(now())
 
-    actorId    String?
-    actorEmail String?
-    actorRole  String?
+  actorId    String?
+  actorEmail String?
+  actorRole  String?
 
-    method     String
-    path       String
-    statusCode Int
-    ip         String?
+  method     String
+  path       String
+  statusCode Int
+  ip         String?
 
-    entity String
-    action String
+  entity String
+  action String
 
-    payload String?
+  payload String?
 
-    @@index([timestamp])
-    @@index([entity])
-    @@index([action])
-    @@index([actorEmail])
+  @@index([timestamp])
+  @@index([entity])
+  @@index([action])
+  @@index([actorEmail])
 }
 
 // ============ ITENS DO PEDIDO ============
 model OrderItem {
-    id      String @id @default(cuid())
-    orderId String
-    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-    menuItemId String?
-    menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+  menuItemId String?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
 
-    comboId String?
-    combo   Combo?  @relation(fields: [comboId], references: [id], onDelete: SetNull)
+  comboId String?
+  combo   Combo?  @relation(fields: [comboId], references: [id], onDelete: SetNull)
 
-    quantity  Int     @default(1)
-    itemPrice Float // Snapshot do preço no momento
-    notes     String?
+  quantity               Int     @default(1)
+  itemPrice              Float // Snapshot do preço no momento
+  notes                  String?
+  removedIngredientsJson String?
 
-    addons OrderItemAddon[]
+  addons OrderItemAddon[]
 
-    @@index([orderId])
-    @@index([menuItemId])
-    @@index([comboId])
+  @@index([orderId])
+  @@index([menuItemId])
+  @@index([comboId])
 }
 
 // ============ ADICIONAIS DO ITEM DE PEDIDO ============
 model OrderItemAddon {
-    id          String    @id @default(cuid())
-    orderItemId String
-    orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
-    addonId String
-    addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
+  addonId String
+  addon   Addon  @relation(fields: [addonId], references: [id], onDelete: Cascade)
 
-    quantity   Int   @default(1)
-    addonPrice Float // Snapshot do preço
+  quantity   Int   @default(1)
+  addonPrice Float // Snapshot do preço
 
-    @@index([orderItemId])
-    @@index([addonId])
+  @@index([orderItemId])
+  @@index([addonId])
 }
 
 // ============ HISTÓRICO DE STATUS ============
 model OrderStatusHistory {
-    id      String @id @default(cuid())
-    orderId String
-    order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-    fromStatus String
-    toStatus   String
-    reason     String?
+  fromStatus String
+  toStatus   String
+  reason     String?
 
-    changedAt DateTime @default(now())
+  changedAt DateTime @default(now())
 
-    @@index([orderId])
-    @@index([changedAt])
+  @@index([orderId])
+  @@index([changedAt])
+}
+
+model StockReservation {
+  id           String              @id @default(cuid())
+  orderId      String
+  order        Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   InventoryIngredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  quantity     Float
+  status       String              @default("RESERVED") // RESERVED, RELEASED
+  createdAt    DateTime            @default(now())
+  releasedAt   DateTime?
+
+  @@unique([orderId, ingredientId])
+  @@index([ingredientId, status])
+}
+
+model InventoryMovement {
+  id            String              @id @default(cuid())
+  ingredientId  String
+  ingredient    InventoryIngredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  orderId       String?
+  order         Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  quantityDelta Float
+  reason        String
+  note          String?
+  createdAt     DateTime            @default(now())
+
+  @@index([ingredientId, createdAt])
+  @@index([orderId])
 }
 
 // ============ USUÁRIOS ============
 model User {
-    id       String @id @default(cuid())
-    email    String @unique
-    password String // Usar bcrypt em produção
+  id       String @id @default(cuid())
+  email    String @unique
+  password String // Usar bcrypt em produção
 
-    role String  @default("STAFF") // STAFF, ADMIN
-    name String?
+  role String  @default("STAFF") // STAFF, ADMIN
+  name String?
 
-    isActive            Boolean   @default(true)
-    lastLogin           DateTime?
-    failedLoginAttempts Int       @default(0)
-    lockedUntil         DateTime?
+  isActive            Boolean   @default(true)
+  lastLogin           DateTime?
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([email])
-    @@index([role])
-    @@index([isActive])
-    @@index([lockedUntil])
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([lockedUntil])
 }

@@ -11,6 +11,7 @@ interface CreateOrderPayload {
     quantity: number;
     notes?: string;
     addons: Array<{ addonId: string; quantity: number }>;
+    removedAddonIds: string[];
   }>;
 }
 
@@ -47,6 +48,9 @@ function cartItemsToPayload(items: CartItem[]): CreateOrderPayload['items'] {
     addons: item.addons
       .filter((a) => !a.removed && a.quantity > 0)
       .map((a) => ({ addonId: a.addonId, quantity: a.quantity })),
+    removedAddonIds: item.addons
+      .filter((addon) => addon.removed)
+      .map((addon) => addon.addonId),
   }));
 }
 

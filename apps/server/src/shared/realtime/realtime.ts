@@ -12,14 +12,20 @@ export interface OrdersRealtimeEvent {
   timestamp: string;
 }
 
-export type CatalogEntityType = 'CATEGORY' | 'MENU_ITEM' | 'COMBO' | 'ADDON';
+export type CatalogEntityType =
+  | 'CATEGORY'
+  | 'MENU_ITEM'
+  | 'COMBO'
+  | 'ADDON'
+  | 'INVENTORY_INGREDIENT';
 
 export type CatalogActionType =
   | 'CREATED'
   | 'UPDATED'
   | 'DELETED'
   | 'STATUS_CHANGED'
-  | 'AVAILABILITY_CHANGED';
+  | 'AVAILABILITY_CHANGED'
+  | 'STOCK_CHANGED';
 
 export interface CatalogRealtimeEvent {
   type: 'CATALOG_CHANGED';

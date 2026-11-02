@@ -27,6 +27,7 @@ export interface OrderItem {
   unitPrice: number;
   subtotal: number;
   notes?: string | null;
+  removedIngredientsJson?: string | null;
   addons: OrderAddon[];
   menuItem?: { id: string; name: string; icon?: string | null };
   combo?: { id: string; name: string; icon?: string | null };

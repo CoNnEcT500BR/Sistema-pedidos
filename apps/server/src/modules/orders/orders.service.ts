@@ -1,20 +1,16 @@
 import { calculateOrderTotal, OrderCalculationError } from './orders.calculator.js';
-import { ordersRepository } from './orders.repository.js';
+import {
+  InsufficientInventoryError,
+  OrderStatusConflictError,
+  ordersRepository,
+} from './orders.repository.js';
 import type {
   CreateOrderInput,
   ListOrdersQuery,
   OrderStatus,
   UpdateOrderStatusInput,
 } from './ordersTypes.js';
-
-const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['PREPARING', 'CANCELLED'],
-  PREPARING: ['READY', 'CANCELLED'],
-  READY: ['COMPLETED', 'CANCELLED'],
-  COMPLETED: [],
-  CANCELLED: [],
-};
+import { isAllowedOrderStatusTransition } from './ordersTypes.js';
 
 export class OrderServiceError extends Error {
   statusCode: number;
@@ -33,7 +29,7 @@ export async function createOrder(payload: CreateOrderInput) {
   try {
     const calculated = await calculateOrderTotal(payload.items);
 
-    return ordersRepository.createOrder({
+    return await ordersRepository.createOrder({
       customerName: payload.customerName,
       customerPhone: payload.customerPhone,
       notes: payload.notes,
@@ -42,6 +38,9 @@ export async function createOrder(payload: CreateOrderInput) {
   } catch (error) {
     if (error instanceof OrderCalculationError) {
       throw new OrderServiceError(error.message, error.statusCode);
+    }
+    if (error instanceof InsufficientInventoryError) {
+      throw new OrderServiceError(error.message, 409);
     }
 
     throw error;
@@ -72,13 +71,25 @@ export async function updateOrderStatus(id: string, payload: UpdateOrderStatusIn
   }
 
   const currentStatus = current.status as OrderStatus;
-  const nextAllowed = allowedTransitions[currentStatus] ?? [];
-
-  if (!nextAllowed.includes(payload.status)) {
+  if (!isAllowedOrderStatusTransition(currentStatus, payload.status)) {
     throw new OrderServiceError('Transicao de status invalida', 400);
   }
 
-  const updated = await ordersRepository.updateStatus(id, payload.status, payload.reason);
+  let updated;
+  try {
+    updated = await ordersRepository.updateStatus(
+      id,
+      currentStatus,
+      payload.status,
+      payload.reason,
+    );
+  } catch (error) {
+    if (error instanceof OrderStatusConflictError) {
+      throw new OrderServiceError('O status do pedido foi alterado. Atualize e tente novamente.', 409);
+    }
+
+    throw error;
+  }
   if (!updated) {
     throw new OrderServiceError('Pedido nao encontrado', 404);
   }

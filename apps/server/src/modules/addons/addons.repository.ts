@@ -50,6 +50,9 @@ export const addonsRepository = {
       where: { menuItemId },
       include: {
         addon: true,
+        inventoryIngredient: {
+          select: { currentQuantity: true },
+        },
       },
       orderBy: { displayOrder: 'asc' },
     }),

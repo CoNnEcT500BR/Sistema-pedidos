@@ -1,21 +1,43 @@
 import { prisma } from '@/shared/database/prismaClient.js';
+import { isMenuItemStockAvailable } from '@/shared/inventory/menu-stock-availability.js';
 
 import type { CreateComboInput, UpdateComboInput } from './combosTypes.js';
 
 export const combosRepository = {
-  listActiveCombos: () =>
-    prisma.combo.findMany({
+  listActiveCombos: async () => {
+    const combos = await prisma.combo.findMany({
       where: { isActive: true },
       include: {
         comboItems: {
           include: {
-            menuItem: true,
+            menuItem: {
+              include: {
+                addons: {
+                  select: {
+                    isRequired: true,
+                    stockQuantity: true,
+                    inventoryIngredient: { select: { currentQuantity: true } },
+                  },
+                },
+              },
+            },
           },
           orderBy: { menuItem: { name: 'asc' } },
         },
       },
       orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
-    }),
+    });
+
+    return combos
+      .filter((combo) => combo.comboItems.every((item) => isMenuItemStockAvailable(item.menuItem)))
+      .map((combo) => ({
+        ...combo,
+        comboItems: combo.comboItems.map((item) => ({
+          ...item,
+          menuItem: (({ addons: _addons, ...menuItem }) => menuItem)(item.menuItem),
+        })),
+      }));
+  },
 
   listAllCombos: () =>
     prisma.combo.findMany({

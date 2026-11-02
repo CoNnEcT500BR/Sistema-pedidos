@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Bike,
+  Boxes,
   BookOpenText,
   ClipboardList,
   LayoutDashboard,
@@ -11,7 +12,8 @@ import {
   Shapes,
   Users,
 } from 'lucide-react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useAuthStore } from '@/features/auth/store/auth.store';
@@ -24,6 +26,7 @@ const navigation = [
   { to: '/admin/menu', label: 'Cardápio', icon: BookOpenText },
   { to: '/admin/categories', label: 'Categorias', icon: Shapes },
   { to: '/admin/ingredients', label: 'Ingredientes', icon: Shapes },
+  { to: '/admin/inventory', label: 'Estoque', icon: Boxes },
   { to: '/admin/combos', label: 'Combos', icon: Package2 },
   { to: '/admin/orders', label: 'Pedidos', icon: ListOrdered },
   { to: '/admin/delivery', label: 'Delivery', icon: Bike },
@@ -34,10 +37,20 @@ const navigation = [
 
 export function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  const previousPathRef = useRef(location.pathname);
   const { t } = useI18n();
   const { user, logout } = useAuthStore();
   const { isEnabled } = useFeatureFlags('ADMIN');
   const realtimeStatus = useRealtimeConnectionStatus();
+
+  useEffect(() => {
+    if (previousPathRef.current !== location.pathname) {
+      mainRef.current?.focus();
+      previousPathRef.current = location.pathname;
+    }
+  }, [location.pathname]);
 
   const visibleNavigation = navigation.filter((item) => {
     if (item.to === '/admin/delivery') {
@@ -73,6 +86,12 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-stone-100 text-stone-900 lg:grid lg:grid-cols-[280px_1fr]">
+      <a
+        href="#admin-main"
+        className="sr-only z-50 rounded-lg bg-white px-4 py-3 font-semibold text-stone-900 focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:ring-2 focus:ring-amber-700"
+      >
+        {t('Pular para o conteúdo principal')}
+      </a>
       <aside className="border-b border-stone-200 bg-white lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between gap-3 px-5 py-5 lg:flex-col lg:items-stretch lg:px-6 lg:py-7">
           <div className="flex items-center gap-3">
@@ -102,7 +121,7 @@ export function AdminLayout() {
                   }`
                 }
               >
-                <Icon size={18} />
+                <Icon size={18} aria-hidden="true" />
                 {t(item.label)}
               </NavLink>
             );
@@ -115,6 +134,8 @@ export function AdminLayout() {
           <div
             className={`mt-4 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${realtimeBadge.wrapperClass}`}
             title={t('Status da conexão em tempo real do painel administrativo')}
+            role="status"
+            aria-live="polite"
           >
             <span className={`h-2 w-2 rounded-full ${realtimeBadge.dotClass}`} />
             {realtimeBadge.label}
@@ -130,7 +151,12 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      <main className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,244,0.92))]">
+      <main
+        id="admin-main"
+        ref={mainRef}
+        tabIndex={-1}
+        className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,244,0.92))] focus:outline-none"
+      >
         <Outlet />
       </main>
     </div>

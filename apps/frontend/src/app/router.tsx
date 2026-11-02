@@ -9,6 +9,7 @@ import { DeliveryPage } from '@/routes/admin/DeliveryPage';
 import { LoginPage as AdminLoginPage } from '@/routes/admin/LoginPage';
 import { MenuManagementPage } from '@/routes/admin/MenuManagementPage';
 import { IngredientsPage } from '@/routes/admin/IngredientsPage';
+import { InventoryPage } from '@/routes/admin/InventoryPage';
 import { OrdersBoardPage } from '@/routes/admin/OrdersBoardPage';
 import { ReportsPage } from '@/routes/admin/ReportsPage';
 import { UsersPage } from '@/routes/admin/UsersPage';
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
           { path: 'menu', element: <MenuManagementPage /> },
           { path: 'categories', element: <AdminCategoriesPage /> },
           { path: 'ingredients', element: <IngredientsPage /> },
+          { path: 'inventory', element: <InventoryPage /> },
           { path: 'combos', element: <CombosPage /> },
           { path: 'orders', element: <OrdersBoardPage /> },
           { path: 'delivery', element: <DeliveryPage /> },
@@ -79,4 +81,3 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-

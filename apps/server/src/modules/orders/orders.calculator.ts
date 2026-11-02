@@ -5,6 +5,65 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+type RemovableMenuItem = { id: string; removablesJson?: string | null };
+
+function getAllowedRemovables(removablesJson?: string | null): Set<string> {
+  if (!removablesJson) return new Set();
+  try {
+    const parsed: unknown = JSON.parse(removablesJson);
+    return Array.isArray(parsed) && parsed.every((value) => typeof value === 'string')
+      ? new Set(parsed)
+      : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function resolveRemovedAddonIds(
+  itemIndex: number,
+  itemName: string,
+  menuItems: RemovableMenuItem[],
+  removedAddonIds: string[],
+  allAddonsMap: Map<string, { id: string; name: string; addonType: string }>,
+  allAllowedAddonByMenuItem: Map<string, Set<string>>,
+): {
+  byMenuItem: Map<string, Set<string>>;
+  error?: ItemValidationError;
+} {
+  const byMenuItem = new Map(
+    menuItems.map((menuItem) => [menuItem.id, new Set<string>()]),
+  );
+
+  for (const addonId of removedAddonIds) {
+    const addon = allAddonsMap.get(addonId);
+    const allowedMenuItems =
+      addon?.addonType === 'REMOVAL'
+        ? menuItems.filter(
+            (menuItem) =>
+              allAllowedAddonByMenuItem.get(menuItem.id)?.has(addonId) &&
+              getAllowedRemovables(menuItem.removablesJson).has(addon.name),
+          )
+        : [];
+
+    if (allowedMenuItems.length === 0) {
+      return {
+        byMenuItem,
+        error: {
+          itemIndex,
+          itemName,
+          message: `Remoção inválida para "${itemName}"`,
+        },
+      };
+    }
+
+    for (const menuItem of allowedMenuItems) {
+      byMenuItem.get(menuItem.id)?.add(addonId);
+    }
+  }
+
+  return { byMenuItem };
+}
+
 export class OrderCalculationError extends Error {
   statusCode: number;
 
@@ -42,16 +101,8 @@ async function validateItemAddons(
 ): Promise<ItemValidationError | null> {
   if (!menuItem) return null;
 
-  // Obter lista de removíveis permitidos
-  let allowedRemovables: Set<string> = new Set();
-  if (removablesJson) {
-    try {
-      const parsed = JSON.parse(removablesJson);
-      allowedRemovables = new Set(parsed);
-    } catch {
-      // Ignorar erros de parsing
-    }
-  }
+  const allowedRemovables = getAllowedRemovables(removablesJson);
+  const itemAllowedAddonIds = allAllowedAddonByMenuItem.get(menuItem.id) ?? new Set();
 
   // Agrupar addons selecionados
   const selectedAddons = addons
@@ -63,10 +114,9 @@ async function validateItemAddons(
 
   const flavorAddons = selectedAddons.filter((a) => a.name.startsWith('Sabor '));
   const removableAddons = selectedAddons.filter((a) => a.addonType === 'REMOVAL');
-
   // Validar que removíveis selecionados sejam aqueles permitidos para o item
   for (const addon of removableAddons) {
-    if (!allowedRemovables.has(addon.name)) {
+    if (!itemAllowedAddonIds.has(addon.id) || !allowedRemovables.has(addon.name)) {
       return {
         itemIndex,
         itemName,
@@ -76,8 +126,7 @@ async function validateItemAddons(
   }
 
   // Validar sabor obrigatório se houver grupo de sabores
-  const itemAllowedAddons = allAllowedAddonByMenuItem.get(menuItem.id) ?? new Set();
-  const itemAllAddonData = Array.from(itemAllowedAddons)
+  const itemAllAddonData = Array.from(itemAllowedAddonIds)
     .map((id) => allAddonsMap.get(id))
     .filter((a): a is { id: string; name: string; addonType: string } => !!a);
 
@@ -137,7 +186,7 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
   const comboItems = comboIds.length
     ? await prisma.comboItem.findMany({
         where: { comboId: { in: comboIds } },
-        select: { comboId: true, menuItemId: true },
+        select: { comboId: true, menuItemId: true, quantity: true },
       })
     : [];
 
@@ -167,7 +216,14 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
     permittedMenuItemIds.length
       ? prisma.menuItemAddon.findMany({
           where: { menuItemId: { in: permittedMenuItemIds } },
-          select: { menuItemId: true, addonId: true },
+          select: {
+            menuItemId: true,
+            addonId: true,
+            isRequired: true,
+            inventoryIngredientId: true,
+            stockQuantity: true,
+            addon: { select: { name: true } },
+          },
         })
       : Promise.resolve([]),
     // Carregar TODOS os addons permitidos para os items (para validação)
@@ -224,6 +280,10 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
 
   // Validar regras de sabor e removíveis por item
   const itemValidationErrors: ItemValidationError[] = [];
+  const removedAddonIdsByMenuItemByItemIndex = new Map<
+    number,
+    Map<string, Set<string>>
+  >();
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -246,6 +306,18 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
         menuItem.removablesJson,
       );
       if (error) itemValidationErrors.push(error);
+      const resolvedRemovedAddons = resolveRemovedAddonIds(
+        i,
+        itemName,
+        [menuItem],
+        item.removedAddonIds,
+        allAddonsMap,
+        allAllowedAddonByMenuItem,
+      );
+      removedAddonIdsByMenuItemByItemIndex.set(i, resolvedRemovedAddons.byMenuItem);
+      if (resolvedRemovedAddons.error) {
+        itemValidationErrors.push(resolvedRemovedAddons.error);
+      }
     }
 
     if (item.comboId) {
@@ -257,9 +329,11 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
 
       // Para combos, validar os itens do combo que têm sabor/removíveis
       const comboItemsForCombo = comboItems.filter((ci) => ci.comboId === item.comboId);
+      const removableMenuItems: RemovableMenuItem[] = [];
       for (const ci of comboItemsForCombo) {
         const comboMenuItem = menuItemMap.get(ci.menuItemId);
         if (!comboMenuItem) continue;
+        removableMenuItems.push(comboMenuItem);
 
         const error = await validateItemAddons(
           i,
@@ -272,6 +346,18 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
         );
         if (error) itemValidationErrors.push(error);
       }
+      const resolvedRemovedAddons = resolveRemovedAddonIds(
+        i,
+        itemName,
+        removableMenuItems,
+        item.removedAddonIds,
+        allAddonsMap,
+        allAllowedAddonByMenuItem,
+      );
+      removedAddonIdsByMenuItemByItemIndex.set(i, resolvedRemovedAddons.byMenuItem);
+      if (resolvedRemovedAddons.error) {
+        itemValidationErrors.push(resolvedRemovedAddons.error);
+      }
     }
   }
 
@@ -280,11 +366,44 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
   }
 
   const processedItems: CalculatedOrderItem[] = [];
+  const stockRequirements = new Map<string, number>();
   let totalAmount = 0;
 
-  for (const item of items) {
+  const addStockRequirements = (
+    menuItemId: string,
+    itemQuantity: number,
+    selectedAddons: Map<string, number>,
+    removedAddonIds: Set<string>,
+  ) => {
+    for (const mapping of allMenuItemAddons) {
+      if (mapping.menuItemId !== menuItemId || !mapping.inventoryIngredientId) continue;
+      if (removedAddonIds.has(mapping.addonId)) continue;
+
+      const selectedQuantity = selectedAddons.get(mapping.addonId) ?? 0;
+      if (!mapping.isRequired && selectedQuantity === 0) continue;
+      if (mapping.stockQuantity === null || mapping.stockQuantity <= 0) {
+        throw new OrderCalculationError('A receita do produto possui uma quantidade de estoque inválida.', 409);
+      }
+
+      const requiredQuantity = mapping.stockQuantity * itemQuantity * Math.max(selectedQuantity, 1);
+      const current = stockRequirements.get(mapping.inventoryIngredientId) ?? 0;
+      stockRequirements.set(mapping.inventoryIngredientId, current + requiredQuantity);
+    }
+  };
+
+  for (let itemIndex = 0; itemIndex < items.length; itemIndex += 1) {
+    const item = items[itemIndex];
     let unitPrice = 0;
     const processedAddons = [];
+    const selectedAddons = new Map(item.addons.map((addon) => [addon.addonId, addon.quantity]));
+    const removedAddonIdsByMenuItem =
+      removedAddonIdsByMenuItemByItemIndex.get(itemIndex) ?? new Map<string, Set<string>>();
+    const removedIngredients = item.removedAddonIds
+      .map((addonId) => allAddonsMap.get(addonId)?.name)
+      .filter((name): name is string => Boolean(name));
+    const removedIngredientLabels = Array.from(
+      new Set(removedIngredients.map((name) => name.trim().replace(/^sem\s+/i, ''))),
+    );
 
     if (item.menuItemId) {
       const menuItem = menuItemMap.get(item.menuItemId);
@@ -293,6 +412,12 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
       }
 
       unitPrice = menuItem.price;
+      addStockRequirements(
+        item.menuItemId,
+        item.quantity,
+        selectedAddons,
+        removedAddonIdsByMenuItem.get(item.menuItemId) ?? new Set(),
+      );
 
       for (const addonInput of item.addons) {
         if (addonInput.quantity > 10) {
@@ -329,6 +454,16 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
       }
 
       unitPrice = combo.price;
+      for (const comboItem of comboItems) {
+        if (comboItem.comboId === item.comboId) {
+          addStockRequirements(
+            comboItem.menuItemId,
+            item.quantity * comboItem.quantity,
+            selectedAddons,
+            removedAddonIdsByMenuItem.get(comboItem.menuItemId) ?? new Set(),
+          );
+        }
+      }
 
       for (const addonInput of item.addons) {
         if (addonInput.quantity > 10) {
@@ -367,6 +502,7 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
       comboId: item.comboId,
       quantity: item.quantity,
       notes: item.notes,
+      removedIngredients: removedIngredientLabels,
       unitPrice,
       subtotal,
       addons: processedAddons,
@@ -376,5 +512,9 @@ export async function calculateOrderTotal(items: OrderItemInput[]): Promise<Calc
   return {
     items: processedItems,
     totalAmount,
+    stockRequirements: Array.from(stockRequirements, ([ingredientId, quantity]) => ({
+      ingredientId,
+      quantity,
+    })),
   };
 }

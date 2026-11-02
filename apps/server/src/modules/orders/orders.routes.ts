@@ -7,6 +7,7 @@ import {
   createOrderBodySchema,
   dataResponse,
   listOrdersQueryOpenApiSchema,
+  messageSchema,
   notFoundErrorSchema,
   orderDetailSchema,
   orderSchema,
@@ -48,6 +49,7 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
         response: {
           201: dataResponse(orderDetailSchema),
           400: validationErrorSchema,
+          409: messageSchema,
         },
       },
     },
@@ -68,6 +70,15 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
           status: order.status,
           timestamp: new Date().toISOString(),
         });
+        for (const reservation of order.stockReservations) {
+          app.realtime.broadcastCatalogChanged({
+            type: 'CATALOG_CHANGED',
+            entity: 'INVENTORY_INGREDIENT',
+            action: 'STOCK_CHANGED',
+            entityId: reservation.ingredientId,
+            timestamp: new Date().toISOString(),
+          });
+        }
         return reply.code(201).send({ data: order });
       } catch (error) {
         if (error instanceof OrderValidationError) {
@@ -165,6 +176,7 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
           400: validationErrorSchema,
           401: unauthorizedErrorSchema,
           404: notFoundErrorSchema,
+          409: messageSchema,
         },
       },
     },
@@ -187,6 +199,17 @@ export async function registerOrdersRoutes(app: FastifyInstance): Promise<void> 
           status: order.status,
           timestamp: new Date().toISOString(),
         });
+        if (order.status === 'CANCELLED') {
+          for (const reservation of order.stockReservations) {
+            app.realtime.broadcastCatalogChanged({
+              type: 'CATALOG_CHANGED',
+              entity: 'INVENTORY_INGREDIENT',
+              action: 'STOCK_CHANGED',
+              entityId: reservation.ingredientId,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        }
         return reply.code(200).send({ data: order });
       } catch (error) {
         if (isOrderServiceError(error)) {

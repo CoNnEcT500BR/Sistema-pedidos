@@ -181,6 +181,12 @@ export const addonsService = {
     const allowed = await addonsRepository.listAllowedAddonsByMenuItem(menuItemId);
     return allowed
       .filter((entry) => entry.addon.isActive)
+      .filter(
+        (entry) =>
+          entry.inventoryIngredient?.currentQuantity == null ||
+          entry.stockQuantity !== null &&
+            entry.inventoryIngredient.currentQuantity >= entry.stockQuantity,
+      )
       .filter((entry) => isAddonCompatibleWithScope(entry.addon, targetScope))
       .filter(
         (entry) =>

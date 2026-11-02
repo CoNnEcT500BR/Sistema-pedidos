@@ -15,6 +15,15 @@ const nextAction: Partial<Record<OrderStatus, { label: string; next: OrderStatus
   READY: { label: 'Finalizar Pedido', next: 'COMPLETED' },
 };
 
+function parseRemovedIngredients(value: string | null | undefined): string[] {
+  if (!value) return [];
+  const parsed: unknown = JSON.parse(value);
+  if (!Array.isArray(parsed) || parsed.some((ingredient) => typeof ingredient !== 'string')) {
+    throw new Error('Dados de remoção de ingredientes inválidos no pedido.');
+  }
+  return parsed;
+}
+
 export function OrderDetailsPage() {
   const { language, t } = useI18n();
   const { id } = useParams<{ id: string }>();
@@ -152,6 +161,7 @@ export function OrderDetailsPage() {
           {order.items.map((item) => {
             const itemName = item.menuItem?.name ?? item.combo?.name ?? t('Item');
             const itemPrice = item.subtotal.toFixed(2).replace('.', ',');
+            const removedIngredients = parseRemovedIngredients(item.removedIngredientsJson);
             return (
               <li key={item.id} className="py-3">
                 <div className="flex items-start justify-between gap-2">
@@ -161,6 +171,18 @@ export function OrderDetailsPage() {
                     </span>
                     {item.notes && (
                       <p className="text-xs text-gray-400 mt-0.5 italic">{item.notes}</p>
+                    )}
+                    {removedIngredients.length > 0 && (
+                      <div className="mt-1 rounded-lg bg-red-50 px-2 py-1.5">
+                        <p className="text-xs font-semibold text-red-800">{t('Sem')}</p>
+                        <ul className="mt-0.5">
+                          {removedIngredients.map((ingredient, index) => (
+                            <li key={`${ingredient}-${index}`} className="text-xs text-red-800">
+                              {t(ingredient)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                     {item.addons.length > 0 && (
                       <ul className="mt-1 space-y-0.5">

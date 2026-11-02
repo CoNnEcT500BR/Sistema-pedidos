@@ -10,6 +10,7 @@ import { registerRoutes } from './routes.js';
 import { registerRealtime } from '@/shared/realtime/realtime.js';
 import { auditService } from '@/shared/audit/audit.service.js';
 import { prisma } from '@/shared/database/prismaClient.js';
+import { requireJwtSecret } from '@/shared/security/jwt-secret.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const usePrettyLogs = !isProduction && process.env.LOG_PRETTY !== 'false';
@@ -35,6 +36,7 @@ function isAllowedCorsOrigin(origin?: string): boolean {
 }
 
 export async function buildApp(): Promise<FastifyInstance> {
+  const jwtSecret = requireJwtSecret(process.env.JWT_SECRET);
   const metricsRegistry = new Registry();
   collectDefaultMetrics({ register: metricsRegistry });
 
@@ -79,7 +81,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   await app.register(fastifyJwt, {
-    secret: process.env.JWT_SECRET || 'dev-secret-key-change-in-production',
+    secret: jwtSecret,
     sign: {
       expiresIn: '7d',
     },

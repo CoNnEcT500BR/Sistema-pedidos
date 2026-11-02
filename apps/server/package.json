@@ -10,6 +10,8 @@
     "start": "node dist/server.js",
     "type-check": "tsc --noEmit",
     "lint": "tsc --noEmit",
+    "test:security": "tsx --test src/shared/audit/sanitize-audit-payload.test.ts src/shared/security/jwt-secret.test.ts",
+    "test:inventory": "tsx --test src/shared/inventory/menu-stock-availability.test.ts",
     "docs:validate": "tsx scripts/validate-openapi.ts",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",

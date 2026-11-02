@@ -16,8 +16,16 @@ function useMenuQuery<T>(options: {
   errorMessage: string;
   enabled?: boolean;
   resetOnDisabled?: boolean;
+  refreshIntervalMs?: number;
 }): QueryState<T> {
-  const { fetcher, initialData, errorMessage, enabled = true, resetOnDisabled = false } = options;
+  const {
+    fetcher,
+    initialData,
+    errorMessage,
+    enabled = true,
+    resetOnDisabled = false,
+    refreshIntervalMs,
+  } = options;
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +38,7 @@ function useMenuQuery<T>(options: {
   const initialDataRef = useRef(initialData);
   initialDataRef.current = initialData;
 
-  const fetch = useCallback(async () => {
+  const fetch = useCallback(async (background = false) => {
     if (!enabled) {
       setLoading(false);
       setError(null);
@@ -40,16 +48,16 @@ function useMenuQuery<T>(options: {
       return;
     }
 
-    setLoading(true);
+    if (!background) setLoading(true);
     setError(null);
     try {
       const result = await fetcherRef.current();
       setData(result);
     } catch {
       setError(errorMessageRef.current);
-      setData(initialDataRef.current);
+      if (!background) setData(initialDataRef.current);
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   }, [enabled, resetOnDisabled]);
 
@@ -57,7 +65,15 @@ function useMenuQuery<T>(options: {
     void fetch();
   }, [fetch]);
 
-  return { data, loading, error, refetch: fetch };
+  useEffect(() => {
+    if (!enabled || !refreshIntervalMs) return;
+    const intervalId = window.setInterval(() => {
+      void fetch(true);
+    }, refreshIntervalMs);
+    return () => window.clearInterval(intervalId);
+  }, [enabled, fetch, refreshIntervalMs]);
+
+  return { data, loading, error, refetch: () => fetch() };
 }
 
 export function useCategories() {
@@ -82,6 +98,7 @@ export function useMenuItems(categoryId?: string) {
     fetcher: () => menuService.getMenuItems(categoryId),
     initialData: [],
     errorMessage: t('Não foi possível carregar os itens.'),
+    refreshIntervalMs: 30_000,
   });
 
   return {
@@ -132,6 +149,7 @@ export function useCombos() {
     fetcher: () => menuService.getCombos(),
     initialData: [],
     errorMessage: t('Nao foi possivel carregar os combos.'),
+    refreshIntervalMs: 30_000,
   });
 
   return {

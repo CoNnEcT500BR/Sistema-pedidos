@@ -1,6 +1,22 @@
 import { prisma } from '@/shared/database/prismaClient.js';
 
-import type { CalculatedOrderResult, OrderStatus } from './ordersTypes.js';
+import {
+  isAllowedOrderStatusTransition,
+  type CalculatedOrderResult,
+  type OrderStatus,
+} from './ordersTypes.js';
+
+export class InsufficientInventoryError extends Error {
+  constructor(public readonly ingredientId: string) {
+    super('Estoque insuficiente para concluir o pedido.');
+  }
+}
+
+export class OrderStatusConflictError extends Error {
+  constructor() {
+    super('O status do pedido foi alterado durante a operação.');
+  }
+}
 
 function isUniqueConstraintError(error: unknown): error is { code: string } {
   return (
@@ -30,7 +46,8 @@ export const ordersRepository = {
       const orderNumber = await ordersRepository.getNextOrderNumber();
 
       try {
-        const order = await prisma.order.create({
+        const order = await prisma.$transaction(async (tx) => {
+          const createdOrder = await tx.order.create({
           data: {
             orderNumber,
             status: 'PENDING',
@@ -48,6 +65,7 @@ export const ordersRepository = {
                 quantity: item.quantity,
                 itemPrice: item.unitPrice,
                 notes: item.notes,
+                removedIngredientsJson: JSON.stringify(item.removedIngredients),
                 addons: {
                   create: item.addons.map((addon) => ({
                     addonId: addon.addonId,
@@ -66,6 +84,9 @@ export const ordersRepository = {
             },
           },
           include: {
+            stockReservations: {
+              select: { ingredientId: true },
+            },
             items: {
               include: {
                 menuItem: true,
@@ -81,6 +102,54 @@ export const ordersRepository = {
               orderBy: { changedAt: 'asc' },
             },
           },
+        });
+
+          for (const requirement of payload.calculated.stockRequirements) {
+            const ingredient = await tx.inventoryIngredient.findUnique({
+              where: { id: requirement.ingredientId },
+              select: { currentQuantity: true },
+            });
+            if (!ingredient || ingredient.currentQuantity === null) {
+              continue;
+            }
+
+            const updated = await tx.inventoryIngredient.updateMany({
+              where: {
+                id: requirement.ingredientId,
+                currentQuantity: { gte: requirement.quantity },
+              },
+              data: {
+                currentQuantity: { decrement: requirement.quantity },
+              },
+            });
+            if (updated.count !== 1) {
+              throw new InsufficientInventoryError(requirement.ingredientId);
+            }
+
+            await tx.stockReservation.create({
+              data: {
+                orderId: createdOrder.id,
+                ingredientId: requirement.ingredientId,
+                quantity: requirement.quantity,
+              },
+            });
+            await tx.inventoryMovement.create({
+              data: {
+                orderId: createdOrder.id,
+                ingredientId: requirement.ingredientId,
+                quantityDelta: -requirement.quantity,
+                reason: 'ORDER_RESERVED',
+              },
+            });
+          }
+
+          return {
+            ...createdOrder,
+            stockReservations: await tx.stockReservation.findMany({
+              where: { orderId: createdOrder.id, status: 'RESERVED' },
+              select: { ingredientId: true },
+            }),
+          };
         });
 
         return order;
@@ -142,6 +211,9 @@ export const ordersRepository = {
     return prisma.order.findUnique({
       where: { id },
       include: {
+        stockReservations: {
+          select: { ingredientId: true },
+        },
         items: {
           include: {
             menuItem: true,
@@ -160,20 +232,66 @@ export const ordersRepository = {
     });
   },
 
-  updateStatus: async (id: string, status: OrderStatus, reason?: string) => {
+  updateStatus: async (
+    id: string,
+    expectedStatus: OrderStatus,
+    status: OrderStatus,
+    reason?: string,
+  ) => {
     return prisma.$transaction(async (tx) => {
       const currentOrder = await tx.order.findUnique({ where: { id } });
       if (!currentOrder) {
         return null;
       }
 
-      const updated = await tx.order.update({
-        where: { id },
+      if (
+        currentOrder.status !== expectedStatus ||
+        !isAllowedOrderStatusTransition(currentOrder.status as OrderStatus, status)
+      ) {
+        throw new OrderStatusConflictError();
+      }
+
+      const statusUpdate = await tx.order.updateMany({
+        where: { id, status: expectedStatus },
         data: {
           status,
           completedAt: status === 'COMPLETED' ? new Date() : currentOrder.completedAt,
         },
       });
+      if (statusUpdate.count !== 1) {
+        throw new OrderStatusConflictError();
+      }
+
+      const updated = await tx.order.findUnique({ where: { id } });
+      if (!updated) {
+        throw new Error('Pedido desapareceu durante a transacao de atualizacao de status.');
+      }
+
+      if (status === 'CANCELLED') {
+        const reservations = await tx.stockReservation.findMany({
+          where: { orderId: id, status: 'RESERVED' },
+        });
+        for (const reservation of reservations) {
+          const released = await tx.stockReservation.updateMany({
+            where: { id: reservation.id, status: 'RESERVED' },
+            data: { status: 'RELEASED', releasedAt: new Date() },
+          });
+          if (released.count !== 1) continue;
+
+          await tx.inventoryIngredient.update({
+            where: { id: reservation.ingredientId },
+            data: { currentQuantity: { increment: reservation.quantity } },
+          });
+          await tx.inventoryMovement.create({
+            data: {
+              orderId: id,
+              ingredientId: reservation.ingredientId,
+              quantityDelta: reservation.quantity,
+              reason: 'ORDER_CANCELLED',
+            },
+          });
+        }
+      }
 
       await tx.orderStatusHistory.create({
         data: {

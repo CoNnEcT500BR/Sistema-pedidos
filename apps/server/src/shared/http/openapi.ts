@@ -377,6 +377,49 @@ export const pathIdSchema = {
   },
 } as const;
 
+export const createInventoryIngredientBodySchema = {
+  type: 'object',
+  required: ['name', 'unit'],
+  properties: {
+    name: { type: 'string', minLength: 2, maxLength: 100 },
+    unit: { type: 'string', enum: ['UNIT', 'GRAM', 'KILOGRAM', 'MILLILITER', 'LITER'] },
+    lowStockThreshold: { type: 'number', minimum: 0 },
+  },
+} as const;
+
+export const updateInventoryIngredientBodySchema = {
+  type: 'object',
+  minProperties: 1,
+  properties: {
+    name: { type: 'string', minLength: 2, maxLength: 100 },
+    unit: { type: 'string', enum: ['UNIT', 'GRAM', 'KILOGRAM', 'MILLILITER', 'LITER'] },
+    lowStockThreshold: { type: 'number', minimum: 0 },
+    isActive: { type: 'boolean' },
+  },
+} as const;
+
+export const countInventoryIngredientBodySchema = {
+  type: 'object',
+  required: ['quantity'],
+  properties: {
+    quantity: { type: 'number', minimum: 0 },
+    note: { type: 'string', maxLength: 500 },
+  },
+} as const;
+
+export const inventoryRecipeBodySchema = {
+  type: 'object',
+  required: ['inventoryIngredientId', 'stockQuantity'],
+  properties: {
+    inventoryIngredientId: {
+      anyOf: [{ type: 'string', minLength: 1 }, { type: 'null' }],
+    },
+    stockQuantity: {
+      anyOf: [{ type: 'number', exclusiveMinimum: 0 }, { type: 'null' }],
+    },
+  },
+} as const;
+
 export const menuItemPathIdSchema = {
   type: 'object',
   required: ['menuItemId'],
@@ -522,6 +565,11 @@ export const orderItemInputSchema = {
           type: 'array',
           items: orderAddonInputSchema,
         },
+        removedAddonIds: {
+          type: 'array',
+          maxItems: 20,
+          items: { type: 'string', minLength: 1 },
+        },
       },
     },
     {
@@ -534,6 +582,11 @@ export const orderItemInputSchema = {
         addons: {
           type: 'array',
           items: orderAddonInputSchema,
+        },
+        removedAddonIds: {
+          type: 'array',
+          maxItems: 20,
+          items: { type: 'string', minLength: 1 },
         },
       },
     },
@@ -615,6 +668,7 @@ export const orderItemSchema = {
     'itemPrice',
     'notes',
     'addons',
+    'removedIngredientsJson',
     'menuItem',
     'combo',
   ],
@@ -630,6 +684,7 @@ export const orderItemSchema = {
       type: 'array',
       items: orderItemAddonSchema,
     },
+    removedIngredientsJson: nullableString,
     menuItem: {
       anyOf: [menuItemSchema, { type: 'null' }],
     },

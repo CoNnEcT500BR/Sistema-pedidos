@@ -1,4 +1,5 @@
 import { prisma } from '@/shared/database/prismaClient.js';
+import { isMenuItemStockAvailable } from '@/shared/inventory/menu-stock-availability.js';
 
 export const menuRepository = {
   listActiveCategories: () =>
@@ -35,16 +36,29 @@ export const menuRepository = {
     }),
 
   listMenuItems: (categoryId?: string) =>
-    prisma.menuItem.findMany({
-      where: {
-        isAvailable: true,
-        ...(categoryId ? { categoryId } : {}),
-      },
-      include: {
-        category: true,
-      },
-      orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
-    }),
+    prisma.menuItem
+      .findMany({
+        where: {
+          isAvailable: true,
+          ...(categoryId ? { categoryId } : {}),
+        },
+        include: {
+          category: true,
+          addons: {
+            select: {
+              isRequired: true,
+              stockQuantity: true,
+              inventoryIngredient: { select: { currentQuantity: true } },
+            },
+          },
+        },
+        orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+      })
+      .then((items) =>
+        items
+          .filter(isMenuItemStockAvailable)
+          .map(({ addons: _addons, ...item }) => item),
+      ),
 
   listAdminMenuItems: (categoryId?: string) =>
     prisma.menuItem.findMany({
@@ -65,6 +79,7 @@ export const menuRepository = {
         addons: {
           include: {
             addon: true,
+            inventoryIngredient: true,
           },
           orderBy: { displayOrder: 'asc' },
         },

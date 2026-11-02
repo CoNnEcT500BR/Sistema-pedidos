@@ -11,6 +11,22 @@ export const ORDER_STATUS = [
 
 export type OrderStatus = (typeof ORDER_STATUS)[number];
 
+export const allowedOrderStatusTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['PREPARING', 'CANCELLED'],
+  PREPARING: ['READY', 'CANCELLED'],
+  READY: ['COMPLETED', 'CANCELLED'],
+  COMPLETED: [],
+  CANCELLED: [],
+};
+
+export function isAllowedOrderStatusTransition(
+  currentStatus: OrderStatus,
+  nextStatus: OrderStatus,
+): boolean {
+  return allowedOrderStatusTransitions[currentStatus].includes(nextStatus);
+}
+
 export const orderAddonInputSchema = z.object({
   addonId: z.string().min(1, 'addonId obrigatorio'),
   quantity: z.number().int().min(1, 'quantity deve ser >= 1'),
@@ -23,6 +39,7 @@ export const orderItemInputSchema = z
     quantity: z.number().int().min(1, 'quantity deve ser >= 1'),
     notes: z.string().optional(),
     addons: z.array(orderAddonInputSchema).max(20, 'maximo de 20 addons por item').default([]),
+    removedAddonIds: z.array(z.string().min(1)).max(20).default([]),
   })
   .refine((data) => Boolean(data.menuItemId) !== Boolean(data.comboId), {
     message: 'Informe menuItemId ou comboId (apenas um)',
@@ -34,6 +51,14 @@ export const orderItemInputSchema = z
         code: z.ZodIssueCode.custom,
         message: 'Nao envie addons duplicados no mesmo item',
         path: ['addons'],
+      });
+    }
+
+    if (new Set(data.removedAddonIds).size !== data.removedAddonIds.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Nao envie removiveis duplicados no mesmo item',
+        path: ['removedAddonIds'],
       });
     }
   });
@@ -77,6 +102,7 @@ export interface CalculatedOrderItem {
   comboId?: string;
   quantity: number;
   notes?: string;
+  removedIngredients: string[];
   unitPrice: number;
   subtotal: number;
   addons: CalculatedOrderAddon[];
@@ -85,4 +111,8 @@ export interface CalculatedOrderItem {
 export interface CalculatedOrderResult {
   items: CalculatedOrderItem[];
   totalAmount: number;
+  stockRequirements: Array<{
+    ingredientId: string;
+    quantity: number;
+  }>;
 }

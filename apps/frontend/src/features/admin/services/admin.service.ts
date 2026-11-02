@@ -29,7 +29,89 @@ interface AuditLogsParams {
   sort?: AdminAuditSortOrder;
 }
 
+export type InventoryUnit = 'UNIT' | 'GRAM' | 'KILOGRAM' | 'MILLILITER' | 'LITER';
+
+export interface InventoryIngredient {
+  id: string;
+  name: string;
+  unit: InventoryUnit;
+  currentQuantity: number | null;
+  lowStockThreshold: number | null;
+  isActive: boolean;
+  linkedMenuItems: Array<{ id: string; name: string }>;
+}
+
+export interface InventoryRecipeLink {
+  id: string;
+  inventoryIngredientId: string | null;
+  stockQuantity: number | null;
+  isRequired: boolean;
+  assignmentType: 'ASSEMBLY' | 'BREAD' | 'EXTRA';
+  menuItem: { id: string; name: string; isAvailable: boolean };
+  addon: { id: string; name: string };
+  inventoryIngredient: Pick<InventoryIngredient, 'id' | 'name' | 'unit' | 'currentQuantity'> | null;
+}
+
+export interface InventoryMovement {
+  id: string;
+  quantityDelta: number;
+  reason: string;
+  note: string | null;
+  createdAt: string;
+  ingredient: { id: string; name: string; unit: InventoryUnit };
+  order: { id: string; orderNumber: number } | null;
+}
+
 export const adminService = {
+  async getInventory(): Promise<InventoryIngredient[]> {
+    const res = await apiClient.get<ApiResponse<InventoryIngredient[]>>('/api/admin/inventory');
+    return res.data.data;
+  },
+
+  async createInventoryIngredient(payload: {
+    name: string;
+    unit: InventoryUnit;
+    lowStockThreshold?: number;
+  }): Promise<InventoryIngredient> {
+    const res = await apiClient.post<ApiResponse<InventoryIngredient>>(
+      '/api/admin/inventory',
+      payload,
+    );
+    return res.data.data;
+  },
+
+  async countInventoryIngredient(
+    id: string,
+    payload: { quantity: number; note?: string },
+  ): Promise<InventoryIngredient> {
+    const res = await apiClient.put<ApiResponse<InventoryIngredient>>(
+      `/api/admin/inventory/${id}/count`,
+      payload,
+    );
+    return res.data.data;
+  },
+
+  async getInventoryRecipes(): Promise<InventoryRecipeLink[]> {
+    const res = await apiClient.get<ApiResponse<InventoryRecipeLink[]>>(
+      '/api/admin/inventory/recipes',
+    );
+    return res.data.data;
+  },
+
+  async getInventoryMovements(): Promise<InventoryMovement[]> {
+    const res = await apiClient.get<ApiResponse<InventoryMovement[]>>(
+      '/api/admin/inventory/movements',
+    );
+    return res.data.data;
+  },
+
+  async updateInventoryRecipe(
+    id: string,
+    payload: { inventoryIngredientId: string | null; stockQuantity: number | null },
+  ): Promise<void> {
+    await apiClient.patch(`/api/admin/inventory/recipes/${id}`, payload);
+  },
+
   async getDashboard(params?: { startDate?: string; endDate?: string }): Promise<DashboardData> {
     const res = await apiClient.get<ApiResponse<DashboardData>>('/api/reports/dashboard', {
       params,

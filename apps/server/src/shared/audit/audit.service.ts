@@ -1,4 +1,5 @@
 import { prisma } from '@/shared/database/prismaClient.js';
+import { sanitizeAuditPayload } from './sanitize-audit-payload.js';
 
 export interface AuditLogEntry {
   timestamp: string;
@@ -40,6 +41,7 @@ function toEntity(pathname: string): string {
   if (pathname.includes('/categories')) return 'CATEGORY';
   if (pathname.includes('/combos')) return 'COMBO';
   if (pathname.includes('/addons')) return 'ADDON';
+  if (pathname.includes('/inventory')) return 'INVENTORY_INGREDIENT';
   if (pathname.includes('/delivery')) return 'DELIVERY';
   if (pathname.includes('/feature-flags')) return 'FEATURE_FLAG';
   return 'SYSTEM';
@@ -55,23 +57,9 @@ function toAction(method: string, pathname: string): string {
   return 'READ';
 }
 
-function sanitizePayloadForAudit(pathname: string, payload: unknown): unknown {
-  if (!payload || typeof payload !== 'object') {
-    return payload;
-  }
-
-  if (pathname.includes('/auth/login')) {
-    const cloned = { ...(payload as Record<string, unknown>) };
-    delete cloned.password;
-    return cloned;
-  }
-
-  return payload;
-}
-
 export const auditService = {
   async append(entry: Omit<AuditLogEntry, 'timestamp' | 'entity' | 'action'>): Promise<void> {
-    const safePayload = sanitizePayloadForAudit(entry.path, entry.payload);
+    const safePayload = sanitizeAuditPayload(entry.payload);
     const payload =
       safePayload === undefined ? null : JSON.stringify(safePayload, (_key, value) => value);
 
