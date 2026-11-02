@@ -119,7 +119,7 @@ function TouchAddonRow({
             <p className="text-sm font-bold text-stone-900">{t(addon.name)}</p>
             {addon.price > 0 && <p className="text-xs text-stone-600">+ R$ {formatCurrency(addon.price)}</p>}
           </div>
-          <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isSelectedFlavor ? 'bg-primary-600 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
+          <span className={`inline-flex h-8 min-w-[88px] items-center justify-center rounded-xl px-3 text-xs font-bold ${isSelectedFlavor ? 'bg-primary-700 text-white' : 'border border-stone-300 bg-white text-stone-700'}`}>
             {isSelectedFlavor ? t('Selecionado') : t('Selecionar')}
           </span>
         </div>
@@ -148,7 +148,7 @@ function TouchAddonRow({
           <button
             type="button"
             onClick={() => onChangeQuantity(addon, 1)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-500 text-white"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-700 text-white"
           >
             <Plus size={18} />
           </button>
@@ -469,14 +469,14 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               <button
                 type="button"
                 onClick={() => setStep('overview')}
-                className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'overview' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
+                className={`touch-target rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'overview' ? 'bg-primary-800 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
               >
                 {t('Visao geral')}
               </button>
               <button
                 type="button"
                 onClick={() => setStep('burger')}
-                className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'burger' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
+                className={`touch-target rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'burger' ? 'bg-primary-800 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
                 disabled={!burgerItem}
               >
                 {t('Lanche')}
@@ -484,7 +484,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               <button
                 type="button"
                 onClick={() => setStep('drink')}
-                className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'drink' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
+                className={`touch-target rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'drink' ? 'bg-primary-800 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
                 disabled={!drinkItem}
               >
                 {t('Bebida')}
@@ -492,7 +492,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               <button
                 type="button"
                 onClick={() => setStep('upgrades')}
-                className={`rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'upgrades' ? 'bg-primary-500 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
+                className={`touch-target rounded-xl px-3 py-2 text-xs font-bold transition-colors ${step === 'upgrades' ? 'bg-primary-800 text-white' : 'border border-stone-200 bg-white text-stone-700'}`}
               >
                 {t('Upgrade do combo')}
               </button>
@@ -572,7 +572,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                               <button
                                 type="button"
                                 onClick={() => setUpgradeQuantity(addon.id, addon.name, 1)}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 text-white"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-700 text-white"
                               >
                                 <Plus size={16} />
                               </button>
@@ -611,7 +611,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
                               <button
                                 type="button"
                                 onClick={() => setUpgradeQuantity(addon.id, addon.name, 1)}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 text-white"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-700 text-white"
                               >
                                 <Plus size={16} />
                               </button>
@@ -639,7 +639,7 @@ export function ComboTouchModal({ combo, open, onClose, onAddToCart }: ComboTouc
               type="button"
               onClick={handleAdd}
               disabled={!isDrinkFlavorValid}
-              className="mt-auto w-full rounded-2xl bg-primary-500 px-4 py-3.5 text-base font-bold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="touch-target mt-auto w-full rounded-2xl bg-primary-700 px-4 py-3.5 text-base font-bold text-white transition-colors hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t('Adicionar combo')}
             </button>

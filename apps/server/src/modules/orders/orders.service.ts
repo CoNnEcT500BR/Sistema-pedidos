@@ -28,11 +28,40 @@ export function isOrderServiceError(error: unknown): error is OrderServiceError 
 export async function createOrder(payload: CreateOrderInput) {
   try {
     const calculated = await calculateOrderTotal(payload.items);
+    const deliveryZone =
+      payload.fulfillmentType === 'DELIVERY' && payload.deliveryZoneId
+        ? await ordersRepository.findActiveDeliveryZone(payload.deliveryZoneId)
+        : null;
+
+    if (payload.fulfillmentType === 'DELIVERY' && !deliveryZone) {
+      throw new OrderServiceError('Zona de entrega indisponivel. Selecione outra zona.', 400);
+    }
+
+    const deliveryFee = deliveryZone?.fee ?? 0;
+    const paymentMethod =
+      payload.paymentMethod ??
+      (payload.fulfillmentType === 'DELIVERY' ? 'CASH_ON_DELIVERY' : 'AT_COUNTER');
+
+    if (
+      payload.cashChangeFor !== undefined &&
+      payload.cashChangeFor < calculated.totalAmount + deliveryFee
+    ) {
+      throw new OrderServiceError('O valor para troco deve cobrir o total do pedido.', 400);
+    }
 
     return await ordersRepository.createOrder({
       customerName: payload.customerName,
       customerPhone: payload.customerPhone,
       notes: payload.notes,
+      fulfillmentType: payload.fulfillmentType,
+      paymentMethod,
+      cashChangeFor: payload.cashChangeFor,
+      deliveryAddress: payload.deliveryAddress,
+      deliveryComplement: payload.deliveryComplement,
+      deliveryReference: payload.deliveryReference,
+      deliveryZoneId: deliveryZone?.id,
+      deliveryZoneName: deliveryZone?.name,
+      deliveryFee,
       calculated,
     });
   } catch (error) {
@@ -68,6 +97,13 @@ export async function updateOrderStatus(id: string, payload: UpdateOrderStatusIn
 
   if (current.status === payload.status) {
     return current;
+  }
+
+  if (current.fulfillmentType === 'DELIVERY' && payload.status === 'COMPLETED') {
+    throw new OrderServiceError(
+      'Pedidos de delivery devem ser finalizados pelo painel de entregas.',
+      409,
+    );
   }
 
   const currentStatus = current.status as OrderStatus;

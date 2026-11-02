@@ -2,6 +2,8 @@
 
 Observacao de contexto (16/03/2026): o projeto segue sem integracao de gateway no runtime atual. Este documento permanece como referencia de evolucao.
 
+No delivery proprio, dinheiro, cartao e Pix sao apenas metodos informados para pagamento no recebimento. O sistema nao captura pagamentos, gera cobrancas ou confirma transacoes online; o status de pagamento continua pendente ate que um fluxo de conciliacao seja implementado.
+
 ## 1. Visão Geral
 
 O sistema atual (MVP) **não implementará integração de pagamento**, mas deve ser **arquitetado para facilitar integração futura** sem refatoração massiva.

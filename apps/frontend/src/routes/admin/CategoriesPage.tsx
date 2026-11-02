@@ -350,7 +350,7 @@ export function CategoriesPage() {
                 <textarea
                   value={form.description}
                   onChange={(event) => updateField('description', event.target.value)}
-                  className="min-h-[110px] w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                  className="min-h-[110px] w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                 />
               </div>
 
@@ -368,7 +368,7 @@ export function CategoriesPage() {
                   <select
                     value={form.displayOrder}
                     onChange={(event) => updateField('displayOrder', event.target.value)}
-                    className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                    className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                   >
                     {availableDisplayOrders.map((order) => (
                       <option key={order} value={String(order)}>

@@ -111,7 +111,7 @@ function FlavorGroup({ label, addons, getQuantity, onSelect }: FlavorGroupProps)
               )}
             >
               <span className="font-medium text-gray-800">{t(addon.name)}</span>
-              <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', isSelected ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600')}>
+              <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', isSelected ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-700')}>
                 {isSelected ? t('Selecionado') : t('Selecionar')}
               </span>
             </button>
@@ -174,7 +174,7 @@ function AddonGroup({ label, addons, getQuantity, onAdjust }: AddonGroupProps) {
                 )}
                 <button
                   onClick={() => onAdjust(addon, 1)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white shadow transition hover:bg-primary-600 active:scale-90"
+                  className="touch-target flex h-11 w-11 items-center justify-center rounded-full bg-primary-700 text-white shadow transition hover:bg-primary-800 active:scale-[0.99]"
                   aria-label={t('Adicionar {name}', { name: t(addon.name) })}
                 >
                   <Plus className="h-4 w-4" strokeWidth={3} />

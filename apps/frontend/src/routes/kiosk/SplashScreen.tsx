@@ -41,14 +41,14 @@ export function SplashScreen() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 px-8">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 px-4 py-8 sm:px-8">
       {/* Logo / Marca */}
-      <div className="mb-10 flex flex-col items-center gap-4">
-        <div className="flex h-32 w-32 items-center justify-center rounded-3xl bg-primary-500 shadow-xl">
-          <span className="text-7xl" role="img" aria-label="restaurante">🍔</span>
+      <div className="mb-8 flex flex-col items-center gap-3 text-center sm:mb-10 sm:gap-4">
+        <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-600 shadow-xl sm:h-32 sm:w-32">
+          <span className="text-6xl sm:text-7xl" role="img" aria-label="restaurante">🍔</span>
         </div>
-        <h1 className="text-4xl font-black tracking-tight text-gray-900">{t('Sistema de Pedidos')}</h1>
-        <p className="text-xl text-gray-500">{t('Peça agora, rápido e fácil')}</p>
+        <h1 className="text-3xl font-black tracking-tight text-gray-900 sm:text-4xl">{t('Sistema de Pedidos')}</h1>
+        <p className="text-lg text-gray-700 sm:text-xl">{t('Peça agora, rápido e fácil')}</p>
       </div>
 
       <div className="w-full max-w-xl rounded-3xl border border-gray-200 bg-white p-3 shadow-2xl">
@@ -59,10 +59,11 @@ export function SplashScreen() {
               setSelectedLanguage('pt');
               setLanguage('pt');
             }}
-            className={`rounded-2xl border px-5 py-4 text-left transition-colors ${selectedLanguage === 'pt' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}
+            aria-pressed={selectedLanguage === 'pt'}
+            className={`touch-target rounded-2xl border px-5 py-4 text-left transition-colors ${selectedLanguage === 'pt' ? 'border-primary-600 bg-primary-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Idioma</p>
-            <p className="mt-1 text-xl font-black text-gray-900">Portugues</p>
+            <p className="mt-1 text-lg font-black text-gray-900 sm:text-xl">Português</p>
           </button>
 
           <button
@@ -71,23 +72,24 @@ export function SplashScreen() {
               setSelectedLanguage('en');
               setLanguage('en');
             }}
-            className={`rounded-2xl border px-5 py-4 text-left transition-colors ${selectedLanguage === 'en' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}
+            aria-pressed={selectedLanguage === 'en'}
+            className={`touch-target rounded-2xl border px-5 py-4 text-left transition-colors ${selectedLanguage === 'en' ? 'border-primary-600 bg-primary-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Language</p>
-            <p className="mt-1 text-xl font-black text-gray-900">English</p>
+            <p className="mt-1 text-lg font-black text-gray-900 sm:text-xl">English</p>
           </button>
         </div>
 
         <button
           type="button"
           onClick={startOrder}
-          className="mt-3 w-full rounded-2xl bg-primary-500 px-6 py-4 text-center text-lg font-bold text-white transition-colors hover:bg-primary-600"
+          className="touch-target mt-3 w-full rounded-2xl bg-primary-700 px-6 py-4 text-center text-lg font-bold text-white transition-colors hover:bg-primary-800"
         >
           {t('Começar pedido')}
         </button>
       </div>
 
-      <p className="mt-8 text-sm text-gray-400">{t('Escolha o idioma para continuar')}</p>
+      <p className="mt-8 text-sm text-gray-700">{t('Escolha o idioma para continuar')}</p>
     </div>
   );
 }

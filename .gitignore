@@ -12,6 +12,8 @@ yarn.lock
 dist/
 build/
 .next/
+.a11y-history/
+.playwright-mcp/
 
 # Development
 *.tsbuildinfo

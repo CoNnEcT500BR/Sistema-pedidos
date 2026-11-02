@@ -6,6 +6,13 @@ export type OrderStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
+export type FulfillmentType = 'PICKUP' | 'DELIVERY';
+export type OrderPaymentMethod =
+  | 'AT_COUNTER'
+  | 'CASH_ON_DELIVERY'
+  | 'CARD_ON_DELIVERY'
+  | 'PIX_ON_DELIVERY';
+
 export interface OrderAddon {
   id: string;
   addonId: string;
@@ -50,6 +57,17 @@ export interface Order {
   customerName?: string | null;
   customerPhone?: string | null;
   notes?: string | null;
+  fulfillmentType?: FulfillmentType;
+  paymentMethod?: OrderPaymentMethod;
+  cashChangeFor?: number | null;
+  deliveryAddress?: string | null;
+  deliveryComplement?: string | null;
+  deliveryReference?: string | null;
+  deliveryZoneId?: string | null;
+  deliveryZoneName?: string | null;
+  deliveryFee?: number;
+  salesChannel?: 'INTERNAL' | 'IFOOD' | '99FOOD';
+  externalOrderId?: string | null;
   items?: OrderItem[];
   createdAt: string;
   completedAt?: string | null;

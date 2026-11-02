@@ -14,7 +14,7 @@ export function CartSummary() {
   return (
     <button
       onClick={() => navigate('/kiosk/cart')}
-      className="flex w-full items-center justify-between rounded-2xl bg-primary-500 px-6 py-4 text-white shadow-lg transition hover:bg-primary-600 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
+      className="touch-target flex w-full items-center justify-between rounded-2xl bg-primary-700 px-6 py-4 text-white shadow-lg transition hover:bg-primary-800 active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-700"
     >
       <div className="flex items-center gap-3">
         <div className="relative">

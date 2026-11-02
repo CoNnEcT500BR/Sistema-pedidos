@@ -4,6 +4,7 @@ import type {
   DeliveryRecord,
   DeliveryRoute,
   DeliveryStatus,
+  DeliveryZone,
 } from '../types/delivery.types';
 
 interface ApiResponse<T> {
@@ -11,6 +12,36 @@ interface ApiResponse<T> {
 }
 
 export const deliveryService = {
+  async getZones(): Promise<DeliveryZone[]> {
+    const res = await apiClient.get<ApiResponse<DeliveryZone[]>>('/api/delivery/zones');
+    return res.data.data;
+  },
+
+  async getAdminZones(): Promise<DeliveryZone[]> {
+    const res = await apiClient.get<ApiResponse<DeliveryZone[]>>('/api/delivery/zones/admin');
+    return res.data.data;
+  },
+
+  async createZone(payload: {
+    name: string;
+    fee: number;
+    estimatedMinutes: number;
+  }): Promise<DeliveryZone> {
+    const res = await apiClient.post<ApiResponse<DeliveryZone>>('/api/delivery/zones', payload);
+    return res.data.data;
+  },
+
+  async updateZone(
+    id: string,
+    payload: Partial<Pick<DeliveryZone, 'name' | 'fee' | 'estimatedMinutes' | 'isActive'>>,
+  ): Promise<DeliveryZone> {
+    const res = await apiClient.patch<ApiResponse<DeliveryZone>>(
+      `/api/delivery/zones/${id}`,
+      payload,
+    );
+    return res.data.data;
+  },
+
   async syncReadyOrdersToQueue(): Promise<DeliveryRecord[]> {
     const res = await apiClient.post<ApiResponse<DeliveryRecord[]>>(
       '/api/delivery/queue/from-ready',

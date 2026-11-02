@@ -69,7 +69,7 @@ export function CartItemRow({ item, onRemove, onUpdateQuantity }: CartItemProps)
           <span className="w-6 text-center text-xl font-bold text-gray-900">{item.quantity}</span>
           <button
             onClick={() => onUpdateQuantity(item.cartId, item.quantity + 1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow transition hover:bg-primary-600 active:scale-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
+            className="touch-target flex h-11 w-11 items-center justify-center rounded-full bg-primary-700 text-white shadow transition hover:bg-primary-800 active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-700"
             aria-label={t('Aumentar')}
           >
             <Plus className="h-4 w-4" strokeWidth={3} />

@@ -84,7 +84,7 @@ export function LoginPage() {
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🍔</div>
           <h1 className="text-2xl font-bold text-gray-900">{t('Área dos Funcionários')}</h1>
-          <p className="text-gray-500 text-sm mt-1">{t('Faça login para continuar')}</p>
+          <p className="text-gray-700 text-sm mt-1">{t('Faça login para continuar')}</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -98,12 +98,12 @@ export function LoginPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border text-base focus:outline-none focus:ring-2 focus:ring-primary-500
+              className={`w-full px-4 py-3 rounded-xl border text-base focus:outline-none focus:ring-2 focus:ring-primary-800
                 ${fieldErrors.email ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'}`}
               placeholder={t('seu@email.com')}
             />
             {fieldErrors.email && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+              <p className="text-red-700 text-xs mt-1">{fieldErrors.email}</p>
             )}
           </div>
 
@@ -117,12 +117,12 @@ export function LoginPage() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border text-base focus:outline-none focus:ring-2 focus:ring-primary-500
+              className={`w-full px-4 py-3 rounded-xl border text-base focus:outline-none focus:ring-2 focus:ring-primary-800
                 ${fieldErrors.password ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'}`}
               placeholder="••••••••"
             />
             {fieldErrors.password && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
+              <p className="text-red-700 text-xs mt-1">{fieldErrors.password}</p>
             )}
           </div>
 

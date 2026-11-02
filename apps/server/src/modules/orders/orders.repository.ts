@@ -28,6 +28,12 @@ function isUniqueConstraintError(error: unknown): error is { code: string } {
 }
 
 export const ordersRepository = {
+  findActiveDeliveryZone: (id: string) =>
+    prisma.deliveryZone.findFirst({
+      where: { id, isActive: true },
+      select: { id: true, name: true, fee: true },
+    }),
+
   getNextOrderNumber: async () => {
     const result = await prisma.order.aggregate({
       _max: { orderNumber: true },
@@ -40,6 +46,15 @@ export const ordersRepository = {
     customerName?: string;
     customerPhone?: string;
     notes?: string;
+    fulfillmentType: 'PICKUP' | 'DELIVERY';
+    paymentMethod: string;
+    cashChangeFor?: number;
+    deliveryAddress?: string;
+    deliveryComplement?: string;
+    deliveryReference?: string;
+    deliveryZoneId?: string;
+    deliveryZoneName?: string;
+    deliveryFee: number;
     calculated: CalculatedOrderResult;
   }) => {
     for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -52,12 +67,37 @@ export const ordersRepository = {
             orderNumber,
             status: 'PENDING',
             paymentStatus: 'PENDING',
+            fulfillmentType: payload.fulfillmentType,
+            paymentMethod: payload.paymentMethod,
             totalPrice: payload.calculated.totalAmount,
             discount: 0,
-            finalPrice: payload.calculated.totalAmount,
+            finalPrice: payload.calculated.totalAmount + payload.deliveryFee,
             customerName: payload.customerName,
             customerPhone: payload.customerPhone,
             notes: payload.notes,
+            cashChangeFor: payload.cashChangeFor,
+            deliveryAddress: payload.deliveryAddress,
+            deliveryComplement: payload.deliveryComplement,
+            deliveryReference: payload.deliveryReference,
+            deliveryZoneId: payload.deliveryZoneId,
+            deliveryZoneName: payload.deliveryZoneName,
+            deliveryFee: payload.deliveryFee,
+            delivery:
+              payload.fulfillmentType === 'DELIVERY'
+                ? {
+                    create: {
+                      status: 'QUEUED',
+                      priority: 3,
+                      history: {
+                        create: {
+                          fromStatus: 'SYSTEM',
+                          toStatus: 'QUEUED',
+                          reason: 'Pedido de delivery recebido',
+                        },
+                      },
+                    },
+                  }
+                : undefined,
             items: {
               create: payload.calculated.items.map((item) => ({
                 menuItemId: item.menuItemId,
@@ -288,6 +328,28 @@ export const ordersRepository = {
               ingredientId: reservation.ingredientId,
               quantityDelta: reservation.quantity,
               reason: 'ORDER_CANCELLED',
+            },
+          });
+        }
+
+        const delivery = await tx.delivery.findUnique({
+          where: { orderId: id },
+          select: { id: true, status: true },
+        });
+        if (delivery && delivery.status !== 'DELIVERED' && delivery.status !== 'CANCELLED') {
+          const deliveryUpdate = await tx.delivery.updateMany({
+            where: { id: delivery.id, status: delivery.status },
+            data: { status: 'CANCELLED' },
+          });
+          if (deliveryUpdate.count !== 1) {
+            throw new OrderStatusConflictError();
+          }
+          await tx.deliveryStatusHistory.create({
+            data: {
+              deliveryId: delivery.id,
+              fromStatus: delivery.status,
+              toStatus: 'CANCELLED',
+              reason: reason ?? 'Pedido cancelado',
             },
           });
         }

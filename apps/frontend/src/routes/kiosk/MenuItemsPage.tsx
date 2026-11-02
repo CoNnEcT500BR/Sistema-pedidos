@@ -35,8 +35,10 @@ export function MenuItemsPage() {
   const [selectedCombo, setSelectedCombo] = useState<Combo | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [comboModalOpen, setComboModalOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   const { toasts, toast, dismiss } = useToast();
+  const latestToast = toasts[toasts.length - 1];
 
   const category = categories.find((c) => c.id === categoryId);
   const isComboCategory = category?.name.toLowerCase().includes('combo') ?? false;
@@ -63,6 +65,10 @@ export function MenuItemsPage() {
       window.removeEventListener('keydown', reset);
     };
   }, [navigate, categoryId, isComboCategory]);
+
+  useEffect(() => {
+    mainRef.current?.focus();
+  }, []);
 
   function handleAddItem(item: MenuItem) {
     trackKioskEvent('item_modal_opened', { itemId: item.id, itemName: item.name });
@@ -109,48 +115,60 @@ export function MenuItemsPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
+      <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2 shadow-sm sm:px-4">
         <button
           onClick={() => navigate('/kiosk/menu')}
-          className="flex items-center gap-1 rounded-xl px-3 py-2 text-gray-600 transition hover:bg-gray-100 active:scale-95"
+          className="touch-target flex shrink-0 items-center gap-1 rounded-xl px-2 py-2 text-gray-700 transition hover:bg-gray-100 active:scale-95 sm:px-3"
           aria-label={t('Voltar')}
         >
           <ChevronLeft className="h-6 w-6" />
           <span className="font-semibold">{t('Voltar')}</span>
         </button>
 
-        <h1 className="flex-1 px-2 text-center text-base font-black uppercase leading-tight text-gray-900 sm:text-xl">
+        <h1 id="kiosk-page-title" className="min-w-0 flex-1 px-1 text-center text-sm font-black uppercase leading-tight text-gray-900 sm:px-2 sm:text-xl">
           {category?.name ? t(category.name) : t('Cardápio')}
         </h1>
 
         <button
           onClick={() => navigate('/kiosk/cart')}
-          className="relative flex items-center gap-2 rounded-xl px-3 py-2 text-gray-600 transition hover:bg-gray-100 active:scale-95"
-          aria-label={t('CARRINHO')}
+          className="touch-target relative flex shrink-0 items-center justify-center gap-2 rounded-xl px-2 py-2 text-gray-700 transition hover:bg-gray-100 active:scale-95 sm:px-3"
+          aria-label={
+            totalItems === 1
+              ? t('Carrinho, 1 item')
+              : totalItems > 1
+                ? t('Carrinho, {count} itens', { count: totalItems })
+                : t('Carrinho')
+          }
         >
           <ShoppingCart className="h-6 w-6" />
           {totalItems > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-bold text-white">
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-xs font-bold text-white">
               {totalItems}
             </span>
           )}
         </button>
       </header>
 
-      <main className="flex flex-1 flex-col gap-3 p-4 pb-32">
+      <main
+        ref={mainRef}
+        id="kiosk-main"
+        tabIndex={-1}
+        aria-labelledby="kiosk-page-title"
+        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 p-3 pb-32 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-900 sm:p-5 sm:pb-36 lg:p-6 lg:pb-36"
+      >
         {((isComboCategory && combosLoading) || (!isComboCategory && loading)) && (
           <div className="flex flex-1 items-center justify-center py-20">
-            <span className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-primary-500" />
+            <span className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-primary-700" />
           </div>
         )}
 
         {!isComboCategory && error && !loading && (
           <div className="rounded-2xl bg-red-50 p-6 text-center">
-            <p className="text-lg font-semibold text-red-600">{t('Erro ao carregar itens.')}</p>
-            <p className="mt-1 text-sm text-red-400">{t('Confira a conexão e tente novamente.')}</p>
+            <p className="text-lg font-semibold text-red-700">{t('Erro ao carregar itens.')}</p>
+            <p className="mt-1 text-sm text-red-700">{t('Confira a conexão e tente novamente.')}</p>
             <button
               onClick={refetch}
-              className="mt-4 rounded-xl bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
+              className="touch-target mt-4 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white transition hover:bg-red-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-700"
             >
               {t('Tentar novamente')}
             </button>
@@ -159,11 +177,11 @@ export function MenuItemsPage() {
 
         {isComboCategory && combosError && !combosLoading && (
           <div className="rounded-2xl bg-red-50 p-6 text-center">
-            <p className="text-lg font-semibold text-red-600">{t('Erro ao carregar combos.')}</p>
-            <p className="mt-1 text-sm text-red-400">{t('Confira a conexão e tente novamente.')}</p>
+            <p className="text-lg font-semibold text-red-700">{t('Erro ao carregar combos.')}</p>
+            <p className="mt-1 text-sm text-red-700">{t('Confira a conexão e tente novamente.')}</p>
             <button
               onClick={refetchCombos}
-              className="mt-4 rounded-xl bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
+              className="touch-target mt-4 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white transition hover:bg-red-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-700"
             >
               {t('Tentar novamente')}
             </button>
@@ -171,20 +189,23 @@ export function MenuItemsPage() {
         )}
 
         {!isComboCategory && !loading && !error && items.length === 0 && (
-          <p className="mt-10 text-center text-gray-400">{t('Nenhum item disponível nesta categoria.')}</p>
+          <p className="mt-10 text-center text-gray-600">{t('Nenhum item disponível nesta categoria.')}</p>
         )}
 
         {isComboCategory && !combosLoading && !combosError && combos.filter((combo) => combo.isActive).length === 0 && (
-          <p className="mt-10 text-center text-gray-400">{t('Nenhum combo disponível nesta categoria.')}</p>
+          <p className="mt-10 text-center text-gray-600">{t('Nenhum combo disponível nesta categoria.')}</p>
         )}
 
         {!isComboCategory && !loading &&
-          items.map((item) => (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 sm:gap-4">
+          {items.map((item) => (
             <MenuItemCard key={item.id} item={item} onAdd={handleAddItem} />
           ))}
+          </div>}
 
         {isComboCategory && !combosLoading && !combosError &&
-          combos
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 sm:gap-4">
+          {combos
             .filter((combo) => combo.isActive)
             .map((combo) => {
               const comboAsMenuItem: MenuItem = {
@@ -205,11 +226,12 @@ export function MenuItemsPage() {
                 />
               );
             })}
+          </div>}
       </main>
 
       {/* Barra flutuante do carrinho */}
       {totalItems > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 px-4 pb-4">
+        <div className="safe-area-bottom fixed bottom-0 left-0 right-0 px-3 pt-3 sm:px-5">
           <CartSummary />
         </div>
       )}
@@ -230,17 +252,22 @@ export function MenuItemsPage() {
       />
 
       {/* Toast notifications */}
-      <div className="fixed right-4 top-20 z-50 flex flex-col gap-2">
-        {toasts.map((t) => (
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {latestToast
+          ? [latestToast.title, latestToast.description].filter(Boolean).join(' ')
+          : ''}
+      </p>
+      <div className="fixed inset-x-3 top-20 z-50 flex flex-col gap-2 sm:left-auto sm:right-4 sm:w-auto">
+        {toasts.map((toastItem) => (
           <div
-            key={t.id}
-            className="flex items-start gap-3 rounded-2xl bg-white px-5 py-3 shadow-lg border border-gray-100"
+            key={toastItem.id}
+            className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-lg sm:px-5"
           >
             <div className="flex flex-col">
-              <span className="font-semibold text-gray-900">{t.title}</span>
-              {t.description && <span className="text-sm text-gray-500">{t.description}</span>}
+              <span className="font-semibold text-gray-900">{toastItem.title}</span>
+              {toastItem.description && <span className="text-sm text-gray-700">{toastItem.description}</span>}
             </div>
-            <button onClick={() => dismiss(t.id)} className="text-gray-400 hover:text-gray-700">✕</button>
+            <button type="button" onClick={() => dismiss(toastItem.id)} aria-label={t('Fechar notificação')} className="touch-target shrink-0 text-gray-700 hover:text-gray-900">✕</button>
           </div>
         ))}
       </div>

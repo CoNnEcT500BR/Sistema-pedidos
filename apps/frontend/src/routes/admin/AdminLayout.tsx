@@ -85,28 +85,31 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 text-stone-900 lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="min-h-dvh min-w-0 bg-stone-100 text-stone-900 xl:grid xl:grid-cols-[17rem_minmax(0,1fr)]">
       <a
         href="#admin-main"
         className="sr-only z-50 rounded-lg bg-white px-4 py-3 font-semibold text-stone-900 focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:ring-2 focus:ring-amber-700"
       >
         {t('Pular para o conteúdo principal')}
       </a>
-      <aside className="border-b border-stone-200 bg-white lg:border-b-0 lg:border-r">
-        <div className="flex items-center justify-between gap-3 px-5 py-5 lg:flex-col lg:items-stretch lg:px-6 lg:py-7">
+      <aside className="min-w-0 border-b border-stone-200 bg-white xl:sticky xl:top-0 xl:h-dvh xl:overflow-y-auto xl:border-b-0 xl:border-r">
+        <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-5 sm:py-4 xl:flex-col xl:items-stretch xl:px-6 xl:py-7">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-              <ShieldCheck size={24} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-800 sm:h-12 sm:w-12">
+              <ShieldCheck size={22} aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">{t('Admin')}</p>
-              <p className="text-lg font-bold text-stone-900">{t('Central de Operações')}</p>
+              <p className="truncate text-base font-bold text-stone-900 sm:text-lg">{t('Central de Operações')}</p>
             </div>
           </div>
-          <LanguageToggle className="inline-flex rounded-xl border border-stone-200 bg-stone-50 p-1" />
+          <LanguageToggle className="inline-flex shrink-0 rounded-xl border border-stone-200 bg-stone-50 p-1" />
         </div>
 
-        <nav className="grid gap-1 px-3 pb-4 lg:px-4">
+        <nav
+          aria-label={t('Navegação administrativa')}
+          className="grid grid-cols-2 gap-1.5 px-3 pb-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-1 xl:gap-1 xl:px-4 xl:pb-4"
+        >
           {visibleNavigation.map((item) => {
             const Icon = item.icon;
             return (
@@ -114,39 +117,41 @@ export function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  `touch-target flex min-w-0 items-center gap-2 rounded-xl px-2.5 py-2.5 text-xs font-semibold leading-tight transition sm:gap-3 sm:px-3 sm:text-sm xl:rounded-2xl xl:px-4 xl:py-3 ${
                     isActive
                       ? 'bg-stone-900 text-white shadow-sm'
                       : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
                   }`
                 }
               >
-                <Icon size={18} aria-hidden="true" />
-                {t(item.label)}
+                <Icon size={18} className="shrink-0" aria-hidden="true" />
+                <span className="min-w-0 truncate">{t(item.label)}</span>
               </NavLink>
             );
           })}
         </nav>
 
-        <div className="mx-4 mb-5 rounded-3xl border border-stone-200 bg-stone-50 p-4">
-          <p className="text-sm font-semibold text-stone-900">{user?.name ?? user?.email ?? t('Administrador')}</p>
-          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-stone-500">{t('Sessão ativa')}</p>
+        <div className="mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-3 sm:mx-4 xl:mb-5 xl:flex-col xl:items-stretch xl:rounded-3xl xl:p-4">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-stone-900">{user?.name ?? user?.email ?? t('Administrador')}</p>
+            <p className="mt-1 text-xs uppercase tracking-[0.18em] text-stone-500">{t('Sessão ativa')}</p>
+          </div>
           <div
-            className={`mt-4 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${realtimeBadge.wrapperClass}`}
+            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${realtimeBadge.wrapperClass} xl:mt-4`}
             title={t('Status da conexão em tempo real do painel administrativo')}
             role="status"
             aria-live="polite"
           >
-            <span className={`h-2 w-2 rounded-full ${realtimeBadge.dotClass}`} />
+            <span className={`h-2 w-2 shrink-0 rounded-full ${realtimeBadge.dotClass}`} aria-hidden="true" />
             {realtimeBadge.label}
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+            className="touch-target inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm font-semibold text-stone-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 xl:mt-4 xl:w-full xl:rounded-2xl xl:px-4"
           >
-            <LogOut size={16} />
-            {t('Sair da conta')}
+            <LogOut size={16} aria-hidden="true" />
+            <span>{t('Sair da conta')}</span>
           </button>
         </div>
       </aside>
@@ -155,7 +160,7 @@ export function AdminLayout() {
         id="admin-main"
         ref={mainRef}
         tabIndex={-1}
-        className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,244,0.92))] focus:outline-none"
+        className="min-h-[60dvh] min-w-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,244,0.92))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800 xl:min-h-dvh"
       >
         <Outlet />
       </main>

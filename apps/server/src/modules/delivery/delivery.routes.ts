@@ -13,8 +13,10 @@ import { deliveryService } from './delivery.service.js';
 import {
   assignDeliverySchema,
   createCourierSchema,
+  createDeliveryZoneSchema,
   createRouteSchema,
   listDeliveriesQuerySchema,
+  updateDeliveryZoneSchema,
   updateDeliveryStatusSchema,
 } from './deliveryTypes.js';
 
@@ -36,8 +38,13 @@ const deliverySchema = {
     'id',
     'orderId',
     'orderNumber',
+    'orderStatus',
     'status',
     'priority',
+    'fulfillmentType',
+    'deliveryFee',
+    'paymentMethod',
+    'finalPrice',
     'createdAt',
     'updatedAt',
     'history',
@@ -46,9 +53,19 @@ const deliverySchema = {
     id: { type: 'string' },
     orderId: { type: 'string' },
     orderNumber: { type: 'integer' },
+    orderStatus: { type: 'string' },
     customerName: { anyOf: [{ type: 'string' }, { type: 'null' }] },
     customerPhone: { anyOf: [{ type: 'string' }, { type: 'null' }] },
     notes: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    fulfillmentType: { type: 'string', enum: ['PICKUP', 'DELIVERY'] },
+    deliveryAddress: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    deliveryComplement: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    deliveryReference: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    deliveryZoneName: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    deliveryFee: { type: 'number' },
+    paymentMethod: { type: 'string' },
+    cashChangeFor: { anyOf: [{ type: 'number' }, { type: 'null' }] },
+    finalPrice: { type: 'number' },
     status: { type: 'string' },
     priority: { type: 'integer' },
     promisedAt: { anyOf: [{ type: 'string', format: 'date-time' }, { type: 'null' }] },
@@ -90,12 +107,48 @@ const routeSchema = {
   },
 } as const;
 
+const deliveryZoneSchema = {
+  type: 'object',
+  required: ['id', 'name', 'fee', 'estimatedMinutes', 'isActive', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    fee: { type: 'number', minimum: 0 },
+    estimatedMinutes: { type: 'integer', minimum: 5, maximum: 300 },
+    isActive: { type: 'boolean' },
+    createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
+const createDeliveryZoneBodySchema = {
+  type: 'object',
+  required: ['name', 'fee', 'estimatedMinutes'],
+  properties: {
+    name: { type: 'string', minLength: 2, maxLength: 80 },
+    fee: { type: 'number', minimum: 0, maximum: 9999.99 },
+    estimatedMinutes: { type: 'integer', minimum: 5, maximum: 300 },
+    isActive: { type: 'boolean', default: true },
+  },
+} as const;
+
+const updateDeliveryZoneBodySchema = {
+  type: 'object',
+  minProperties: 1,
+  properties: {
+    name: { type: 'string', minLength: 2, maxLength: 80 },
+    fee: { type: 'number', minimum: 0, maximum: 9999.99 },
+    estimatedMinutes: { type: 'integer', minimum: 5, maximum: 300 },
+    isActive: { type: 'boolean' },
+  },
+} as const;
+
 const listDeliveriesQueryOpenApiSchema = {
   type: 'object',
   properties: {
     status: {
       type: 'string',
-      enum: ['QUEUED', 'ASSIGNED', 'DISPATCHED', 'IN_ROUTE', 'DELIVERED', 'FAILED'],
+      enum: ['QUEUED', 'ASSIGNED', 'DISPATCHED', 'IN_ROUTE', 'DELIVERED', 'FAILED', 'CANCELLED'],
     },
     courierId: { type: 'string' },
     zone: { type: 'string' },
@@ -140,13 +193,123 @@ const updateDeliveryStatusBodySchema = {
   properties: {
     status: {
       type: 'string',
-      enum: ['QUEUED', 'ASSIGNED', 'DISPATCHED', 'IN_ROUTE', 'DELIVERED', 'FAILED'],
+      enum: ['QUEUED', 'ASSIGNED', 'DISPATCHED', 'IN_ROUTE', 'DELIVERED', 'FAILED', 'CANCELLED'],
     },
     reason: { type: 'string' },
   },
 } as const;
 
 export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void> {
+  app.get(
+    '/delivery/zones',
+    {
+      schema: {
+        tags: ['delivery'],
+        summary: 'Listar zonas de entrega ativas',
+        description: 'Retorna zonas ativas para cotacao no checkout publico.',
+        response: { 200: arrayDataResponse(deliveryZoneSchema) },
+      },
+    },
+    async () => ({ data: await deliveryService.listDeliveryZones() }),
+  );
+
+  app.get(
+    '/delivery/zones/admin',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['delivery', 'admin'],
+        summary: 'Listar todas as zonas de entrega',
+        security: bearerAuthSecurity,
+        response: {
+          200: arrayDataResponse(deliveryZoneSchema),
+          401: unauthorizedErrorSchema,
+        },
+      },
+    },
+    async () => ({ data: await deliveryService.listDeliveryZones(true) }),
+  );
+
+  app.post(
+    '/delivery/zones',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['delivery', 'admin'],
+        summary: 'Criar zona de entrega',
+        security: bearerAuthSecurity,
+        body: createDeliveryZoneBodySchema,
+        response: {
+          201: dataResponse(deliveryZoneSchema),
+          400: validationErrorSchema,
+          401: unauthorizedErrorSchema,
+          409: validationErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const parsed = createDeliveryZoneSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply
+          .code(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Zona invalida' });
+      }
+
+      try {
+        return reply.code(201).send({ data: await deliveryService.createDeliveryZone(parsed.data) });
+      } catch (error) {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002') {
+          return reply.code(409).send({ message: 'Ja existe uma zona com esse nome' });
+        }
+        throw error;
+      }
+    },
+  );
+
+  app.patch(
+    '/delivery/zones/:id',
+    {
+      preHandler: [authenticate, checkRole(['ADMIN'])],
+      schema: {
+        tags: ['delivery', 'admin'],
+        summary: 'Atualizar zona de entrega',
+        security: bearerAuthSecurity,
+        params: pathIdSchema,
+        body: updateDeliveryZoneBodySchema,
+        response: {
+          200: dataResponse(deliveryZoneSchema),
+          400: validationErrorSchema,
+          401: unauthorizedErrorSchema,
+          404: validationErrorSchema,
+          409: validationErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = request.params as { id: string };
+      const parsed = updateDeliveryZoneSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply
+          .code(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Zona invalida' });
+      }
+
+      try {
+        return { data: await deliveryService.updateDeliveryZone(params.id, parsed.data) };
+      } catch (error) {
+        if (typeof error === 'object' && error !== null && 'code' in error) {
+          if (error.code === 'P2002') {
+            return reply.code(409).send({ message: 'Ja existe uma zona com esse nome' });
+          }
+          if (error.code === 'P2025') {
+            return reply.code(404).send({ message: 'Zona de entrega nao encontrada' });
+          }
+        }
+        throw error;
+      }
+    },
+  );
+
   app.get(
     '/delivery/queue',
     {
@@ -317,7 +480,15 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       }
 
       try {
-        return { data: await deliveryService.assignDelivery(params.id, parsed.data) };
+        const delivery = await deliveryService.assignDelivery(params.id, parsed.data);
+        app.realtime.broadcastOrderChanged({
+          type: 'ORDER_STATUS_UPDATED',
+          orderId: delivery.orderId,
+          orderNumber: delivery.orderNumber,
+          status: delivery.orderStatus,
+          timestamp: new Date().toISOString(),
+        });
+        return { data: delivery };
       } catch (error) {
         if (error instanceof Error) {
           return reply.code(400).send({ message: error.message });
@@ -356,13 +527,19 @@ export async function registerDeliveryRoutes(app: FastifyInstance): Promise<void
       }
 
       try {
-        return {
-          data: await deliveryService.updateDeliveryStatus(
-            params.id,
-            parsed.data.status,
-            parsed.data.reason,
-          ),
-        };
+        const delivery = await deliveryService.updateDeliveryStatus(
+          params.id,
+          parsed.data.status,
+          parsed.data.reason,
+        );
+        app.realtime.broadcastOrderChanged({
+          type: 'ORDER_STATUS_UPDATED',
+          orderId: delivery.orderId,
+          orderNumber: delivery.orderNumber,
+          status: delivery.orderStatus,
+          timestamp: new Date().toISOString(),
+        });
+        return { data: delivery };
       } catch (error) {
         if (error instanceof Error) {
           return reply.code(400).send({ message: error.message });

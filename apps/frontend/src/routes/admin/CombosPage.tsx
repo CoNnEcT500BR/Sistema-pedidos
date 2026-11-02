@@ -370,7 +370,7 @@ export function CombosPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-stone-700">{t('Descrição')}</label>
-                  <textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className="min-h-[140px] w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500" />
+                  <textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className="min-h-[140px] w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800" />
                 </div>
               </div>
 
@@ -397,7 +397,7 @@ export function CombosPage() {
                   <select
                     value={form.displayOrder}
                     onChange={(event) => setForm((current) => ({ ...current, displayOrder: event.target.value }))}
-                    className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                    className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                   >
                     {availableDisplayOrders.map((order) => (
                       <option key={order} value={String(order)}>
@@ -417,7 +417,7 @@ export function CombosPage() {
                   <div className="space-y-3 rounded-2xl border border-stone-200 bg-stone-50 p-3">
                     {form.comboItems.map((item, index) => (
                       <div key={`${item.menuItemId}-${index}`} className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_110px_auto]">
-                        <select value={item.menuItemId} onChange={(event) => updateComboItem(index, 'menuItemId', event.target.value)} className="h-10 min-w-0 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                        <select value={item.menuItemId} onChange={(event) => updateComboItem(index, 'menuItemId', event.target.value)} className="touch-target min-w-0 rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800">
                           {menuItems.map((menuItem) => (
                             <option key={menuItem.id} value={menuItem.id}>
                               {menuItem.name}

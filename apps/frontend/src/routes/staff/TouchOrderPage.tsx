@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios';
 import { Banknote, CheckCircle2, CreditCard, QrCode, ShoppingBag, StepForward, StepBack } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CartItemRow } from '@/features/cart/components/CartItem';
 import { useStaffCartStore } from '@/features/cart/store/staff-cart.store';
 import type { CartAddon, CartItem as CartItemType } from '@/features/cart/store/cart.store';
@@ -111,7 +111,7 @@ function TouchMenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: Me
       type="button"
       onClick={() => onSelect(item)}
       disabled={!item.isAvailable}
-      className={`h-[208px] rounded-3xl border p-3.5 text-left transition-all
+      className={`min-h-[208px] rounded-3xl border p-3.5 text-left transition-all
         ${item.isAvailable
           ? 'border-stone-200 bg-white shadow-sm hover:-translate-y-1 hover:border-primary-300 hover:shadow-lg'
           : 'cursor-not-allowed border-stone-200 bg-stone-100 opacity-60'}`}
@@ -138,7 +138,7 @@ function TouchMenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: Me
 
       <div className="mt-3 flex items-end justify-between gap-2">
         <p className="text-xl font-bold text-primary-600">R$ {formatCurrency(item.price)}</p>
-        <span className="inline-flex min-w-[106px] items-center justify-center rounded-xl bg-primary-500 px-3 py-2 text-xs font-bold text-white shadow-sm">
+        <span className="inline-flex min-h-11 min-w-[106px] items-center justify-center rounded-xl bg-primary-800 px-3 py-2 text-xs font-bold text-white shadow-sm">
           + {t('Adicionar')}
         </span>
       </div>
@@ -203,6 +203,7 @@ export function TouchOrderPage() {
   const [validationErrors, setValidationErrors] = useState<ItemValidationError[]>([]);
   const [lastOrderNumber, setLastOrderNumber] = useState<number | null>(null);
   const [autoReturnCountdown, setAutoReturnCountdown] = useState(AUTO_RETURN_SECONDS);
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const cartPageCapacity = useMemo(
     () => getCartPageCapacity(viewportHeight),
@@ -301,6 +302,12 @@ export function TouchOrderPage() {
     };
   }, [lastOrderNumber]);
 
+  useEffect(() => {
+    if (lastOrderNumber) {
+      successHeadingRef.current?.focus();
+    }
+  }, [lastOrderNumber]);
+
   function handleOpenModal(item: MenuItem) {
     setLastOrderNumber(null);
 
@@ -376,13 +383,22 @@ export function TouchOrderPage() {
 
   if (lastOrderNumber) {
     return (
-      <div className="flex h-full items-center justify-center bg-stone-100 p-6">
+      <div className="flex min-h-[calc(100dvh-5rem)] items-center justify-center bg-stone-100 p-4 sm:p-6">
         <div className="w-full max-w-3xl rounded-[2.5rem] border border-stone-200 bg-white p-8 text-center shadow-2xl lg:p-12">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-green-100 text-green-700">
             <CheckCircle2 size={42} />
           </div>
           <p className="mt-6 text-sm font-bold uppercase tracking-[0.22em] text-green-700">{t('Pagamento confirmado')}</p>
-          <h1 className="mt-3 text-4xl font-bold text-stone-900 lg:text-5xl">{t('Pedido')} #{lastOrderNumber}</h1>
+          <h2
+            ref={successHeadingRef}
+            tabIndex={-1}
+            className="mt-3 text-4xl font-bold text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-900 lg:text-5xl"
+          >
+            {t('Pedido')} #{lastOrderNumber}
+          </h2>
+          <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            {t('Pedido {number} registrado com sucesso.', { number: lastOrderNumber })}
+          </p>
           <p className="mt-4 text-lg leading-8 text-stone-700">
             {t('O pedido foi registrado com sucesso. A tela voltara automaticamente para um novo atendimento.')}
           </p>
@@ -410,19 +426,20 @@ export function TouchOrderPage() {
   }
 
   return (
-    <div className="grid h-full overflow-hidden bg-stone-100 xl:grid-cols-[minmax(0,1fr)_30rem]">
-      <section className="flex min-h-0 flex-col p-4 lg:p-5">
-        <div className="grid flex-1 min-h-0 overflow-hidden rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-wrap gap-2">
+    <div className="grid min-h-full min-w-0 grid-cols-1 gap-4 overflow-visible bg-stone-100 xl:h-full xl:grid-cols-[minmax(0,1fr)_30rem] xl:gap-0 xl:overflow-hidden">
+      <section className="flex min-h-[65dvh] min-w-0 flex-col p-3 sm:p-4 xl:min-h-0 xl:p-5">
+        <div className="grid min-h-[65dvh] flex-1 gap-4 overflow-visible rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm sm:p-4 xl:min-h-0 xl:overflow-hidden">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 xl:flex-wrap xl:overflow-visible xl:pb-0">
               <button
                 type="button"
                 onClick={() => {
                   setActiveCategoryId(undefined);
                   setPageIndex(0);
                 }}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors
-                  ${activeCategoryId === undefined ? 'bg-primary-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+                aria-pressed={activeCategoryId === undefined}
+                className={`touch-target shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors
+                  ${activeCategoryId === undefined ? 'bg-primary-800 text-white ring-2 ring-primary-950 ring-offset-2' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
               >
                 {t('Todos')}
               </button>
@@ -434,8 +451,9 @@ export function TouchOrderPage() {
                     setActiveCategoryId(cat.id);
                     setPageIndex(0);
                   }}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors
-                    ${activeCategoryId === cat.id ? 'bg-primary-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
+                  aria-pressed={activeCategoryId === cat.id}
+                  className={`touch-target shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors
+                    ${activeCategoryId === cat.id ? 'bg-primary-800 text-white ring-2 ring-primary-950 ring-offset-2' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
                 >
                   {t(cat.name)}
                   <span className="ml-1 opacity-80">
@@ -445,28 +463,38 @@ export function TouchOrderPage() {
               ))}
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm font-semibold text-stone-700">
+            <div className="inline-flex items-center justify-between gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm font-semibold text-stone-700 xl:justify-center">
               <button
                 type="button"
                 onClick={handlePreviousPage}
                 disabled={pageIndex === 0}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 bg-white disabled:opacity-40"
+                aria-label={t('Página anterior')}
+                className="touch-target inline-flex items-center justify-center rounded-lg border border-stone-200 bg-white disabled:opacity-40"
               >
-                <StepBack size={16} />
+                <StepBack size={16} aria-hidden="true" />
               </button>
-              <span>{t('Página {current}/{total}', { current: pageIndex + 1, total: pagesCount })}</span>
+              <span role="status" aria-live="polite" aria-atomic="true">
+                {t('Página {current}/{total}', { current: pageIndex + 1, total: pagesCount })}
+                {' · '}
+                {t('Exibindo {first}-{last} de {total}', {
+                  first: sourceItems.length === 0 ? 0 : pageIndex * ITEMS_PER_PAGE + 1,
+                  last: pageIndex * ITEMS_PER_PAGE + paginatedItems.length,
+                  total: sourceItems.length,
+                })}
+              </span>
               <button
                 type="button"
                 onClick={handleNextPage}
                 disabled={pageIndex + 1 >= pagesCount}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 bg-white disabled:opacity-40"
+                aria-label={t('Próxima página')}
+                className="touch-target inline-flex items-center justify-center rounded-lg border border-stone-200 bg-white disabled:opacity-40"
               >
-                <StepForward size={16} />
+                <StepForward size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
 
-          <div className="mt-4 min-h-0 overflow-hidden">
+          <div className="mt-4 min-h-[45dvh] overflow-y-auto xl:min-h-0">
             {(isComboCategorySelected ? combosLoading : itemsLoading) ? (
               <div className="grid h-full place-items-center rounded-2xl border border-stone-200 bg-stone-50 text-stone-500">
                 {isComboCategorySelected ? t('Carregando combos...') : t('Carregando itens...')}
@@ -476,7 +504,7 @@ export function TouchOrderPage() {
                 {isComboCategorySelected ? t('Nenhum combo ativo nesta categoria.') : t('Nenhum item nesta categoria.')}
               </div>
             ) : (
-              <div className="grid h-full grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-4">
+              <div className="grid min-h-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {paginatedItems.map((item) => (
                   <TouchMenuCard key={item.id} item={item} onSelect={handleOpenModal} />
                 ))}
@@ -486,7 +514,7 @@ export function TouchOrderPage() {
         </div>
       </section>
 
-      <aside className="flex h-full flex-col border-l border-stone-200 bg-white p-4">
+      <aside className="flex min-w-0 flex-col border-t border-stone-200 bg-white p-3 sm:p-4 xl:h-full xl:overflow-y-auto xl:border-l xl:border-t-0">
         <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-stone-900">
@@ -496,7 +524,7 @@ export function TouchOrderPage() {
             <button
               type="button"
               onClick={clearCart}
-              className="text-xs font-semibold text-stone-600 hover:text-red-600"
+              className="touch-target rounded-lg px-3 text-xs font-semibold text-stone-700 hover:text-red-700"
             >
               {t('Limpar')}
             </button>
@@ -510,14 +538,16 @@ export function TouchOrderPage() {
             <button
               type="button"
               onClick={() => setStep('items')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${step === 'items' ? 'bg-primary-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}
+              aria-pressed={step === 'items'}
+              className={`touch-target flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${step === 'items' ? 'bg-primary-800 text-white ring-2 ring-primary-950 ring-offset-2' : 'border border-stone-200 bg-white text-stone-700'}`}
             >
               {t('Itens')}
             </button>
             <button
               type="button"
               onClick={() => setStep('payment')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${step === 'payment' ? 'bg-primary-500 text-white' : 'bg-white text-stone-700 border border-stone-200'}`}
+              aria-pressed={step === 'payment'}
+              className={`touch-target flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${step === 'payment' ? 'bg-primary-800 text-white ring-2 ring-primary-950 ring-offset-2' : 'border border-stone-200 bg-white text-stone-700'}`}
               disabled={cartItems.length === 0}
             >
               {t('Pagamento')}
@@ -526,20 +556,20 @@ export function TouchOrderPage() {
         </div>
 
         {step === 'items' ? (
-          <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-hidden">
-            <div className="h-full space-y-3 overflow-hidden">
+          <div className="mt-4 min-h-[12rem] flex-1 space-y-3 xl:min-h-0">
+            <div className="space-y-3 xl:h-full xl:overflow-hidden">
               {cartItems.length === 0 ? (
                 <div className="grid h-full place-items-center rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-6 text-center text-sm text-stone-600">
                   {t('Selecione os itens ao lado.')}
                 </div>
               ) : (
-                <div className="flex h-full flex-col overflow-hidden">
+                <div className="flex flex-col xl:h-full xl:overflow-hidden">
                   <div className="mb-2 inline-flex w-fit items-center gap-1.5 rounded-lg border border-stone-200 bg-stone-50 px-2 py-1 text-xs font-semibold text-stone-700">
                     <button
                       type="button"
                       onClick={() => setCartPageIndex((current) => (current > 0 ? current - 1 : 0))}
                       disabled={cartPageIndex === 0}
-                      className="rounded border border-stone-300 px-2 py-0.5 disabled:opacity-40"
+                      className="touch-target rounded border border-stone-300 px-3 py-1 disabled:opacity-40"
                     >
                       {t('Ant.')}
                     </button>
@@ -548,13 +578,13 @@ export function TouchOrderPage() {
                       type="button"
                       onClick={() => setCartPageIndex((current) => (current + 1 < cartPagesCount ? current + 1 : current))}
                       disabled={cartPageIndex + 1 >= cartPagesCount}
-                      className="rounded border border-stone-300 px-2 py-0.5 disabled:opacity-40"
+                      className="touch-target rounded border border-stone-300 px-3 py-1 disabled:opacity-40"
                     >
                       {t('Prox.')}
                     </button>
                   </div>
 
-                  <div className="grid flex-1 auto-rows-fr gap-3 overflow-hidden">
+                  <div className="grid flex-1 auto-rows-fr gap-3 xl:overflow-hidden">
                     {paginatedCartItems.map((item) => (
                       <CartItemRow key={item.cartId} item={item} onRemove={removeItem} onUpdateQuantity={updateQuantity} />
                     ))}
@@ -573,7 +603,7 @@ export function TouchOrderPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-hidden pr-1">
+          <div className="mt-4 flex-1 space-y-3 pr-1 xl:min-h-0 xl:overflow-y-auto">
             <div>
               <label htmlFor="touchCustomerName" className="mb-1.5 block text-sm font-semibold text-stone-700">
                 {t('Nome do cliente')}
@@ -584,7 +614,7 @@ export function TouchOrderPage() {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder={t('Opcional')}
-                className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="min-h-11 w-full rounded-xl border border-stone-500 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-800"
               />
             </div>
 
@@ -598,30 +628,37 @@ export function TouchOrderPage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder={t('Sem cebola, bem passado, etc.')}
-                className="w-full resize-none rounded-xl border border-stone-300 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="min-h-11 w-full resize-y rounded-xl border border-stone-500 px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-800"
               />
             </div>
 
-            <div className="space-y-2">
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-sm font-semibold text-stone-800">{t('Forma de pagamento')}</legend>
               {paymentOptions.map(({ value, label, helper, icon: Icon }) => (
-                <button
+                <label
                   key={value}
-                  type="button"
-                  onClick={() => setPaymentMethod(value)}
-                  className={`w-full rounded-2xl border px-3 py-2.5 text-left transition-colors ${paymentMethod === value ? 'border-primary-500 bg-primary-50' : 'border-stone-200 bg-white hover:bg-stone-50'}`}
+                  htmlFor={`touch-payment-${value.toLowerCase()}`}
+                  className={`touch-target flex w-full cursor-pointer items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary-800 ${paymentMethod === value ? 'border-primary-700 bg-primary-50' : 'border-stone-200 bg-white hover:bg-stone-50'}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`rounded-xl p-2 ${paymentMethod === value ? 'bg-primary-500 text-white' : 'bg-stone-100 text-stone-700'}`}>
-                      <Icon size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-stone-900">{t(label)}</p>
-                      <p className="text-xs text-stone-600">{t(helper)}</p>
-                    </div>
+                  <input
+                    id={`touch-payment-${value.toLowerCase()}`}
+                    type="radio"
+                    name="touch-payment-method"
+                    value={value}
+                    checked={paymentMethod === value}
+                    onChange={() => setPaymentMethod(value)}
+                    className="h-5 w-5 shrink-0 accent-primary-800"
+                  />
+                  <div className={`rounded-xl p-2 ${paymentMethod === value ? 'bg-primary-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
+                    <Icon size={16} aria-hidden="true" />
                   </div>
-                </button>
+                  <div>
+                    <p className="text-sm font-bold text-stone-900">{t(label)}</p>
+                    <p className="text-xs text-stone-700">{t(helper)}</p>
+                  </div>
+                </label>
               ))}
-            </div>
+            </fieldset>
 
             {paymentMethod === 'CASH' && (
               <div className="space-y-2 rounded-2xl border border-stone-200 bg-stone-50 p-3">
@@ -635,7 +672,7 @@ export function TouchOrderPage() {
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
                   placeholder={t('0,00')}
-                  className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="min-h-11 w-full rounded-xl border border-stone-500 bg-white px-3 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary-800"
                 />
                 <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm">
                   <span className="text-stone-700">{t('Troco')}</span>
@@ -663,7 +700,7 @@ export function TouchOrderPage() {
               type="button"
               onClick={handleSubmitOrder}
               disabled={!isPaymentValid || submitting}
-              className="w-full rounded-2xl bg-primary-500 py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="touch-target w-full rounded-2xl bg-primary-800 py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t('Registrando pedido...') : t('Confirmar pagamento ({method})', { method: getPaymentLabel(paymentMethod, t) })}
             </button>

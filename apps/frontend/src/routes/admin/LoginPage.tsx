@@ -140,7 +140,7 @@ export function LoginPage() {
                   fieldErrors.email ? 'border-red-400 focus:border-red-400' : 'border-stone-300'
                 }`}
               />
-              {fieldErrors.email ? <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p> : null}
+              {fieldErrors.email ? <p className="mt-1 text-xs text-red-700">{fieldErrors.email}</p> : null}
             </div>
 
             <div>
@@ -158,7 +158,7 @@ export function LoginPage() {
                   fieldErrors.password ? 'border-red-400 focus:border-red-400' : 'border-stone-300'
                 }`}
               />
-              {fieldErrors.password ? <p className="mt-1 text-xs text-red-500">{fieldErrors.password}</p> : null}
+              {fieldErrors.password ? <p className="mt-1 text-xs text-red-700">{fieldErrors.password}</p> : null}
             </div>
 
             {error ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}

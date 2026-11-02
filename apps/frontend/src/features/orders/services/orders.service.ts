@@ -4,7 +4,15 @@ import type { Order, OrderDetail, OrderStatus } from '../types/order.types';
 
 interface CreateOrderPayload {
   customerName?: string;
+  customerPhone?: string;
   notes?: string;
+  fulfillmentType?: 'PICKUP' | 'DELIVERY';
+  paymentMethod?: 'AT_COUNTER' | 'CASH_ON_DELIVERY' | 'CARD_ON_DELIVERY' | 'PIX_ON_DELIVERY';
+  cashChangeFor?: number;
+  deliveryAddress?: string;
+  deliveryComplement?: string;
+  deliveryReference?: string;
+  deliveryZoneId?: string;
   items: Array<{
     menuItemId?: string;
     comboId?: string;
@@ -19,9 +27,23 @@ export interface CreatedOrder {
   id: string;
   orderNumber: number;
   status: string;
-  totalAmount: number;
+  totalPrice: number;
   finalPrice: number;
   customerName?: string;
+  fulfillmentType: 'PICKUP' | 'DELIVERY';
+  paymentMethod: string;
+  deliveryZoneName?: string | null;
+}
+
+export interface CreateOrderOptions {
+  customerPhone?: string;
+  fulfillmentType?: 'PICKUP' | 'DELIVERY';
+  paymentMethod?: 'AT_COUNTER' | 'CASH_ON_DELIVERY' | 'CARD_ON_DELIVERY' | 'PIX_ON_DELIVERY';
+  cashChangeFor?: number;
+  deliveryAddress?: string;
+  deliveryComplement?: string;
+  deliveryReference?: string;
+  deliveryZoneId?: string;
 }
 
 export interface ItemValidationError {
@@ -59,10 +81,12 @@ export const ordersService = {
     items: CartItem[],
     customerName?: string,
     notes?: string,
+    options: CreateOrderOptions = {},
   ): Promise<CreatedOrder> {
     const payload: CreateOrderPayload = {
       customerName,
       notes,
+      ...options,
       items: cartItemsToPayload(items),
     };
     const res = await apiClient.post<ApiResponse<CreatedOrder>>('/api/orders', payload);

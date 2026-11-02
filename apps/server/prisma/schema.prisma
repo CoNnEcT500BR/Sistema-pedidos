@@ -158,6 +158,8 @@ model Order {
 
   status        String @default("PENDING") // PENDING, PREPARING, READY, COMPLETED, CANCELLED
   paymentStatus String @default("PENDING") // PENDING, PAID, REFUNDED
+  fulfillmentType String @default("PICKUP") // PICKUP, DELIVERY
+  paymentMethod   String @default("AT_COUNTER")
 
   totalPrice Float
   discount   Float @default(0)
@@ -166,6 +168,17 @@ model Order {
   customerName  String?
   customerPhone String?
   notes         String?
+  cashChangeFor Float?
+
+  deliveryAddress     String?
+  deliveryComplement  String?
+  deliveryReference   String?
+  deliveryZoneId      String?
+  deliveryZoneName    String?
+  deliveryFee         Float  @default(0)
+
+  salesChannel     String  @default("INTERNAL")
+  externalOrderId  String?
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -174,15 +187,31 @@ model Order {
   items              OrderItem[]
   statusHistory      OrderStatusHistory[]
   delivery           Delivery?
+  deliveryZone       DeliveryZone? @relation("DeliveryZoneOrders", fields: [deliveryZoneId], references: [id], onDelete: SetNull)
   stockReservations  StockReservation[]
   inventoryMovements InventoryMovement[]
 
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
+  @@unique([salesChannel, externalOrderId])
 }
 
 // ============ DELIVERY ============
+model DeliveryZone {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  fee              Float
+  estimatedMinutes Int
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orders Order[] @relation("DeliveryZoneOrders")
+
+  @@index([isActive])
+}
+
 model DeliveryCourier {
   id       String  @id @default(cuid())
   name     String
@@ -219,7 +248,7 @@ model Delivery {
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  status     String    @default("QUEUED") // QUEUED, ASSIGNED, DISPATCHED, IN_ROUTE, DELIVERED, FAILED
+  status     String    @default("QUEUED") // QUEUED, ASSIGNED, DISPATCHED, IN_ROUTE, DELIVERED, FAILED, CANCELLED
   priority   Int       @default(3)
   promisedAt DateTime?
 

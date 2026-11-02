@@ -269,7 +269,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                   <span
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-semibold',
-                      isSelectedBread ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600',
+                      isSelectedBread ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-700',
                     )}
                   >
                     {isSelectedBread ? t('Selecionado') : t('Selecionar')}
@@ -313,7 +313,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                   <span
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-semibold',
-                      isSelectedFlavor ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600',
+                      isSelectedFlavor ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-700',
                     )}
                   >
                     {isSelectedFlavor ? t('Selecionado') : t('Selecionar')}
@@ -357,7 +357,7 @@ export function IngredientsEditor({ addons, selected, onChange }: IngredientsEdi
                   <span
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-semibold',
-                      isSelectedUpgrade ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600',
+                      isSelectedUpgrade ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-700',
                     )}
                   >
                     {isSelectedUpgrade ? t('Selecionado') : t('Selecionar')}

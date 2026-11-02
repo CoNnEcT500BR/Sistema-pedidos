@@ -376,7 +376,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
                             )}
                             <button
                               onClick={() => setUpgradeQuantity(opt.id, opt.name, 1)}
-                              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white shadow transition hover:bg-primary-700"
+                              className="touch-target flex h-11 w-11 items-center justify-center rounded-full bg-primary-700 text-white shadow transition hover:bg-primary-800"
                               aria-label={t('Adicionar {name}', { name: t(opt.name) })}
                             >
                               <Plus className="h-3 w-3" strokeWidth={3} />
@@ -416,7 +416,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
                             )}
                             <button
                               onClick={() => setUpgradeQuantity(opt.id, opt.name, 1)}
-                              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white shadow transition hover:bg-primary-700"
+                              className="touch-target flex h-11 w-11 items-center justify-center rounded-full bg-primary-700 text-white shadow transition hover:bg-primary-800"
                               aria-label={t('Adicionar {name}', { name: t(opt.name) })}
                             >
                               <Plus className="h-3 w-3" strokeWidth={3} />
@@ -510,7 +510,7 @@ export function ComboModal({ combo, open, onClose, onAddToCart }: ComboModalProp
           <button
             onClick={handleAdd}
             disabled={!isDrinkFlavorValid}
-            className="flex w-full items-center justify-between rounded-2xl bg-primary-500 px-6 py-4 text-white shadow-md transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="touch-target flex w-full items-center justify-between rounded-2xl bg-primary-700 px-6 py-4 text-white shadow-md transition hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="text-lg font-bold">{t('Adicionar Combo')}</span>
             <span className="text-lg font-bold">R$ {calcTotal().toFixed(2).replace('.', ',')}</span>

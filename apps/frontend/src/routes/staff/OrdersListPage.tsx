@@ -68,14 +68,14 @@ export function OrdersListPage() {
   ];
 
   return (
-    <div className="p-6 space-y-5">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 sm:space-y-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t('Pedidos')}</h1>
         <button
           onClick={() => {
             void fetchOrders();
           }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-600
+          className="touch-target flex items-center gap-1.5 rounded-lg border border-gray-500 px-3 py-2 text-gray-800
             text-sm font-medium hover:bg-gray-50 transition-colors"
         >
           <RefreshCw size={14} />
@@ -84,17 +84,18 @@ export function OrdersListPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 flex-wrap bg-gray-100 p-1 rounded-xl">
+      <div className="flex gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1" role="group" aria-label={t('Filtrar pedidos por status')}>
         {tabs.map(({ key, label }) => {
           const count = key === 'ALL' ? orders.length : orders.filter((o) => o.status === key).length;
           return (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+              aria-pressed={activeTab === key}
+              className={`touch-target flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors
                 ${activeTab === key
                   ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'}`}
+                  : 'text-gray-700 hover:text-gray-900'}`}
             >
               {label}
               {count > 0 && (
@@ -109,10 +110,20 @@ export function OrdersListPage() {
           );
         })}
       </div>
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {!loading && !error
+          ? t('Pedidos: {pending} aguardando, {confirmed} confirmados, {preparing} preparando, {ready} prontos.', {
+            pending: orders.filter((order) => order.status === 'PENDING').length,
+            confirmed: orders.filter((order) => order.status === 'CONFIRMED').length,
+            preparing: orders.filter((order) => order.status === 'PREPARING').length,
+            ready: orders.filter((order) => order.status === 'READY').length,
+          })
+          : ''}
+      </p>
 
       {/* List */}
       {loading ? (
-        <div className="flex items-center justify-center py-16 text-gray-400">
+        <div className="flex items-center justify-center py-16 text-gray-600">
           <RefreshCw size={24} className="animate-spin mr-2" />
           {t('Carregando pedidos...')}
         </div>
@@ -122,11 +133,11 @@ export function OrdersListPage() {
           {error}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           <p className="font-medium">{t('Nenhum pedido encontrado.')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 2xl:grid-cols-3">
           {filtered.map((order) => (
             <OrderCard
               key={order.id}

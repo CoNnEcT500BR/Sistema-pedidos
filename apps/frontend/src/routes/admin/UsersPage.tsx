@@ -280,7 +280,7 @@ export function UsersPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-stone-700">{t('Perfil')}</label>
-                  <select value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as 'ADMIN' | 'STAFF' }))} className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                  <select value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as 'ADMIN' | 'STAFF' }))} className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800">
                     <option value="STAFF">{t('Atendente')}</option>
                     <option value="ADMIN">{t('Administrador')}</option>
                   </select>

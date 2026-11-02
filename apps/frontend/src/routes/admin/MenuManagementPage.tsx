@@ -876,7 +876,7 @@ export function MenuManagementPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-stone-700">{t('Categoria')}</label>
-                  <select value={form.categoryId} onChange={(event) => updateField('categoryId', event.target.value)} className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                  <select value={form.categoryId} onChange={(event) => updateField('categoryId', event.target.value)} className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800">
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
@@ -886,7 +886,7 @@ export function MenuManagementPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-stone-700">{t('Descrição')}</label>
-                  <textarea value={form.description} onChange={(event) => updateField('description', event.target.value)} className="min-h-[120px] w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500" />
+                  <textarea value={form.description} onChange={(event) => updateField('description', event.target.value)} className="min-h-[120px] w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800" />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -898,7 +898,7 @@ export function MenuManagementPage() {
                     <select
                       value={form.displayOrder}
                       onChange={(event) => updateField('displayOrder', event.target.value)}
-                      className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                      className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                     >
                       {availableDisplayOrders.map((order) => (
                         <option key={order} value={String(order)}>

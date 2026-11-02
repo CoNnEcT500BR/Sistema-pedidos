@@ -646,7 +646,7 @@ export function IngredientsPage() {
             <select
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value as 'ALL' | Addon['addonType'])}
-              className="h-10 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+              className="touch-target rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
             >
               <option value="ALL">{t('Todos os tipos')}</option>
               <option value="EXTRA">{t('Extra')}</option>
@@ -658,7 +658,7 @@ export function IngredientsPage() {
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'INACTIVE')}
-              className="h-10 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+              className="touch-target rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
             >
               <option value="ALL">{t('Todos os status')}</option>
               <option value="ACTIVE">{t('Somente ativos')}</option>
@@ -668,7 +668,7 @@ export function IngredientsPage() {
             <select
               value={stationFilter}
               onChange={(event) => setStationFilter(event.target.value as 'ALL' | KitchenStation)}
-              className="h-10 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+              className="touch-target rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
             >
               <option value="ALL">{t('Todas as estações')}</option>
               {Object.entries(kitchenStationLabels).map(([key, label]) => (
@@ -681,7 +681,7 @@ export function IngredientsPage() {
             <select
               value={scopeFilter}
               onChange={(event) => setScopeFilter(event.target.value as 'ALL' | ProductScope)}
-              className="h-10 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+              className="touch-target rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
             >
               <option value="ALL">{t('Todos os conjuntos')}</option>
               {Object.entries(productScopeLabels).map(([key, label]) => (
@@ -835,7 +835,7 @@ export function IngredientsPage() {
                   <textarea
                     value={form.description}
                     onChange={(event) => updateField('description', event.target.value)}
-                    className="min-h-[120px] w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                    className="min-h-[120px] w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                   />
                 </div>
               </div>
@@ -847,7 +847,7 @@ export function IngredientsPage() {
                     <select
                       value={form.station}
                       onChange={(event) => updateField('station', event.target.value as KitchenStation)}
-                      className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                      className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                     >
                       {Object.entries(kitchenStationLabels).map(([key, label]) => (
                         <option key={key} value={key}>
@@ -862,7 +862,7 @@ export function IngredientsPage() {
                     <select
                       value={form.scope}
                       onChange={(event) => handleScopeChange(event.target.value as ProductScope)}
-                      className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                      className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                     >
                       {Object.entries(productScopeLabels).map(([key, label]) => (
                         <option key={key} value={key}>
@@ -877,7 +877,7 @@ export function IngredientsPage() {
                     <select
                       value={form.priority}
                       onChange={(event) => updateField('priority', event.target.value as IngredientPriority)}
-                      className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                      className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                     >
                       {Object.entries(priorityLabels).map(([key, label]) => (
                         <option key={key} value={key}>
@@ -893,7 +893,7 @@ export function IngredientsPage() {
                   <select
                     value={form.addonType}
                     onChange={(event) => handleAddonTypeChange(event.target.value as Addon['addonType'])}
-                    className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                    className="touch-target w-full rounded-md border border-stone-500 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary-800"
                   >
                     <option value="EXTRA" disabled={form.scope === 'BURGER_BUILD'}>{t('Extra')}</option>
                     <option value="SUBSTITUTION">{t('Substituição')}</option>

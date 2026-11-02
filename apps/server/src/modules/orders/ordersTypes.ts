@@ -11,6 +11,17 @@ export const ORDER_STATUS = [
 
 export type OrderStatus = (typeof ORDER_STATUS)[number];
 
+export const FULFILLMENT_TYPES = ['PICKUP', 'DELIVERY'] as const;
+export type FulfillmentType = (typeof FULFILLMENT_TYPES)[number];
+
+export const ORDER_PAYMENT_METHODS = [
+  'AT_COUNTER',
+  'CASH_ON_DELIVERY',
+  'CARD_ON_DELIVERY',
+  'PIX_ON_DELIVERY',
+] as const;
+export type OrderPaymentMethod = (typeof ORDER_PAYMENT_METHODS)[number];
+
 export const allowedOrderStatusTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
   CONFIRMED: ['PREPARING', 'CANCELLED'],
@@ -64,10 +75,45 @@ export const orderItemInputSchema = z
   });
 
 export const createOrderSchema = z.object({
-  customerName: z.string().optional(),
-  customerPhone: z.string().optional(),
+  customerName: z.string().trim().max(100).optional(),
+  customerPhone: z.string().trim().max(30).optional(),
   notes: z.string().optional(),
+  fulfillmentType: z.enum(FULFILLMENT_TYPES).default('PICKUP'),
+  paymentMethod: z.enum(ORDER_PAYMENT_METHODS).optional(),
+  cashChangeFor: z.number().positive().optional(),
+  deliveryAddress: z.string().trim().max(250).optional(),
+  deliveryComplement: z.string().trim().max(120).optional(),
+  deliveryReference: z.string().trim().max(160).optional(),
+  deliveryZoneId: z.string().min(1).optional(),
   items: z.array(orderItemInputSchema).min(1, 'items obrigatorio'),
+}).superRefine((data, ctx) => {
+  if (data.fulfillmentType === 'DELIVERY') {
+    if (!data.customerName) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['customerName'], message: 'Nome obrigatorio para entrega' });
+    }
+    if (!data.customerPhone || data.customerPhone.replace(/\D/g, '').length < 10) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['customerPhone'], message: 'Telefone valido obrigatorio para entrega' });
+    }
+    if (!data.deliveryAddress) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['deliveryAddress'], message: 'Endereco obrigatorio para entrega' });
+    }
+    if (!data.deliveryZoneId) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['deliveryZoneId'], message: 'Selecione uma zona de entrega' });
+    }
+    if (data.paymentMethod === 'AT_COUNTER') {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['paymentMethod'], message: 'Escolha pagamento no recebimento' });
+    }
+    if (data.cashChangeFor !== undefined && data.paymentMethod !== 'CASH_ON_DELIVERY') {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['cashChangeFor'], message: 'Troco so pode ser informado para pagamento em dinheiro' });
+    }
+  } else {
+    if (data.paymentMethod && data.paymentMethod !== 'AT_COUNTER') {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['paymentMethod'], message: 'Pagamento no recebimento exige entrega' });
+    }
+    if (data.cashChangeFor !== undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['cashChangeFor'], message: 'Troco so pode ser informado para entrega' });
+    }
+  }
 });
 
 export const listOrdersQuerySchema = z.object({

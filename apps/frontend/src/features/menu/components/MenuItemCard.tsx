@@ -13,12 +13,12 @@ export function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md',
+        'flex min-h-32 items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:gap-4 sm:p-4',
         !item.isAvailable && 'opacity-60',
       )}
     >
       {/* Imagem ou emoji placeholder */}
-      <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-orange-50 text-4xl">
+      <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-orange-50 text-3xl sm:h-20 sm:w-20 sm:text-4xl">
         {item.imageUrl ? (
           <img
             src={item.imageUrl}
@@ -50,7 +50,7 @@ export function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
           {item.isAvailable && (
             <button
               onClick={() => onAdd(item)}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow transition-colors hover:bg-primary-600 active:scale-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
+              className="touch-target flex items-center justify-center rounded-full bg-primary-700 text-white shadow transition-colors hover:bg-primary-800 active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-700"
               aria-label={t('Adicionar {name}', { name: t(item.name) })}
             >
               <Plus className="h-6 w-6" strokeWidth={3} />

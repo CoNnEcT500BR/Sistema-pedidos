@@ -131,7 +131,7 @@ function StaffMenuCard({ item, onSelect }: StaffMenuCardProps) {
         <div
           className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors
             ${item.isAvailable
-              ? 'bg-primary-500 text-white group-hover:bg-primary-600'
+              ? 'bg-primary-800 text-white group-hover:bg-primary-900'
               : 'bg-stone-200 text-stone-500'}`}
         >
           {t('Adicionar')}
@@ -391,9 +391,9 @@ export function NewOrderPage() {
   }
 
   return (
-    <div className="grid h-full overflow-hidden bg-stone-100 xl:grid-cols-[minmax(0,1fr)_28rem]">
-      <div className="flex min-h-0 flex-col p-4 lg:p-6">
-        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-6">
+    <div className="grid min-h-full min-w-0 grid-cols-1 bg-stone-100 xl:h-full xl:grid-cols-[minmax(0,1fr)_28rem] xl:overflow-hidden">
+      <div className="flex min-h-[60dvh] min-w-0 flex-col p-3 sm:p-4 lg:p-6 xl:min-h-0">
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 sm:gap-6">
           <section className="rounded-[2rem] bg-white border border-stone-200 p-4 shadow-sm">
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
               <div>
@@ -408,7 +408,7 @@ export function NewOrderPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={t('Ex.: X-Bacon, batata, refrigerante...')}
-                    className="w-full rounded-2xl border border-stone-300 bg-stone-50 py-4 pl-12 pr-4 text-base font-medium text-stone-900 placeholder:text-stone-500
+                    className="min-h-12 w-full rounded-2xl border border-stone-300 bg-stone-50 py-3 pl-12 pr-4 text-base font-medium text-stone-900 placeholder:text-stone-600 sm:py-4
                       focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100"
                   />
                 </div>
@@ -427,9 +427,9 @@ export function NewOrderPage() {
               <button
                 type="button"
                 onClick={() => setActiveCategoryId(undefined)}
-                className={`rounded-full px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors
+                className={`touch-target rounded-full px-4 py-2.5 text-xs font-semibold transition-colors sm:text-sm
                   ${activeCategoryId === undefined
-                    ? 'bg-primary-500 text-white shadow'
+                    ? 'bg-primary-800 text-white shadow'
                     : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
               >
                 {t('Todos')}
@@ -437,7 +437,7 @@ export function NewOrderPage() {
               <button
                 type="button"
                 onClick={() => setActiveCategoryId(FAVORITES_CATEGORY_ID)}
-                className={`rounded-full px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors
+                className={`touch-target rounded-full px-4 py-2.5 text-xs font-semibold transition-colors sm:text-sm
                   ${isFavoritesSelected
                     ? 'bg-amber-500 text-white shadow'
                     : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}`}
@@ -449,9 +449,9 @@ export function NewOrderPage() {
                   type="button"
                   key={cat.id}
                   onClick={() => setActiveCategoryId(cat.id)}
-                  className={`rounded-full px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors
+                  className={`touch-target rounded-full px-4 py-2.5 text-xs font-semibold transition-colors sm:text-sm
                     ${activeCategoryId === cat.id
-                      ? 'bg-primary-500 text-white shadow'
+                      ? 'bg-primary-800 text-white shadow'
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
                 >
                   {cat.icon ? `${cat.icon} ` : ''}
@@ -513,7 +513,7 @@ export function NewOrderPage() {
         </div>
       </div>
 
-      <aside className="flex flex-col border-t border-stone-200 bg-white xl:sticky xl:top-0 xl:h-[calc(100vh-81px)] xl:border-l xl:border-t-0">
+      <aside className="flex min-w-0 flex-col border-t border-stone-200 bg-white xl:sticky xl:top-0 xl:h-[calc(100dvh-81px)] xl:border-l xl:border-t-0">
         <div className="px-5 py-5 border-b border-stone-100 bg-white xl:sticky xl:top-0 xl:z-10">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-stone-900 flex items-center gap-2 text-lg">
@@ -524,7 +524,7 @@ export function NewOrderPage() {
               <button
                 type="button"
                 onClick={clearCart}
-                className="flex items-center gap-1 text-xs font-semibold text-stone-600 hover:text-red-500 transition-colors"
+                className="touch-target flex items-center gap-1 text-xs font-semibold text-stone-700 transition-colors hover:text-red-700"
               >
                 <Trash2 size={13} />
                 {t('Limpar')}
@@ -568,7 +568,7 @@ export function NewOrderPage() {
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder={t('Opcional')}
                 className="w-full px-3 py-3 rounded-xl border border-stone-300 bg-white text-sm text-stone-900 placeholder:text-stone-500
-                  focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  focus:outline-none focus:ring-2 focus:ring-primary-800"
               />
             </div>
 
@@ -583,7 +583,7 @@ export function NewOrderPage() {
                 placeholder={t('Sem cebola, entregar rápido, etc.')}
                 rows={3}
                 className="w-full px-3 py-3 rounded-xl border border-stone-300 bg-white text-sm text-stone-900 placeholder:text-stone-500 resize-none
-                  focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  focus:outline-none focus:ring-2 focus:ring-primary-800"
               />
             </div>
           </div>
@@ -606,7 +606,7 @@ export function NewOrderPage() {
                       : 'border-stone-200 hover:bg-stone-50'}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`rounded-xl p-2 ${paymentMethod === value ? 'bg-primary-500 text-white' : 'bg-stone-100 text-stone-700'}`}>
+                    <div className={`rounded-xl p-2 ${paymentMethod === value ? 'bg-primary-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
                       <Icon size={18} />
                     </div>
                     <div>
@@ -631,7 +631,7 @@ export function NewOrderPage() {
                   onChange={(e) => setCashReceived(e.target.value)}
                   placeholder={t('0,00')}
                   className="w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base font-medium text-stone-900 placeholder:text-stone-500
-                    focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    focus:outline-none focus:ring-2 focus:ring-primary-800"
                 />
                 <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm border border-stone-200">
                   <span className="font-medium text-stone-700">{t('Troco')}</span>

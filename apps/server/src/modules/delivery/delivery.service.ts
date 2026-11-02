@@ -1,9 +1,12 @@
 import { prisma } from '@/shared/database/prismaClient.js';
-import { updateOrderStatus } from '@/modules/orders/orders.service.js';
+import { isAllowedDeliveryStatusTransition } from './deliveryTypes.js';
 import type {
   AssignDeliveryInput,
   CreateCourierInput,
   CreateRouteInput,
+  CreateDeliveryZoneInput,
+  DeliveryZone,
+  UpdateDeliveryZoneInput,
   DeliveryCourier,
   DeliveryHistoryEntry,
   DeliveryRecord,
@@ -24,9 +27,19 @@ function mapDeliveryRecord(input: {
   updatedAt: Date;
   order: {
     orderNumber: number;
+    status: string;
     customerName: string | null;
     customerPhone: string | null;
     notes: string | null;
+    fulfillmentType: string;
+    deliveryAddress: string | null;
+    deliveryComplement: string | null;
+    deliveryReference: string | null;
+    deliveryZoneName: string | null;
+    deliveryFee: number;
+    paymentMethod: string;
+    cashChangeFor: number | null;
+    finalPrice: number;
   };
   history: Array<{
     id: string;
@@ -40,9 +53,19 @@ function mapDeliveryRecord(input: {
     id: input.id,
     orderId: input.orderId,
     orderNumber: input.order.orderNumber,
+    orderStatus: input.order.status,
     customerName: input.order.customerName,
     customerPhone: input.order.customerPhone,
     notes: input.order.notes,
+    fulfillmentType: input.order.fulfillmentType as 'PICKUP' | 'DELIVERY',
+    deliveryAddress: input.order.deliveryAddress,
+    deliveryComplement: input.order.deliveryComplement,
+    deliveryReference: input.order.deliveryReference,
+    deliveryZoneName: input.order.deliveryZoneName,
+    deliveryFee: input.order.deliveryFee,
+    paymentMethod: input.order.paymentMethod,
+    cashChangeFor: input.order.cashChangeFor,
+    finalPrice: input.order.finalPrice,
     status: input.status as DeliveryStatus,
     priority: input.priority,
     promisedAt: input.promisedAt?.toISOString(),
@@ -69,9 +92,19 @@ async function getPersistedDeliveryById(id: string) {
       order: {
         select: {
           orderNumber: true,
+          status: true,
           customerName: true,
           customerPhone: true,
           notes: true,
+          fulfillmentType: true,
+          deliveryAddress: true,
+          deliveryComplement: true,
+          deliveryReference: true,
+          deliveryZoneName: true,
+          deliveryFee: true,
+          paymentMethod: true,
+          cashChangeFor: true,
+          finalPrice: true,
         },
       },
       history: {
@@ -102,19 +135,16 @@ export const deliveryService = {
     const readyOrders = await prisma.order.findMany({
       where: {
         status: 'READY',
+        fulfillmentType: 'DELIVERY',
       },
       orderBy: { createdAt: 'desc' },
       take: 200,
     });
 
     for (const order of readyOrders) {
-      const existing = await prisma.delivery.findUnique({ where: { orderId: order.id } });
-      if (existing) {
-        continue;
-      }
-
-      const created = await prisma.delivery.create({
-        data: {
+      await prisma.delivery.upsert({
+        where: { orderId: order.id },
+        create: {
           orderId: order.id,
           status: 'QUEUED',
           priority: 3,
@@ -126,9 +156,8 @@ export const deliveryService = {
             },
           },
         },
+        update: {},
       });
-
-      void created;
     }
 
     return await deliveryService.listDeliveries({});
@@ -149,9 +178,19 @@ export const deliveryService = {
         order: {
           select: {
             orderNumber: true,
+            status: true,
             customerName: true,
             customerPhone: true,
             notes: true,
+            fulfillmentType: true,
+            deliveryAddress: true,
+            deliveryComplement: true,
+            deliveryReference: true,
+            deliveryZoneName: true,
+            deliveryFee: true,
+            paymentMethod: true,
+            cashChangeFor: true,
+            finalPrice: true,
           },
         },
         history: {
@@ -244,21 +283,83 @@ export const deliveryService = {
     );
   },
 
+  async listDeliveryZones(includeInactive = false): Promise<DeliveryZone[]> {
+    const zones = await prisma.deliveryZone.findMany({
+      where: includeInactive ? undefined : { isActive: true },
+      orderBy: { name: 'asc' },
+    });
+
+    return zones.map((zone) => ({
+      id: zone.id,
+      name: zone.name,
+      fee: zone.fee,
+      estimatedMinutes: zone.estimatedMinutes,
+      isActive: zone.isActive,
+      createdAt: zone.createdAt.toISOString(),
+      updatedAt: zone.updatedAt.toISOString(),
+    }));
+  },
+
+  async createDeliveryZone(payload: CreateDeliveryZoneInput): Promise<DeliveryZone> {
+    const zone = await prisma.deliveryZone.create({ data: payload });
+    return {
+      id: zone.id,
+      name: zone.name,
+      fee: zone.fee,
+      estimatedMinutes: zone.estimatedMinutes,
+      isActive: zone.isActive,
+      createdAt: zone.createdAt.toISOString(),
+      updatedAt: zone.updatedAt.toISOString(),
+    };
+  },
+
+  async updateDeliveryZone(id: string, payload: UpdateDeliveryZoneInput): Promise<DeliveryZone> {
+    const zone = await prisma.deliveryZone.update({ where: { id }, data: payload });
+    return {
+      id: zone.id,
+      name: zone.name,
+      fee: zone.fee,
+      estimatedMinutes: zone.estimatedMinutes,
+      isActive: zone.isActive,
+      createdAt: zone.createdAt.toISOString(),
+      updatedAt: zone.updatedAt.toISOString(),
+    };
+  },
+
   async assignDelivery(id: string, payload: AssignDeliveryInput) {
     const item = await getPersistedDeliveryById(id);
+    if (!['QUEUED', 'ASSIGNED', 'FAILED'].includes(item.status)) {
+      throw new Error('A entrega nao pode ser atribuida neste status');
+    }
+
     const courier = await prisma.deliveryCourier.findUnique({ where: { id: payload.courierId } });
     if (!courier || !courier.isActive) {
       throw new Error('Entregador invalido ou inativo');
     }
 
+    if (
+      courier.zone &&
+      item.order.deliveryZoneName &&
+      courier.zone.trim().toLocaleLowerCase() !== item.order.deliveryZoneName.trim().toLocaleLowerCase()
+    ) {
+      throw new Error('O entregador nao atende a zona desta entrega');
+    }
+
+    let route;
     if (payload.routeId) {
-      const route = await prisma.deliveryRoute.findUnique({ where: { id: payload.routeId } });
+      route = await prisma.deliveryRoute.findUnique({ where: { id: payload.routeId } });
       if (!route || !route.isActive) {
         throw new Error('Rota invalida ou inativa');
       }
+      if (
+        item.order.deliveryZoneName &&
+        route.zone.trim().toLocaleLowerCase() !== item.order.deliveryZoneName.trim().toLocaleLowerCase()
+      ) {
+        throw new Error('A rota nao atende a zona desta entrega');
+      }
     }
 
-    const nextStatus = item.status === 'QUEUED' ? 'ASSIGNED' : item.status;
+    const nextStatus = 'ASSIGNED';
 
     const updated = await prisma.delivery.update({
       where: { id },
@@ -269,11 +370,11 @@ export const deliveryService = {
         promisedAt: payload.promisedAt ? new Date(payload.promisedAt) : item.promisedAt,
         status: nextStatus,
         history:
-          item.status === 'QUEUED'
+          item.status !== nextStatus
             ? {
                 create: {
-                  fromStatus: 'QUEUED',
-                  toStatus: 'ASSIGNED',
+                  fromStatus: item.status,
+                  toStatus: nextStatus,
                   reason: 'Entrega atribuida',
                 },
               }
@@ -283,9 +384,19 @@ export const deliveryService = {
         order: {
           select: {
             orderNumber: true,
+            status: true,
             customerName: true,
             customerPhone: true,
             notes: true,
+            fulfillmentType: true,
+            deliveryAddress: true,
+            deliveryComplement: true,
+            deliveryReference: true,
+            deliveryZoneName: true,
+            deliveryFee: true,
+            paymentMethod: true,
+            cashChangeFor: true,
+            finalPrice: true,
           },
         },
         history: {
@@ -299,47 +410,83 @@ export const deliveryService = {
 
   async updateDeliveryStatus(id: string, status: DeliveryStatus, reason?: string) {
     const item = await getPersistedDeliveryById(id);
+    if (item.status === status) {
+      return mapDeliveryRecord(item);
+    }
 
-    let updated = item;
-    if (item.status !== status) {
-      updated = await prisma.delivery.update({
-        where: { id },
+    if (!isAllowedDeliveryStatusTransition(item.status as DeliveryStatus, status)) {
+      throw new Error('Transicao de status da entrega invalida');
+    }
+
+    if (
+      ['DISPATCHED', 'IN_ROUTE', 'DELIVERED'].includes(status) &&
+      item.order.status !== 'READY'
+    ) {
+      throw new Error('O pedido precisa estar pronto antes de sair para entrega');
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const deliveryUpdate = await tx.delivery.updateMany({
+        where: { id, status: item.status },
+        data: { status },
+      });
+      if (deliveryUpdate.count !== 1) {
+        throw new Error('O status da entrega foi alterado. Atualize e tente novamente.');
+      }
+
+      await tx.deliveryStatusHistory.create({
         data: {
-          status,
-          history: {
-            create: {
-              fromStatus: item.status,
-              toStatus: status,
-              reason,
-            },
-          },
+          deliveryId: id,
+          fromStatus: item.status,
+          toStatus: status,
+          reason,
         },
+      });
+
+      if (status === 'DELIVERED') {
+        const orderUpdate = await tx.order.updateMany({
+          where: { id: item.orderId, status: 'READY' },
+          data: { status: 'COMPLETED', completedAt: new Date() },
+        });
+        if (orderUpdate.count !== 1) {
+          throw new Error('O pedido mudou de status antes da confirmacao da entrega');
+        }
+
+        await tx.orderStatusHistory.create({
+          data: {
+            orderId: item.orderId,
+            fromStatus: 'READY',
+            toStatus: 'COMPLETED',
+            reason: reason ?? 'Entregue',
+          },
+        });
+      }
+
+      return tx.delivery.findUniqueOrThrow({
+        where: { id },
         include: {
           order: {
             select: {
               orderNumber: true,
+              status: true,
               customerName: true,
               customerPhone: true,
               notes: true,
+              fulfillmentType: true,
+              deliveryAddress: true,
+              deliveryComplement: true,
+              deliveryReference: true,
+              deliveryZoneName: true,
+              deliveryFee: true,
+              paymentMethod: true,
+              cashChangeFor: true,
+              finalPrice: true,
             },
           },
-          history: {
-            orderBy: { changedAt: 'asc' },
-          },
+          history: { orderBy: { changedAt: 'asc' } },
         },
       });
-    }
-
-    if (status === 'DELIVERED') {
-      try {
-        await updateOrderStatus(item.orderId, {
-          status: 'COMPLETED',
-          reason: reason ?? 'Entregue',
-        });
-      } catch {
-        // Pedido pode estar em estado diferente; nao bloqueia fluxo de entrega.
-      }
-    }
+    });
 
     return mapDeliveryRecord(updated);
   },

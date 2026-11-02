@@ -81,21 +81,21 @@ export function DashboardPage() {
   const metrics = calcMetrics(orders);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-5 p-3 sm:space-y-6 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('Dashboard')}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-gray-700 mt-0.5">
             {t('Pedidos de hoje · atualiza automaticamente')}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
               void fetchOrders();
             }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-600
+            className="touch-target flex items-center gap-1.5 rounded-lg border border-gray-500 px-3 py-2 text-gray-800
               text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             <RefreshCw size={14} />
@@ -103,7 +103,7 @@ export function DashboardPage() {
           </button>
           <button
             onClick={() => navigate('/staff/orders/new')}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600
+            className="touch-target flex items-center gap-1.5 rounded-lg bg-primary-800 px-4 py-2
               text-white text-sm font-semibold transition-colors"
           >
             <PlusCircle size={16} />
@@ -111,6 +111,16 @@ export function DashboardPage() {
           </button>
         </div>
       </div>
+
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {!loading && !error
+          ? t('Pedidos ativos: {waiting} aguardando, {preparing} preparando, {ready} prontos.', {
+            waiting: metrics.waiting,
+            preparing: metrics.preparing,
+            ready: metrics.ready,
+          })
+          : ''}
+      </p>
 
       {/* Metrics */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
@@ -120,16 +130,16 @@ export function DashboardPage() {
           { label: t('Prontos'), value: metrics.ready, color: 'bg-green-50 border-green-200 text-green-700' },
           { label: t('Total Hoje'), value: metrics.total, color: 'bg-gray-50 border-gray-200 text-gray-700' },
         ].map(({ label, value, color }) => (
-          <div key={label} className={`rounded-xl border p-4 ${color}`}>
+          <div key={label} className={`min-w-0 rounded-xl border p-3 sm:p-4 ${color}`}>
             <p className="text-3xl font-bold">{value}</p>
-            <p className="text-sm font-medium mt-1">{label}</p>
+            <p className="mt-1 text-sm font-medium leading-tight">{label}</p>
           </div>
         ))}
       </div>
 
       {/* Orders list */}
       {loading ? (
-        <div className="flex items-center justify-center py-16 text-gray-400">
+        <div className="flex items-center justify-center py-16 text-gray-600">
           <RefreshCw size={24} className="animate-spin mr-2" />
           {t('Carregando pedidos...')}
         </div>
@@ -139,13 +149,13 @@ export function DashboardPage() {
           {error}
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           <div className="text-5xl mb-4">🎉</div>
           <p className="font-medium">{t('Nenhum pedido ativo no momento.')}</p>
         </div>
       ) : (
         <div>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
             {t('Pedidos Ativos')} ({orders.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

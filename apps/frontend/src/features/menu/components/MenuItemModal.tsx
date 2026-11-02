@@ -280,7 +280,7 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
               <button
                 ref={increaseButtonRef}
                 onClick={() => setQuantity((q) => q + 1)}
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow transition hover:bg-primary-600 active:scale-90"
+                className="touch-target flex h-11 w-11 items-center justify-center rounded-full bg-primary-700 text-white shadow transition hover:bg-primary-800 active:scale-[0.99]"
                 aria-label={t('Aumentar quantidade')}
               >
                 <Plus className="h-5 w-5" strokeWidth={3} />
@@ -292,7 +292,7 @@ export function MenuItemModal({ item, open, onClose, onAddToCart }: MenuItemModa
           <button
             onClick={handleAdd}
             disabled={!isSelectionValid}
-            className="flex w-full items-center justify-between rounded-2xl bg-primary-500 px-6 py-4 text-white shadow-md transition hover:bg-primary-600 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-300"
+            className="touch-target flex w-full items-center justify-between rounded-2xl bg-primary-700 px-6 py-4 text-white shadow-md transition hover:bg-primary-800 active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-700"
           >
             <span className="text-lg font-bold">{t('Adicionar ao Carrinho')}</span>
             <span className="text-lg font-bold">

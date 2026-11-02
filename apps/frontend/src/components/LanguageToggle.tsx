@@ -14,14 +14,16 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
       <button
         type="button"
         onClick={() => setLanguage('pt')}
-        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${language === 'pt' ? 'bg-primary-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+        aria-pressed={language === 'pt'}
+        className={`touch-target min-w-11 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${language === 'pt' ? 'bg-primary-700 text-white' : 'text-gray-700 hover:text-gray-900'}`}
       >
         PT
       </button>
       <button
         type="button"
         onClick={() => setLanguage('en')}
-        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${language === 'en' ? 'bg-primary-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+        aria-pressed={language === 'en'}
+        className={`touch-target min-w-11 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${language === 'en' ? 'bg-primary-700 text-white' : 'text-gray-700 hover:text-gray-900'}`}
       >
         EN
       </button>
